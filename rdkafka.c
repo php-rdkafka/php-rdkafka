@@ -432,7 +432,7 @@ PHP_METHOD(RdKafka, setLogLevel)
 /* }}} */
 
 #ifdef HAS_RD_KAFKA_OAUTHBEARER
-/* {{{ proto void RdKafka::oauthbearerSetToken(string $token_value, int $lifetime_ms, string $principal_name, array $extensions = [])
+/* {{{ proto void RdKafka::oauthbearerSetToken(string $token_value, int|float|string $lifetime_ms, string $principal_name, array $extensions = [])
  * Set SASL/OAUTHBEARER token and metadata
  *
  * The SASL/OAUTHBEARER token refresh callback or event handler should cause
@@ -449,7 +449,8 @@ PHP_METHOD(RdKafka, oauthbearerSetToken)
     kafka_object *intern;
     char *token_value;
     size_t token_value_len;
-    zend_long lifetime_ms;
+    zval *zlifetime_ms;
+    int64_t lifetime_ms;
     char *principal_name;
     size_t principal_len;
     HashTable *extensions_hash = NULL;
@@ -457,8 +458,29 @@ PHP_METHOD(RdKafka, oauthbearerSetToken)
     char errstr[512];
     rd_kafka_resp_err_t ret = 0;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "sls|h", &token_value, &token_value_len, &lifetime_ms, &principal_name, &principal_len, &extensions_hash) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "szs|h", &token_value, &token_value_len, &zlifetime_ms, &principal_name, &principal_len, &extensions_hash) == FAILURE) {
         return;
+    }
+
+    /* On 32-bits, it might be required to pass $lifetime_ms as a float or a
+     * string */
+    switch (Z_TYPE_P(zlifetime_ms)) {
+        case IS_LONG:
+            lifetime_ms = (int64_t) Z_LVAL_P(zlifetime_ms);
+            break;
+        case IS_DOUBLE:
+            lifetime_ms = (int64_t) Z_DVAL_P(zlifetime_ms);
+            break;
+        case IS_STRING:;
+            char *str = Z_STRVAL_P(zlifetime_ms);
+            char *end;
+            lifetime_ms = (int64_t) strtoll(str, &end, 10);
+            if (end != str + Z_STRLEN_P(zlifetime_ms)) {
+                zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Argument #2 ($lifetime_ms) must be a valid integer");
+                return;
+            }
+            break;
+        EMPTY_SWITCH_DEFAULT_CASE();
     }
 
     intern = get_kafka_object(getThis());
@@ -721,7 +743,7 @@ PHP_METHOD(RdKafka, queryWatermarkOffsets)
     kafka_object *intern;
     char *topic;
     size_t topic_length;
-    long low, high;
+    int64_t low, high;
     zend_long partition, timeout;
     zval *lowResult, *highResult;
     rd_kafka_resp_err_t err;
@@ -745,8 +767,8 @@ PHP_METHOD(RdKafka, queryWatermarkOffsets)
         return;
     }
 
-    ZVAL_LONG(lowResult, low);
-    ZVAL_LONG(highResult, high);
+    ZVAL_LONG(lowResult, (zend_long) low);
+    ZVAL_LONG(highResult, (zend_long) high);
 }
 /* }}} */
 

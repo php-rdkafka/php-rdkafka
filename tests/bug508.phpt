@@ -73,7 +73,7 @@ array(10) {
   ["topic_name"]=>
   string(%d) "test_rdkafka_%s"
   ["timestamp"]=>
-  int(%d)
+  int(%f)
   ["partition"]=>
   int(0)
   ["payload"]=>
