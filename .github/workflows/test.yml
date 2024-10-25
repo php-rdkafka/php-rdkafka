@@ -38,6 +38,11 @@ jobs:
                 librdkafka: 'v1.9.2'
                 memcheck: '1'
 
+              # X32
+              - php: '8.3.0'
+                librdkafka: 'v2.6.0'
+                arch: 'X32'
+
               # Latest librdkafka 2.x
               - php: '8.3.0'
                 librdkafka: 'v2.6.0'
@@ -86,6 +91,7 @@ jobs:
             SKIP_OAUTH: ${{ matrix.skipoauth }}
             TEST_KAFKA_BROKERS: kafka:9092
             TEST_KAFKA_BROKER_VERSION: 2.6
+            ARCH: ${{ matrix.arch }}
         steps:
             - name: 'Check out repository'
               uses: 'actions/checkout@v2'
@@ -95,12 +101,15 @@ jobs:
             - uses: actions/cache@v2
               with:
                   path: ~/build-cache/php
-                  key: ${{ runner.os }}-${{ matrix.php }}-${{ matrix.memcheck }}
+                  key: ${{ runner.os }}-${{ matrix.arch }}-${{ matrix.php }}-${{ matrix.memcheck }}
 
             - uses: actions/cache@v2
               with:
                   path: ~/build-cache/librdkafka
-                  key: ${{ runner.os }}-${{ matrix.librdkafka }}
+                  key: ${{ runner.os }}-${{ matrix.arch }}-${{ matrix.librdkafka }}
+
+            - name: 'Install dependencies'
+              run: './php-rdkafka/.github/workflows/test/install-dependencies.sh'
 
             - name: 'Build librdkafka'
               run: './php-rdkafka/.github/workflows/test/build-librdkafka.sh'

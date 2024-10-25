@@ -124,7 +124,7 @@ PHP_METHOD(RdKafka_ConsumerTopic, consumeCallback)
     }
 
     if (partition < 0 || partition > 0x7FFFFFFF) {
-        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Out of range value '%ld' for $partition", partition);
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Out of range value '" ZEND_LONG_FMT "' for $partition", partition);
         return;
     }
 
@@ -161,7 +161,7 @@ PHP_METHOD(RdKafka_ConsumerTopic, consumeQueueStart)
     }
 
     if (partition != RD_KAFKA_PARTITION_UA && (partition < 0 || partition > 0x7FFFFFFF)) {
-        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Out of range value '%ld' for $partition", partition);
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Out of range value '" ZEND_LONG_FMT "' for $partition", partition);
         return;
     }
 
@@ -219,7 +219,7 @@ PHP_METHOD(RdKafka_ConsumerTopic, consumeStart)
     }
 
     if (partition != RD_KAFKA_PARTITION_UA && (partition < 0 || partition > 0x7FFFFFFF)) {
-        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Out of range value '%ld' for $partition", partition);
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Out of range value '" ZEND_LONG_FMT "' for $partition", partition);
         return;
     }
 
@@ -271,7 +271,7 @@ PHP_METHOD(RdKafka_ConsumerTopic, consumeStop)
     }
 
     if (partition != RD_KAFKA_PARTITION_UA && (partition < 0 || partition > 0x7FFFFFFF)) {
-        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Out of range value '%ld' for $partition", partition);
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Out of range value '" ZEND_LONG_FMT "' for $partition", partition);
         return;
     }
 
@@ -312,7 +312,7 @@ PHP_METHOD(RdKafka_ConsumerTopic, consume)
     }
 
     if (partition != RD_KAFKA_PARTITION_UA && (partition < 0 || partition > 0x7FFFFFFF)) {
-        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Out of range value '%ld' for $partition", partition);
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Out of range value '" ZEND_LONG_FMT "' for $partition", partition);
         return;
     }
 
@@ -353,12 +353,12 @@ PHP_METHOD(RdKafka_ConsumerTopic, consumeBatch)
     }
 
     if (0 >= batch_size) {
-        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Out of range value '%ld' for batch_size", batch_size);
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Out of range value '" ZEND_LONG_FMT "' for batch_size", batch_size);
         return;
     }
 
     if (partition != RD_KAFKA_PARTITION_UA && (partition < 0 || partition > 0x7FFFFFFF)) {
-        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Out of range value '%ld' for $partition", partition);
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Out of range value '" ZEND_LONG_FMT "' for $partition", partition);
         return;
     }
 
@@ -402,7 +402,7 @@ PHP_METHOD(RdKafka_ConsumerTopic, offsetStore)
     }
 
     if (partition < 0 || partition > 0x7FFFFFFF) {
-        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Out of range value '%ld' for $partition", partition);
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Out of range value '" ZEND_LONG_FMT "' for $partition", partition);
         return;
     }
 
@@ -445,12 +445,12 @@ PHP_METHOD(RdKafka_ProducerTopic, produce)
     ZEND_PARSE_PARAMETERS_END();
 
     if (partition != RD_KAFKA_PARTITION_UA && (partition < 0 || partition > 0x7FFFFFFF)) {
-        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Out of range value '%ld' for $partition", partition);
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Out of range value '" ZEND_LONG_FMT "' for $partition", partition);
         return;
     }
 
     if (msgflags != 0 && msgflags != RD_KAFKA_MSG_F_BLOCK) {
-        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Invalid value '%ld' for $msgflags", msgflags);
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Invalid value '" ZEND_LONG_FMT "' for $msgflags", msgflags);
         return;
     }
 
@@ -507,12 +507,12 @@ PHP_METHOD(RdKafka_ProducerTopic, producev)
     ZEND_PARSE_PARAMETERS_END();
 
     if (partition != RD_KAFKA_PARTITION_UA && (partition < 0 || partition > 0x7FFFFFFF)) {
-        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Out of range value '%ld' for $partition", partition);
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Out of range value '" ZEND_LONG_FMT "' for $partition", partition);
         return;
     }
 
     if (msgflags != 0 && msgflags != RD_KAFKA_MSG_F_BLOCK) {
-        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Invalid value '%ld' for $msgflags", msgflags);
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Invalid value '" ZEND_LONG_FMT "' for $msgflags", msgflags);
         return;
     }
 

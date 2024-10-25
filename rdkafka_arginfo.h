@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 278f62b10f92f6211d8095be7fb0eef539ecca2e */
+ * Stub hash: a7de61984c96ac34a70cd48ea1785a4ed5ed00d5 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -115,7 +115,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_RdKafka_oauthbea
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_oauthbearerSetToken, 0, 0, 3)
 #endif
 	ZEND_ARG_TYPE_INFO(0, token_value, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, lifetime_ms, IS_LONG, 0)
+	ZEND_ARG_TYPE_MASK(0, lifetime_ms, MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO(0, principal_name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, extensions, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()

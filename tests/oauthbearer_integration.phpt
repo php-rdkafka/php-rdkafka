@@ -53,7 +53,7 @@ $conf->setErrorCb(function ($producer, $err, $errstr) {
 $conf->setOauthbearerTokenRefreshCb(function ($producer) {
     echo "Refreshing token and succeeding\n";
     $token = generateJws();
-    $producer->oauthbearerSetToken($token['value'], $token['expiryMs'], $token['principal']);
+    $producer->oauthbearerSetToken($token['value'], (string) $token['expiryMs'], $token['principal']);
 });
 $producer = new \RdKafka\Producer($conf);
 $producer->poll(0);
@@ -64,7 +64,8 @@ try {
     $producer->getMetadata(false, $topic, 10*1000);
     echo "Metadata retrieved successfully when refresh callback set token\n";
 } catch (\RdKafka\Exception $e) {
-    echo "FAIL: Caught exception when getting metadata after successfully refreshing any token\n";
+    echo "FAIL: Caught exception when getting metadata after successfully refreshing any token:\n";
+    printf("%s: %s\n", get_class($e), $e->getMessage());
 }
 
 // Test that refresh token with setting token failure will fail when getting metadata

@@ -368,8 +368,6 @@ static void kafka_conf_set_oauthbearer_token_refresh_cb(rd_kafka_t *rk, const ch
     zval_ptr_dtor(&args[1]);
 }
 
-
-
 /* {{{ proto RdKafka\Conf::__construct() */
 PHP_METHOD(RdKafka_Conf, __construct)
 {

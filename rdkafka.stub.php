@@ -77,7 +77,7 @@ namespace {
         public function resumePartitions(array $topic_partitions): array {}
         
         /** @tentative-return-type */
-        public function oauthbearerSetToken(string $token_value, int $lifetime_ms, string $principal_name, array $extensions = []): void {}
+        public function oauthbearerSetToken(string $token_value, int|float|string $lifetime_ms, string $principal_name, array $extensions = []): void {}
         
         /** @tentative-return-type */
         public function oauthbearerSetTokenFailure(string $error): void {}
