@@ -20,7 +20,7 @@ function generateJws($scope = 'required-scope', $expiresInSeconds = 60)
         $principal,
         $expirySeconds,
         $nowSeconds - 10,
-        $scope,
+        $scope
     );
     $headerJwsSegment = 'eyJhbGciOiJub25lIn0';
     $claimsJwsSegment = base64_encode($claimsJson);
