@@ -36,7 +36,7 @@ typedef struct _object_intern {
     zend_object                     std;
 } object_intern;
 
-static HashTable *get_debug_info(Z_RDKAFKA_OBJ *object, int *is_temp);
+static HashTable *get_debug_info(zend_object *object, int *is_temp);
 
 static zend_class_entry * ce;
 static zend_object_handlers handlers;
@@ -81,7 +81,7 @@ static object_intern * get_object(zval *zmt)
     return omt;
 }
 
-static HashTable *get_debug_info(Z_RDKAFKA_OBJ *object, int *is_temp) /* {{{ */
+static HashTable *get_debug_info(zend_object *object, int *is_temp) /* {{{ */
 {
     zval ary;
     object_intern *intern;
@@ -90,7 +90,7 @@ static HashTable *get_debug_info(Z_RDKAFKA_OBJ *object, int *is_temp) /* {{{ */
 
     array_init(&ary);
 
-    intern = rdkafka_get_debug_object(object_intern, object);
+    intern = php_kafka_from_obj(object_intern, object);
     if (!intern || !intern->metadata_partition) {
         return Z_ARRVAL(ary);
     }
@@ -181,7 +181,7 @@ PHP_METHOD(RdKafka_Metadata_Partition, getReplicas)
         return;
     }
 
-    kafka_metadata_collection_init(return_value, Z_RDKAFKA_PROP_OBJ(getThis()), intern->metadata_partition->replicas, intern->metadata_partition->replica_cnt, sizeof(*intern->metadata_partition->replicas), int32_ctor);
+    kafka_metadata_collection_init(return_value, Z_OBJ_P(getThis()), intern->metadata_partition->replicas, intern->metadata_partition->replica_cnt, sizeof(*intern->metadata_partition->replicas), int32_ctor);
 }
 /* }}} */
 
@@ -200,7 +200,7 @@ PHP_METHOD(RdKafka_Metadata_Partition, getIsrs)
         return;
     }
 
-    kafka_metadata_collection_init(return_value, Z_RDKAFKA_PROP_OBJ(getThis()), intern->metadata_partition->isrs, intern->metadata_partition->isr_cnt, sizeof(*intern->metadata_partition->isrs), int32_ctor);
+    kafka_metadata_collection_init(return_value, Z_OBJ_P(getThis()), intern->metadata_partition->isrs, intern->metadata_partition->isr_cnt, sizeof(*intern->metadata_partition->isrs), int32_ctor);
 }
 /* }}} */
 

@@ -446,25 +446,25 @@ static void consumer_commit(int async, INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
             zval *zoffset;
             rd_kafka_topic_partition_t *rktpar;
 
-            zerr = rdkafka_read_property(NULL, Z_RDKAFKA_PROP_OBJ(zarg), ZEND_STRL("err"), 0);
+            zerr = rdkafka_read_property(NULL, Z_OBJ_P(zarg), ZEND_STRL("err"), 0);
             if (zerr && Z_TYPE_P(zerr) != IS_NULL && (Z_TYPE_P(zerr) != IS_LONG || Z_LVAL_P(zerr) != RD_KAFKA_RESP_ERR_NO_ERROR)) {
                 zend_throw_exception(ce_kafka_exception, "Invalid argument: Specified Message has an error", RD_KAFKA_RESP_ERR__INVALID_ARG);
                 return;
             }
 
-            ztopic = rdkafka_read_property(NULL, Z_RDKAFKA_PROP_OBJ(zarg), ZEND_STRL("topic_name"), 0);
+            ztopic = rdkafka_read_property(NULL, Z_OBJ_P(zarg), ZEND_STRL("topic_name"), 0);
             if (!ztopic || Z_TYPE_P(ztopic) != IS_STRING) {
                 zend_throw_exception(ce_kafka_exception, "Invalid argument: Specified Message's topic_name is not a string", RD_KAFKA_RESP_ERR__INVALID_ARG);
                 return;
             }
 
-            zpartition = rdkafka_read_property(NULL, Z_RDKAFKA_PROP_OBJ(zarg), ZEND_STRL("partition"), 0);
+            zpartition = rdkafka_read_property(NULL, Z_OBJ_P(zarg), ZEND_STRL("partition"), 0);
             if (!zpartition || Z_TYPE_P(zpartition) != IS_LONG) {
                 zend_throw_exception(ce_kafka_exception, "Invalid argument: Specified Message's partition is not an int", RD_KAFKA_RESP_ERR__INVALID_ARG);
                 return;
             }
 
-            zoffset = rdkafka_read_property(NULL, Z_RDKAFKA_PROP_OBJ(zarg), ZEND_STRL("offset"), 0);
+            zoffset = rdkafka_read_property(NULL, Z_OBJ_P(zarg), ZEND_STRL("offset"), 0);
             if (!zoffset || Z_TYPE_P(zoffset) != IS_LONG) {
                 zend_throw_exception(ce_kafka_exception, "Invalid argument: Specified Message's offset is not an int", RD_KAFKA_RESP_ERR__INVALID_ARG);
                 return;

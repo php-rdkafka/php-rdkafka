@@ -19,4 +19,4 @@
 typedef void (*kafka_metadata_collection_ctor_t)(zval *renurn_value, zval *zmetadata, const void *object);
 
 void kafka_metadata_collection_minit(INIT_FUNC_ARGS);
-void kafka_metadata_collection_init(zval *return_value, Z_RDKAFKA_OBJ *zmetadata, const void * items, size_t item_cnt, size_t item_size, kafka_metadata_collection_ctor_t ctor);
+void kafka_metadata_collection_init(zval *return_value, zend_object *zmetadata, const void * items, size_t item_cnt, size_t item_size, kafka_metadata_collection_ctor_t ctor);

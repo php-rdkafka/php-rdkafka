@@ -40,7 +40,7 @@ typedef struct _object_intern {
     zend_object                      std;
 } object_intern;
 
-static HashTable *get_debug_info(Z_RDKAFKA_OBJ *object, int *is_temp);
+static HashTable *get_debug_info(zend_object *object, int *is_temp);
 
 static zend_class_entry *ce;
 static zend_object_handlers handlers;
@@ -85,7 +85,7 @@ static object_intern * get_object(zval *zmti)
     return omti;
 }
 
-static HashTable *get_debug_info(Z_RDKAFKA_OBJ *object, int *is_temp) /* {{{ */
+static HashTable *get_debug_info(zend_object *object, int *is_temp) /* {{{ */
 {
     zval ary;
     object_intern *intern;
@@ -96,7 +96,7 @@ static HashTable *get_debug_info(Z_RDKAFKA_OBJ *object, int *is_temp) /* {{{ */
 
     array_init(&ary);
 
-    intern = rdkafka_get_debug_object(object_intern, object);
+    intern = php_kafka_from_obj(object_intern, object);
     if (!intern || !intern->items) {
         return Z_ARRVAL(ary);
     }
@@ -246,7 +246,7 @@ void kafka_metadata_collection_minit(INIT_FUNC_ARGS)
     handlers.offset = XtOffsetOf(object_intern, std);
 }
 
-void kafka_metadata_collection_init(zval *return_value, Z_RDKAFKA_OBJ *zmetadata, const void * items, size_t item_cnt, size_t item_size, kafka_metadata_collection_ctor_t ctor)
+void kafka_metadata_collection_init(zval *return_value, zend_object *zmetadata, const void * items, size_t item_cnt, size_t item_size, kafka_metadata_collection_ctor_t ctor)
 {
     object_intern *intern;
 
@@ -259,7 +259,7 @@ void kafka_metadata_collection_init(zval *return_value, Z_RDKAFKA_OBJ *zmetadata
         return;
     }
 
-    Z_RDKAFKA_OBJ_COPY(&intern->zmetadata, zmetadata);
+    ZVAL_OBJ_COPY(&intern->zmetadata, zmetadata);
     intern->items = items;
     intern->item_cnt = item_cnt;
     intern->item_size = item_size;
