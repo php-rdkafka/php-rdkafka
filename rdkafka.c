@@ -491,9 +491,7 @@ PHP_METHOD(RdKafka, oauthbearerSetToken)
             zend_string *tmp_extension_val_str;
             zend_string *extension_val_str = zval_get_tmp_string(extension_zval, &tmp_extension_val_str);
             extensions[pos++] = estrdup(ZSTR_VAL(extension_val_str));
-            if (tmp_extension_val_str) {
-                zend_string_release(tmp_extension_val_str);
-            }
+            zend_tmp_string_release(tmp_extension_val_str);
         } ZEND_HASH_FOREACH_END();
     }    
 
