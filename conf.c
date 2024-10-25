@@ -340,6 +340,7 @@ static void kafka_conf_log_cb(const rd_kafka_t *rk, int level, const char *facil
     zval_ptr_dtor(&args[3]);
 }
 
+#ifdef HAS_RD_KAFKA_OAUTHBEARER
 /* 
 void rd_kafka_conf_set_oauthbearer_token_refresh_cb(
     rd_kafka_conf_t *conf,
@@ -371,8 +372,7 @@ static void kafka_conf_set_oauthbearer_token_refresh_cb(rd_kafka_t *rk, const ch
     zval_ptr_dtor(&args[0]);
     zval_ptr_dtor(&args[1]);
 }
-
-
+#endif
 
 /* {{{ proto RdKafka\Conf::__construct() */
 PHP_METHOD(RdKafka_Conf, __construct)
