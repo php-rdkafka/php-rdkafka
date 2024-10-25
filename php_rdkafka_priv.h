@@ -79,7 +79,21 @@ static zend_always_inline void *zend_object_alloc(size_t obj_size, zend_class_en
     memset(obj, 0, obj_size - sizeof(zval));
     return obj;
 }
-#endif
+
+static zend_always_inline zend_string *zval_get_tmp_string(zval *op, zend_string **tmp) {
+	if (EXPECTED(Z_TYPE_P(op) == IS_STRING)) {
+		*tmp = NULL;
+		return Z_STR_P(op);
+	} else {
+		return *tmp = _zval_get_string_func(op);
+	}
+}
+static zend_always_inline void zend_tmp_string_release(zend_string *tmp) {
+	if (UNEXPECTED(tmp)) {
+		zend_string_release(tmp);
+	}
+}
+#endif // PHP_MINOR_VERSION < 3
 
 #endif // PHP 7
 
