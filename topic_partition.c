@@ -33,7 +33,7 @@
 
 typedef kafka_topic_partition_intern object_intern;
 
-static HashTable *get_debug_info(Z_RDKAFKA_OBJ *object, int *is_temp);
+static HashTable *get_debug_info(zend_object *object, int *is_temp);
 
 zend_class_entry * ce_kafka_topic_partition;
 
@@ -84,7 +84,7 @@ kafka_topic_partition_intern * get_topic_partition_object(zval *z) /* {{{ */
     return get_object(z);
 } /* }}} */
 
-static HashTable *get_debug_info(Z_RDKAFKA_OBJ *object, int *is_temp) /* {{{ */
+static HashTable *get_debug_info(zend_object *object, int *is_temp) /* {{{ */
 {
     zval ary;
     object_intern *intern;
@@ -93,7 +93,7 @@ static HashTable *get_debug_info(Z_RDKAFKA_OBJ *object, int *is_temp) /* {{{ */
 
     array_init(&ary);
 
-    intern = rdkafka_get_debug_object(object_intern, object);
+    intern = php_kafka_from_obj(object_intern, object);
 
     if (!intern || !intern->topic) {
         return Z_ARRVAL(ary);

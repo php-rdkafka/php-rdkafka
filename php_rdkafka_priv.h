@@ -19,84 +19,6 @@
 #ifndef PHP_RDKAFKA_PRIV_H
 #define PHP_RDKAFKA_PRIV_H
 
-#ifndef Z_PARAM_STRING_OR_NULL
-#define Z_PARAM_STRING_OR_NULL(dest, dest_len) \
-    Z_PARAM_STRING_EX(dest, dest_len, 1, 0)
-#endif
-
-#ifndef Z_PARAM_STR_OR_NULL
-#define Z_PARAM_STR_OR_NULL(dest) \
-    Z_PARAM_STR_EX(dest, 1, 0)
-#endif
-
-#ifndef Z_PARAM_ARRAY_HT_OR_NULL
-#define Z_PARAM_ARRAY_HT_OR_NULL(dest) \
-    Z_PARAM_ARRAY_HT_EX(dest, 1, 0)
-#endif
-
-#ifndef Z_PARAM_LONG_OR_NULL
-#define Z_PARAM_LONG_OR_NULL(dest, is_null) \
-    Z_PARAM_LONG_EX(dest, is_null, 1, 0)
-#endif
-
-#ifndef ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX
-#define ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(name, return_reference, required_num_args, type, allow_null) \
-    ZEND_BEGIN_ARG_INFO_EX(name, 0, return_reference, required_num_args)
-#endif
-
-#ifndef ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX
-#define ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(name, return_reference, required_num_args, type, allow_null) \
-    ZEND_BEGIN_ARG_INFO_EX(name, 0, return_reference, required_num_args)
-#endif
-
-#if PHP_MAJOR_VERSION >= 8
-
-#define Z_RDKAFKA_OBJ zend_object
-
-#define Z_RDKAFKA_OBJ_COPY(z, o) ZVAL_OBJ_COPY(z, o)
-
-#define Z_RDKAFKA_PROP_OBJ(object) Z_OBJ_P(object)
-
-#define rdkafka_get_debug_object(type, object) php_kafka_from_obj(type, object)
-
-#else // PHP 7
-
-#define Z_RDKAFKA_OBJ zval
-
-#define Z_RDKAFKA_OBJ_COPY(z, o) ZVAL_ZVAL(z, o, 1, 0)
-
-#define Z_RDKAFKA_PROP_OBJ(object) object
-
-#define rdkafka_get_debug_object(type, object) php_kafka_from_obj(type, Z_OBJ_P(object))
-
-#if PHP_MINOR_VERSION < 3
-/* Allocates object type and zeros it, but not the properties.
- * Properties MUST be initialized using object_properties_init(). */
-static zend_always_inline void *zend_object_alloc(size_t obj_size, zend_class_entry *ce) {
-    void *obj = emalloc(obj_size + zend_object_properties_size(ce));
-    /* Subtraction of sizeof(zval) is necessary, because zend_object_properties_size() may be
-     * -sizeof(zval), if the object has no properties. */
-    memset(obj, 0, obj_size - sizeof(zval));
-    return obj;
-}
-
-static zend_always_inline zend_string *zval_get_tmp_string(zval *op, zend_string **tmp) {
-	if (EXPECTED(Z_TYPE_P(op) == IS_STRING)) {
-		*tmp = NULL;
-		return Z_STR_P(op);
-	} else {
-		return *tmp = _zval_get_string_func(op);
-	}
-}
-static zend_always_inline void zend_tmp_string_release(zend_string *tmp) {
-	if (UNEXPECTED(tmp)) {
-		zend_string_release(tmp);
-	}
-}
-#endif // PHP_MINOR_VERSION < 3
-
-#endif // PHP 7
-
 #define Z_RDKAFKA_P(php_kafka_type, zobject) php_kafka_from_obj(php_kafka_type, Z_OBJ_P(zobject))
 
 #define php_kafka_from_obj(php_kafka_type, object) \
@@ -125,7 +47,7 @@ static inline void rdkafka_call_function(zend_fcall_info *fci, zend_fcall_info_c
     }
 }
 
-static inline zval *rdkafka_read_property(zend_class_entry *scope, Z_RDKAFKA_OBJ *object, const char *name, size_t name_length, zend_bool silent)
+static inline zval *rdkafka_read_property(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, zend_bool silent)
 {
     zval rv;
     return zend_read_property(scope, object, name, name_length, silent, &rv);
