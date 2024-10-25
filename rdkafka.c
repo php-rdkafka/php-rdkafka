@@ -711,7 +711,7 @@ PHP_METHOD(RdKafka, queryWatermarkOffsets)
     kafka_object *intern;
     char *topic;
     size_t topic_length;
-    long low, high;
+    int64_t low, high;
     zend_long partition, timeout;
     zval *lowResult, *highResult;
     rd_kafka_resp_err_t err;
@@ -735,8 +735,8 @@ PHP_METHOD(RdKafka, queryWatermarkOffsets)
         return;
     }
 
-    ZVAL_LONG(lowResult, low);
-    ZVAL_LONG(highResult, high);
+    ZVAL_LONG(lowResult, (zend_long) low);
+    ZVAL_LONG(highResult, (zend_long) high);
 }
 /* }}} */
 
