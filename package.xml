@@ -118,6 +118,7 @@
     <file role="test" name="bug465.phpt"/>
     <file role="test" name="bug508.phpt"/>
     <file role="test" name="bug521.phpt"/>
+    <file role="test" name="bug567.phpt"/>
     <file role="test" name="bug74.phpt"/>
     <file role="test" name="bug88.phpt"/>
     <file role="test" name="bugConfSetArgument.phpt"/>
