@@ -1,0 +1,19 @@
+{
+    "name": "rdkafka/rdkafka",
+    "type": "php-ext",
+    "license": "MIT",
+    "description": "A PHP extension for Kafka",
+    "require": {
+        "php": ">= 8.1.0"
+    },
+    "php-ext": {
+        "extension-name": "rdkafka",
+        "configure-options": [
+            {
+                "name": "with-rdkafka",
+                "description": "Use system librdkafka",
+                "needs-value": true
+            }
+        ]
+    }
+}
