@@ -31,8 +31,9 @@ function printUsage(): void
 function generateReleaseNotes(string $newVersion): string
 {
     $cmd = sprintf(
-        'gh api repos/arnaud-lb/php-rdkafka/releases/generate-notes -f  tag_name=%s',
+        'gh api repos/arnaud-lb/php-rdkafka/releases/generate-notes -f tag_name=%s -f target_commitish=%s',
         escapeshellcmd($newVersion),
+        escapeshellcmd(exec("git rev-parse HEAD")),
     );
 
     $result = exec($cmd);
