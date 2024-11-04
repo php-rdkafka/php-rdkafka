@@ -10,10 +10,10 @@
   <email>arnaud.lb@gmail.com</email>
   <active>yes</active>
  </lead>
- <date>2024-10-24</date>
- <time>14:56:47</time>
+ <date>2024-11-04</date>
+ <time>11:24:15</time>
  <version>
-  <release>6.0.4</release>
+  <release>6.0.5</release>
   <api>6.0.0</api>
  </version>
  <stability>
@@ -22,16 +22,10 @@
  </stability>
  <license uri="http://opensource.org/licenses/mit-license.php">MIT License</license>
  <notes>
-  ## Improvements
-  - Added OAUTHBEARER support. New methods: RdKafka\Conf::setOauthbearerTokenRefreshCb(), RdKafka::oauthbearerSetToken(), RdKafka::oauthbearerSetTokenFailure() (#546, #547, @cb-freddysart, @scorgn)
-  - Added incremental rebalance support. New methods: RdKafka\KafkaConsumer::incrementalAssign(), RdKafka\KafkaConsumer::incrementalUnassign() (#541, @ikeberlein)
-  - Added RdKafka::getControllerId() (#554, @qkdreyer)
-
-  ## Bugfixes
-  - Add private constructor on Metadata classes (#531, @arnaud-lb)
-
-  ## Other Changes
-  - Improve KafkaErrorException message (#555, @arnaud-lb)
+  ## Bug fixes
+  - Fix php 7.0 build (#563, @arnaud-lb)
+  - Fix x32 build (#565, @arnaud-lb)
+  - Fix segmentation fault in setOauthbearerTokenRefreshCb when sasl.oauthbearer.config is unset (#568, @scorgn)
  </notes>
  <contents>
   <dir name="/">
@@ -178,6 +172,31 @@
    <configureoption name="with-rdkafka" default="autodetect" prompt="librdkafka installation path?"/>
  </extsrcrelease>
  <changelog>
+  <release>
+   <date>2024-10-24</date>
+   <time>14:56:47</time>
+   <version>
+    <release>6.0.4</release>
+    <api>6.0.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://opensource.org/licenses/mit-license.php">MIT License</license>
+   <notes>
+    ## Improvements
+    - Added OAUTHBEARER support. New methods: RdKafka\Conf::setOauthbearerTokenRefreshCb(), RdKafka::oauthbearerSetToken(), RdKafka::oauthbearerSetTokenFailure() (#546, #547, @cb-freddysart, @scorgn)
+    - Added incremental rebalance support. New methods: RdKafka\KafkaConsumer::incrementalAssign(), RdKafka\KafkaConsumer::incrementalUnassign() (#541, @ikeberlein)
+    - Added RdKafka::getControllerId() (#554, @qkdreyer)
+  
+    ## Bugfixes
+    - Add private constructor on Metadata classes (#531, @arnaud-lb)
+  
+    ## Other Changes
+    - Improve KafkaErrorException message (#555, @arnaud-lb)
+   </notes>
+  </release>
   <release>
    <date>2022-07-02</date>
    <time>12:26:56</time>
