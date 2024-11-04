@@ -1,5 +1,5 @@
 {
-    "name": "arnaud-lb/rdkafka",
+    "name": "rdkafka/rdkafka",
     "type": "php-ext",
     "license": "MIT",
     "description": "A PHP extension for Kafka",
