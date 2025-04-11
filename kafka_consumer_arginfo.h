@@ -129,6 +129,27 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_KafkaConsumer_queryWatermarkOffsets
 	ZEND_ARG_TYPE_INFO(0, timeout_ms, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
+#if defined(HAS_RD_KAFKA_OAUTHBEARER)
+#if (PHP_VERSION_ID >= 80100)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_RdKafka_KafkaConsumer_oauthbearerSetToken, 0, 3, IS_VOID, 0)
+#else
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_KafkaConsumer_oauthbearerSetToken, 0, 0, 3)
+#endif
+	ZEND_ARG_TYPE_INFO(0, token_value, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, lifetime_ms, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, principal_name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, extensions, IS_ARRAY, 0, "[]")
+ZEND_END_ARG_INFO()
+
+#if (PHP_VERSION_ID >= 80100)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_RdKafka_KafkaConsumer_oauthbearerSetTokenFailure, 0, 1, IS_VOID, 0)
+#else
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_KafkaConsumer_oauthbearerSetTokenFailure, 0, 0, 1)
+#endif
+	ZEND_ARG_TYPE_INFO(0, error, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
+
 #define arginfo_class_RdKafka_KafkaConsumer_offsetsForTimes arginfo_class_RdKafka_KafkaConsumer_getCommittedOffsets
 
 #define arginfo_class_RdKafka_KafkaConsumer_pausePartitions arginfo_class_RdKafka_KafkaConsumer_getOffsetPositions
@@ -162,6 +183,10 @@ ZEND_METHOD(RdKafka_KafkaConsumer, queryWatermarkOffsets);
 ZEND_METHOD(RdKafka_KafkaConsumer, offsetsForTimes);
 ZEND_METHOD(RdKafka_KafkaConsumer, pausePartitions);
 ZEND_METHOD(RdKafka_KafkaConsumer, resumePartitions);
+#if defined(HAS_RD_KAFKA_OAUTHBEARER)
+ZEND_METHOD(RdKafka_KafkaConsumer, oauthbearerSetToken);
+ZEND_METHOD(RdKafka_KafkaConsumer, oauthbearerSetTokenFailure);
+#endif
 
 static const zend_function_entry class_RdKafka_KafkaConsumer_methods[] = {
 	ZEND_ME(RdKafka_KafkaConsumer, __construct, arginfo_class_RdKafka_KafkaConsumer___construct, ZEND_ACC_PUBLIC)
@@ -191,6 +216,10 @@ static const zend_function_entry class_RdKafka_KafkaConsumer_methods[] = {
 	ZEND_ME(RdKafka_KafkaConsumer, offsetsForTimes, arginfo_class_RdKafka_KafkaConsumer_offsetsForTimes, ZEND_ACC_PUBLIC)
 	ZEND_ME(RdKafka_KafkaConsumer, pausePartitions, arginfo_class_RdKafka_KafkaConsumer_pausePartitions, ZEND_ACC_PUBLIC)
 	ZEND_ME(RdKafka_KafkaConsumer, resumePartitions, arginfo_class_RdKafka_KafkaConsumer_resumePartitions, ZEND_ACC_PUBLIC)
+#if defined(HAS_RD_KAFKA_OAUTHBEARER)
+	ZEND_ME(RdKafka_KafkaConsumer, oauthbearerSetToken, arginfo_class_RdKafka_KafkaConsumer_oauthbearerSetToken, ZEND_ACC_PUBLIC)
+	ZEND_ME(RdKafka_KafkaConsumer, oauthbearerSetTokenFailure, arginfo_class_RdKafka_KafkaConsumer_oauthbearerSetTokenFailure, ZEND_ACC_PUBLIC)
+#endif
 	ZEND_FE_END
 };
 

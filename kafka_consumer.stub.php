@@ -81,4 +81,12 @@ class KafkaConsumer
 
     /** @tentative-return-type */
     public function resumePartitions(array $topic_partitions): array {}
+
+    #ifdef HAS_RD_KAFKA_OAUTHBEARER
+    /** @tentative-return-type */
+    public function oauthbearerSetToken(string $token_value, int $lifetime_ms, string $principal_name, array $extensions = []): void {}
+
+    /** @tentative-return-type */
+    public function oauthbearerSetTokenFailure(string $error): void {}
+    #endif
 }
