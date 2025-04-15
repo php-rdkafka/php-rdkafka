@@ -85,6 +85,8 @@
    <file role="src" name="metadata_topic_legacy_arginfo.h"/>
    <file role="src" name="php_rdkafka.h"/>
    <file role="src" name="php_rdkafka_priv.h"/>
+   <file role="src" name="oauthbearer.c"/>
+   <file role="src" name="oauthbearer.h"/>
    <file role="src" name="queue.c"/>
    <file role="src" name="queue.h"/>
    <file role="src" name="queue.stub.php"/>
@@ -136,6 +138,7 @@
     <file role="test" name="metadata_topic_001.phpt"/>
     <file role="test" name="new_topic_with_conf.phpt"/>
     <file role="test" name="oauthbearer_integration.phpt"/>
+    <file role="test" name="oauthbearer_integration_hl.phpt"/>
     <file role="test" name="pause_resume.phpt"/>
     <file role="test" name="produce_consume.phpt"/>
     <file role="test" name="produce_consume_queue.phpt"/>
