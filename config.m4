@@ -96,6 +96,7 @@ if test "$PHP_RDKAFKA" != "no"; then
 
   AC_CHECK_LIB($LIBNAME,[rd_kafka_oauthbearer_set_token],[
     AC_DEFINE(HAS_RD_KAFKA_OAUTHBEARER,1,[ ])
+    SOURCES="$SOURCES oauthbearer.c"
   ],[
     AC_MSG_WARN([oauthbearer support is not available])
   ])

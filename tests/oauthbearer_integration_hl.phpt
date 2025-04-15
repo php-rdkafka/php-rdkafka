@@ -99,87 +99,24 @@ $confConsumer->setOauthbearerTokenRefreshCb(function ($consumer) {
 $consumer = new \RdKafka\KafkaConsumer($confConsumer);
 $consumer->subscribe([$topicName]);
 echo "Reading data\n";
-$message = $consumer->consume(5500);
+$message = $consumer->consume(500);
 echo ($message->err === RD_KAFKA_RESP_ERR_NO_ERROR) ? "Read successful\n" : "Read Error\n";
 echo $message->payload . "\n";
 
-//// Test that refresh token with setting token failure will fail when getting metadata
-//$conf->setOauthbearerTokenRefreshCb(function ($producer) {
-//    echo "Setting token failure in refresh cb\n";
-//    $producer->oauthbearerSetTokenFailure('Token failure before getting metadata');
-//    $producer->poll(0);
-//});
-//$producer = new \RdKafka\Producer($conf);
-//$producer->poll(0);
-//$topicName = sprintf("test_rdkafka_%s", uniqid());
-//$topic = $producer->newTopic($topicName);
-//try {
-//    $producer->getMetadata(false, $topic, 10*1000);
-//    echo "FAIL: Did not catch exception after not setting or refreshing any token\n";
-//} catch (\RdKafka\Exception $e) {
-//    echo "Caught exception when getting metadata after not setting or refreshing any token\n";
-//}
-//
-//// Test that setting token without refreshing will get metadata successfully
-//$conf->setOauthbearerTokenRefreshCb(function ($producer) {});
-//$producer = new \RdKafka\Producer($conf);
-//$token = generateJws();
-//$producer->oauthbearerSetToken($token['value'], $token['expiryMs'], $token['principal']);
-//$topicName = sprintf("test_rdkafka_%s", uniqid());
-//$topic = $producer->newTopic($topicName);
-//try {
-//    $producer->getMetadata(false, $topic, 10*1000);
-//    echo "Got metadata successfully\n";
-//} catch (\RdKafka\Exception $e) {
-//    echo "FAIL: Set token but still got exception \n";
-//    exit;
-//}
-//
-//// Test that token refresh is called after token expires
-//$conf->setOauthbearerTokenRefreshCb(function ($producer) {
-//    echo "Refreshing token\n";
-//});
-//$producer = new \RdKafka\Producer($conf);
-//$token = generateJws('required-scope', 5);
-//$producer->oauthbearerSetToken($token['value'], $token['expiryMs'], $token['principal']);
-//$producer->poll(0);
-//echo "Polled with refresh\n";
-//sleep(1);
-//$producer->poll(0);
-//echo "Polled without refresh\n";
-//sleep(4);
-//$producer->poll(0);
-//echo "Polled with refresh\n";
-//
-//// Test that tokens without required scope fail
-//$producer = new \RdKafka\Producer($conf);
-//$token = generateJws('not-required-scope');
-//$producer->oauthbearerSetToken($token['value'], $token['expiryMs'], $token['principal']);
-//$topicName = sprintf("test_rdkafka_%s", uniqid());
-//$topic = $producer->newTopic($topicName);
-//try {
-//    $producer->getMetadata(false, $topic, 10*1000);
-//    echo "FAIL: Exception not thrown as expected when using insufficient scope\n";
-//    exit;
-//} catch (\RdKafka\Exception $e) {
-//    echo "Caught expected exception with insufficient_scope\n";
-//}
-//
-//// Test that setting token with extensions succeeds
-//$conf->setOauthbearerTokenRefreshCb(function ($producer) {});
-//$producer = new \RdKafka\Producer($conf);
-//$token = generateJws();
-//$producer->oauthbearerSetToken($token['value'], $token['expiryMs'], $token['principal'], ['testExtensionKey' => 'Test extension value']);
-//$producer->poll(0);
+// Test that refresh token with setting token failure will fail when trying to read data
+$confConsumer->setOauthbearerTokenRefreshCb(function ($consumer) {
+    echo "Setting token failure in refresh cb\n";
+    $consumer->oauthbearerSetTokenFailure('Token failure before data consumption');
+});
+$confConsumer->set('group.id', 'test_group_fail');
 
-//Setting token failure in refresh cb
-//Local: Authentication failure: Failed to acquire SASL OAUTHBEARER token: Token failure before getting metadata
-//Caught exception when getting metadata after not setting or refreshing any token--EXPECT--
-//Got metadata successfullyRefreshing token and succeeding
-//Refreshing tokenMetadata retrieved successfully when refresh callback set token
-//Polled with refreshWriting test data
-//Polled without refreshWrite successful
-//Refreshing token
+$consumer = new \RdKafka\KafkaConsumer($confConsumer);
+$consumer->subscribe([$topicName]);
+echo "Reading data\n";
+
+$message = $consumer->consume(500);
+echo $message->err === -185 ? "Received empty message when reading data after not setting or refreshing any token\n" :
+    "FAIL: Did receive a message after not setting or refreshing any token\n";
 
 --EXPECT--
 Refreshing token and succeeding
@@ -190,3 +127,7 @@ Reading data
 Refreshing token and succeeding
 Read successful
 Test
+Reading data
+Setting token failure in refresh cb
+Local: Authentication failure: Failed to acquire SASL OAUTHBEARER token: Token failure before data consumption
+Received empty message when reading data after not setting or refreshing any token

@@ -31,6 +31,9 @@
 #include "topic.h"
 #include "message.h"
 #include "metadata.h"
+#ifdef HAS_RD_KAFKA_OAUTHBEARER
+#include "oauthbearer.h"
+#endif
 #if PHP_VERSION_ID < 80000
 #include "kafka_consumer_legacy_arginfo.h"
 #else
@@ -869,12 +872,12 @@ PHP_METHOD(RdKafka_KafkaConsumer, resumePartitions)
 /* }}} */
 
 #ifdef HAS_RD_KAFKA_OAUTHBEARER
-/* {{{ proto void RdKafka::oauthbearerSetToken(string $token_value, int $lifetime_ms, string $principal_name, array $extensions = [])
+/* {{{ proto void RdKafka\KafkaConsumer::oauthbearerSetToken(string $token_value, int $lifetime_ms, string $principal_name, array $extensions = [])
  * Set SASL/OAUTHBEARER token and metadata
  *
  * The SASL/OAUTHBEARER token refresh callback or event handler should cause
  * this method to be invoked upon success, via
- * $kafka->oauthbearerSetToken(). The extension keys must not include the
+ * $consumer->oauthbearerSetToken(). The extension keys must not include the
  * reserved key "`auth`", and all extension keys and values must conform to the
  * required format as per https://tools.ietf.org/html/rfc7628#section-3.1:
  *
@@ -886,86 +889,24 @@ PHP_METHOD(RdKafka_KafkaConsumer, oauthbearerSetToken)
     object_intern *intern;
     char *token_value;
     size_t token_value_len;
-    zend_long lifetime_ms;
+    zval *zlifetime_ms;
+    int64_t lifetime_ms;
     char *principal_name;
     size_t principal_len;
     HashTable *extensions_hash = NULL;
 
-    char errstr[512];
-    rd_kafka_resp_err_t ret = 0;
-
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "sls|h", &token_value, &token_value_len, &lifetime_ms, &principal_name, &principal_len, &extensions_hash) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "szs|h", &token_value, &token_value_len, &zlifetime_ms, &principal_name, &principal_len, &extensions_hash) == FAILURE) {
         return;
     }
+
+    lifetime_ms = zval_to_int64(zlifetime_ms, "Argument #2 ($lifetime_ms) must be a valid integer");
 
     intern = get_object(getThis());
     if (!intern) {
         return;
     }
 
-    errstr[0] = '\0';
-
-    int extensions_size = 0;
-    char **extensions = NULL;
-
-    if (extensions_hash != NULL) {
-        extensions_size = zend_hash_num_elements(extensions_hash) * 2;
-        extensions = safe_emalloc((extensions_size * 2), sizeof(char *), 0);
-
-        int pos = 0;
-        zend_ulong num_key;
-        zend_string *extension_key_str;
-        zval *extension_zval;
-        ZEND_HASH_FOREACH_KEY_VAL(extensions_hash, num_key, extension_key_str, extension_zval) {
-            if (!extension_key_str) {
-                extension_key_str = zend_long_to_str(num_key);
-                extensions[pos++] = estrdup(ZSTR_VAL(extension_key_str));
-                zend_string_release(extension_key_str);
-            } else {
-                extensions[pos++] = estrdup(ZSTR_VAL(extension_key_str));
-            }
-
-            zend_string *tmp_extension_val_str;
-            zend_string *extension_val_str = zval_get_tmp_string(extension_zval, &tmp_extension_val_str);
-            extensions[pos++] = estrdup(ZSTR_VAL(extension_val_str));
-            if (tmp_extension_val_str) {
-                zend_string_release(tmp_extension_val_str);
-            }
-        } ZEND_HASH_FOREACH_END();
-    }
-
-    ret = rd_kafka_oauthbearer_set_token(
-        intern->rk,
-        token_value,
-        lifetime_ms,
-        principal_name,
-        (const char **)extensions,
-        extensions_size,
-        errstr,
-        sizeof(errstr));
-
-    if (extensions != NULL) {
-        for (int i = 0; i < extensions_size; i++) {
-            efree(extensions[i]);
-        }
-        efree(extensions);
-    }
-
-    switch (ret) {
-        case RD_KAFKA_RESP_ERR__INVALID_ARG:
-            zend_throw_exception(ce_kafka_exception, errstr, RD_KAFKA_RESP_ERR__INVALID_ARG);
-            return;
-        case RD_KAFKA_RESP_ERR__NOT_IMPLEMENTED:
-            zend_throw_exception(ce_kafka_exception, errstr, RD_KAFKA_RESP_ERR__NOT_IMPLEMENTED);
-            return;
-        case RD_KAFKA_RESP_ERR__STATE:
-            zend_throw_exception(ce_kafka_exception, errstr, RD_KAFKA_RESP_ERR__STATE);
-            return;
-        case RD_KAFKA_RESP_ERR_NO_ERROR:
-            break;
-        default:
-            return;
-    }
+    oauthbearer_set_token(intern->rk, token_value, lifetime_ms, principal_name, extensions_hash);
 }
 /* }}} */
 
@@ -989,20 +930,7 @@ PHP_METHOD(RdKafka_KafkaConsumer, oauthbearerSetTokenFailure)
         return;
     }
 
-    rd_kafka_resp_err_t ret = rd_kafka_oauthbearer_set_token_failure(intern->rk, errstr);
-
-    switch (ret) {
-        case RD_KAFKA_RESP_ERR__INVALID_ARG:
-            zend_throw_exception(ce_kafka_exception, NULL, RD_KAFKA_RESP_ERR__INVALID_ARG);
-            return;
-        case RD_KAFKA_RESP_ERR__STATE:
-            zend_throw_exception(ce_kafka_exception, NULL, RD_KAFKA_RESP_ERR__STATE);
-            return;
-        case RD_KAFKA_RESP_ERR_NO_ERROR:
-            break;
-        default:
-            return;
-    }
+    oauthbearer_set_token_failure(intern->rk, errstr);
 }
 /* }}} */
 #endif
