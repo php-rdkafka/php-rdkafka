@@ -871,6 +871,26 @@ PHP_METHOD(RdKafka_KafkaConsumer, resumePartitions)
 }
 /* }}} */
 
+/* {{{ proto int RdKafka::poll(int $timeout_ms)
+   Polls the provided kafka handle for events */
+PHP_METHOD(RdKafka_KafkaConsumer, poll)
+{
+    object_intern *intern;
+    zend_long timeout;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &timeout) == FAILURE) {
+        return;
+    }
+
+    intern = get_object(getThis());
+    if (!intern) {
+        return;
+    }
+
+    RETURN_LONG(rd_kafka_poll(intern->rk, timeout));
+}
+/* }}} */
+
 #ifdef HAS_RD_KAFKA_OAUTHBEARER
 /* {{{ proto void RdKafka\KafkaConsumer::oauthbearerSetToken(string $token_value, int $lifetime_ms, string $principal_name, array $extensions = [])
  * Set SASL/OAUTHBEARER token and metadata

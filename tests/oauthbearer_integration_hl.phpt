@@ -60,14 +60,6 @@ $producer->poll(0);
 $topicName = sprintf("test_rdkafka_%s", uniqid());
 $topic = $producer->newTopic($topicName);
 
-try {
-    $producer->getMetadata(false, $topic, 10*1000);
-    echo "Metadata retrieved successfully when refresh callback set token\n";
-} catch (\RdKafka\Exception $e) {
-    echo "FAIL: Caught exception when getting metadata after successfully refreshing any token:\n";
-    printf("%s: %s\n", get_class($e), $e->getMessage());
-}
-
 echo "Writing test data\n";
 $topic->produce(RD_KAFKA_PARTITION_UA, 0, "Test");
 $producer->poll(0);
@@ -89,7 +81,7 @@ $confConsumer->setErrorCb(function ($producer, $err, $errstr) {
     printf("%s: %s\n", rd_kafka_err2str($err), $errstr);
 });
 
-// Test that refresh token with setting token accurately will succeed when getting metadata
+// Test that refresh token with setting token accurately will succeed when consuming data
 $confConsumer->setOauthbearerTokenRefreshCb(function ($consumer) {
     echo "Refreshing token and succeeding\n";
     $token = generateJws();
@@ -118,9 +110,26 @@ $message = $consumer->consume(500);
 echo $message->err === -185 ? "Received empty message when reading data after not setting or refreshing any token\n" :
     "FAIL: Did receive a message after not setting or refreshing any token\n";
 
+// Test that metadata will be loaded before data consumption, under the condition that poll is called
+$confConsumer->setOauthbearerTokenRefreshCb(function ($consumer) {
+    echo "Refreshing token on poll and succeeding\n";
+    $token = generateJws();
+    $consumer->oauthbearerSetToken($token['value'], (string) $token['expiryMs'], $token['principal']);
+});
+$consumer = new \RdKafka\KafkaConsumer($confConsumer);
+$consumerTopic = $consumer->newTopic($topicName);
+$consumer->poll(0);
+
+try {
+    echo "Reading metadata\n";
+    $consumer->getMetadata(false, $consumerTopic, 1000);
+    echo "Metadata was fetched successfully after calling poll\n";
+} catch (\RdKafka\Exception $e) {
+    echo "FAIL: Caught exception when getting metadata after calling poll\n";
+}
+
 --EXPECT--
 Refreshing token and succeeding
-Metadata retrieved successfully when refresh callback set token
 Writing test data
 Write successful
 Reading data
@@ -131,3 +140,6 @@ Reading data
 Setting token failure in refresh cb
 Local: Authentication failure: Failed to acquire SASL OAUTHBEARER token: Token failure before data consumption
 Received empty message when reading data after not setting or refreshing any token
+Refreshing token on poll and succeeding
+Reading metadata
+Metadata was fetched successfully after calling poll
