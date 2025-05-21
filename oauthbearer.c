@@ -60,7 +60,7 @@ void oauthbearer_set_token(
         zend_ulong num_key;
         zend_string *extension_key_str;
         zval *extension_zval;
-        ZEND_HASH_FOREACH_KEY_VAL(extensions_hash, num_key, extension_key_str, extension_zval) {
+        ZEND_HASH_FOREACH_KEY_VAL((HashTable*)extensions_hash, num_key, extension_key_str, extension_zval) {
             if (!extension_key_str) {
                 extension_key_str = zend_long_to_str(num_key);
                 extensions[pos++] = estrdup(ZSTR_VAL(extension_key_str));
