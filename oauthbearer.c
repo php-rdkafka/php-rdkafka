@@ -142,13 +142,13 @@ int64_t zval_to_int64(zval *zval, const char *errstr) {
             return (int64_t) Z_DVAL_P(zval);
         break;
         case IS_STRING:;
-        char *str = Z_STRVAL_P(zval);
-        char *end;
-        converted = (int64_t) strtoll(str, &end, 10);
-        if (end != str + Z_STRLEN_P(zval)) {
-            zend_throw_exception(spl_ce_InvalidArgumentException, errstr, 0);
-            return 0;
-        }
+           char *str = Z_STRVAL_P(zval);
+           char *end;
+           converted = (int64_t) strtoll(str, &end, 10);
+           if (end != str + Z_STRLEN_P(zval)) {
+               zend_throw_exception(spl_ce_InvalidArgumentException, errstr, 0);
+               return 0;
+           }
         break;
         EMPTY_SWITCH_DEFAULT_CASE();
     }
