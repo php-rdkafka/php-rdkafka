@@ -23,19 +23,8 @@
 #include "php.h"
 #include "php_rdkafka.h"
 #include "php_rdkafka_priv.h"
-#include "librdkafka/rdkafka.h"
 #include "Zend/zend_exceptions.h"
 #include "ext/spl/spl_exceptions.h"
-#include "conf.h"
-#include "topic_partition.h"
-#include "topic.h"
-#include "message.h"
-#include "metadata.h"
-#if PHP_VERSION_ID < 80000
-#include "kafka_consumer_legacy_arginfo.h"
-#else
-#include "kafka_consumer_arginfo.h"
-#endif
 
 void oauthbearer_set_token(
     rd_kafka_t *rk,
