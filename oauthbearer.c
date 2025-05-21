@@ -149,6 +149,7 @@ int64_t zval_to_int64(zval *zval, const char *errstr) {
                zend_throw_exception(spl_ce_InvalidArgumentException, errstr, 0);
                return 0;
            }
+           return converted;
         break;
         EMPTY_SWITCH_DEFAULT_CASE();
     }
