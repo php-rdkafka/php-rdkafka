@@ -141,6 +141,7 @@ PHP_METHOD(RdKafka_KafkaConsumer, __construct)
     }
 
     if (!has_group_id(conf)) {
+        zend_restore_error_handling(&error_handling);
         if (conf) {
             rd_kafka_conf_destroy(conf);
         }
