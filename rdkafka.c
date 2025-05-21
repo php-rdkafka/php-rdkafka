@@ -458,9 +458,6 @@ PHP_METHOD(RdKafka, oauthbearerSetToken)
     size_t principal_len;
     HashTable *extensions_hash = NULL;
     
-    char errstr[512];
-    rd_kafka_resp_err_t ret = 0;
-
     if (zend_parse_parameters(ZEND_NUM_ARGS(), "szs|h", &token_value, &token_value_len, &zlifetime_ms, &principal_name, &principal_len, &extensions_hash) == FAILURE) {
         return;
     }
