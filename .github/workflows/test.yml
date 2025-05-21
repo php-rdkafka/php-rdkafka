@@ -168,7 +168,7 @@ jobs:
                 librdkafka: 'master'
                 experimental: true
 
-        runs-on: 'ubuntu-20.04'
+        runs-on: 'ubuntu-24.04'
         continue-on-error: ${{ !!matrix.experimental }}
         env:
             PHP_VERSION: ${{ matrix.php }}
@@ -184,12 +184,12 @@ jobs:
               with:
                   path: 'php-rdkafka'
 
-            - uses: actions/cache@v2
+            - uses: actions/cache@v4
               with:
                   path: ~/build-cache/php
                   key: ${{ runner.os }}-${{ matrix.arch }}-${{ matrix.php }}-${{ matrix.memcheck }}
 
-            - uses: actions/cache@v2
+            - uses: actions/cache@v4
               with:
                   path: ~/build-cache/librdkafka
                   key: ${{ runner.os }}-${{ matrix.arch }}-${{ matrix.librdkafka }}
