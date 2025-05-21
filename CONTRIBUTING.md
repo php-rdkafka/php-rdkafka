@@ -6,7 +6,7 @@ Here are a few informations you need to know before starting:
 
 ## Branches
 
-Pull requests should be made against the 5.x branch, which supports both PHP 7 and PHP 8.
+Pull requests should be made against the default branch (currently 7.x).
 
 ## How to make good contributions
 
