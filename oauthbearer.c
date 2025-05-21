@@ -146,7 +146,7 @@ int64_t zval_to_int64(zval *zval, const char *errstr) {
         char *end;
         converted = (int64_t) strtoll(str, &end, 10);
         if (end != str + Z_STRLEN_P(zval)) {
-            zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, errstr);
+            zend_throw_exception(spl_ce_InvalidArgumentException, errstr, 0);
             return 0;
         }
         break;
