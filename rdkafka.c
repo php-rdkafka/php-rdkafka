@@ -465,6 +465,8 @@ PHP_METHOD(RdKafka, oauthbearerSetToken)
         return;
     }
 
+    /* On 32-bits, it might be required to pass $lifetime_ms as a float or a
+     * string */
     lifetime_ms = zval_to_int64(zlifetime_ms, "Argument #2 ($lifetime_ms) must be a valid integer");
 
     intern = get_kafka_object(getThis());

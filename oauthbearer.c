@@ -132,8 +132,6 @@ void oauthbearer_set_token_failure(rd_kafka_t *rk, const char *errstr) {
 int64_t zval_to_int64(zval *zval, const char *errstr) {
     int64_t converted;
 
-    /* On 32-bits, it might be required to pass $lifetime_ms as a float or a
-       * string */
     switch (Z_TYPE_P(zval)) {
         case IS_LONG:
             return (int64_t) Z_LVAL_P(zval);
