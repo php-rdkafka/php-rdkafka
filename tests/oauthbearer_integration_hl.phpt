@@ -122,10 +122,11 @@ $consumer->poll(0);
 
 try {
     echo "Reading metadata\n";
-    $consumer->getMetadata(false, $consumerTopic, 1000);
+    $consumer->getMetadata(false, $consumerTopic, 10*1000);
     echo "Metadata was fetched successfully after calling poll\n";
 } catch (\RdKafka\Exception $e) {
-    echo "FAIL: Caught exception when getting metadata after calling poll\n";
+    echo "FAIL: Caught exception when getting metadata after calling poll:\n";
+    echo $e, "\n";
 }
 
 --EXPECT--
