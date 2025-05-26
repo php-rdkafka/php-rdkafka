@@ -31,6 +31,9 @@
 #include "topic.h"
 #include "message.h"
 #include "metadata.h"
+#ifdef HAS_RD_KAFKA_OAUTHBEARER
+#include "oauthbearer.h"
+#endif
 #if PHP_VERSION_ID < 80000
 #include "kafka_consumer_legacy_arginfo.h"
 #else
@@ -868,6 +871,90 @@ PHP_METHOD(RdKafka_KafkaConsumer, resumePartitions)
     rd_kafka_topic_partition_list_destroy(topars);
 }
 /* }}} */
+
+/* {{{ proto int RdKafka::poll(int $timeout_ms)
+   Polls the provided kafka handle for events */
+PHP_METHOD(RdKafka_KafkaConsumer, poll)
+{
+    object_intern *intern;
+    zend_long timeout;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &timeout) == FAILURE) {
+        return;
+    }
+
+    intern = get_object(getThis());
+    if (!intern) {
+        return;
+    }
+
+    RETURN_LONG(rd_kafka_poll(intern->rk, timeout));
+}
+/* }}} */
+
+#ifdef HAS_RD_KAFKA_OAUTHBEARER
+/* {{{ proto void RdKafka\KafkaConsumer::oauthbearerSetToken(string $token_value, int $lifetime_ms, string $principal_name, array $extensions = [])
+ * Set SASL/OAUTHBEARER token and metadata
+ *
+ * The SASL/OAUTHBEARER token refresh callback or event handler should cause
+ * this method to be invoked upon success, via
+ * $consumer->oauthbearerSetToken(). The extension keys must not include the
+ * reserved key "`auth`", and all extension keys and values must conform to the
+ * required format as per https://tools.ietf.org/html/rfc7628#section-3.1:
+ *
+ * key            = 1*(ALPHA)
+ * value          = *(VCHAR / SP / HTAB / CR / LF )
+*/
+PHP_METHOD(RdKafka_KafkaConsumer, oauthbearerSetToken)
+{
+    object_intern *intern;
+    char *token_value;
+    size_t token_value_len;
+    zval *zlifetime_ms;
+    int64_t lifetime_ms;
+    char *principal_name;
+    size_t principal_len;
+    HashTable *extensions_hash = NULL;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "szs|h", &token_value, &token_value_len, &zlifetime_ms, &principal_name, &principal_len, &extensions_hash) == FAILURE) {
+        return;
+    }
+
+    lifetime_ms = zval_to_int64(zlifetime_ms, "Argument #2 ($lifetime_ms) must be a valid integer");
+
+    intern = get_object(getThis());
+    if (!intern) {
+        return;
+    }
+
+    oauthbearer_set_token(intern->rk, token_value, lifetime_ms, principal_name, extensions_hash);
+}
+/* }}} */
+
+/* {{{ proto void RdKafka::oauthbearerSetTokenFailure(string $error)
+ The SASL/OAUTHBEARER token refresh callback or event handler should cause
+ this method to be invoked upon failure, via
+ rd_kafka_oauthbearer_set_token_failure().
+*/
+PHP_METHOD(RdKafka_KafkaConsumer, oauthbearerSetTokenFailure)
+{
+    object_intern *intern;
+    const char *errstr;
+    size_t errstr_len;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &errstr, &errstr_len) == FAILURE) {
+        return;
+    }
+
+    intern = get_object(getThis());
+    if (!intern) {
+        return;
+    }
+
+    oauthbearer_set_token_failure(intern->rk, errstr);
+}
+/* }}} */
+#endif
 
 void kafka_kafka_consumer_minit(INIT_FUNC_ARGS) /* {{{ */
 {
