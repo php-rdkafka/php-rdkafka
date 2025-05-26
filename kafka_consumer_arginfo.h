@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5396249050f6bf118e5f830140cc016efee80def */
+ * Stub hash: 6ebc69a2e5c4d2a7815e02ebebc84d54b93d01ec */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_KafkaConsumer___construct, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, conf, RdKafka\\Conf, 0)
@@ -133,6 +133,27 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_RdKafka_KafkaConsumer_resumePartitions arginfo_class_RdKafka_KafkaConsumer_getOffsetPositions
 
+#define arginfo_class_RdKafka_KafkaConsumer_poll arginfo_class_RdKafka_KafkaConsumer_getControllerId
+
+#if (PHP_VERSION_ID >= 80100)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_RdKafka_KafkaConsumer_oauthbearerSetToken, 0, 3, IS_VOID, 0)
+#else
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_KafkaConsumer_oauthbearerSetToken, 0, 0, 3)
+#endif
+	ZEND_ARG_TYPE_INFO(0, token_value, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, lifetime_ms, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, principal_name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, extensions, IS_ARRAY, 0, "[]")
+ZEND_END_ARG_INFO()
+
+#if (PHP_VERSION_ID >= 80100)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_RdKafka_KafkaConsumer_oauthbearerSetTokenFailure, 0, 1, IS_VOID, 0)
+#else
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_KafkaConsumer_oauthbearerSetTokenFailure, 0, 0, 1)
+#endif
+	ZEND_ARG_TYPE_INFO(0, error, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 
 ZEND_METHOD(RdKafka_KafkaConsumer, __construct);
 ZEND_METHOD(RdKafka_KafkaConsumer, assign);
@@ -159,6 +180,9 @@ ZEND_METHOD(RdKafka_KafkaConsumer, queryWatermarkOffsets);
 ZEND_METHOD(RdKafka_KafkaConsumer, offsetsForTimes);
 ZEND_METHOD(RdKafka_KafkaConsumer, pausePartitions);
 ZEND_METHOD(RdKafka_KafkaConsumer, resumePartitions);
+ZEND_METHOD(RdKafka_KafkaConsumer, poll);
+ZEND_METHOD(RdKafka_KafkaConsumer, oauthbearerSetToken);
+ZEND_METHOD(RdKafka_KafkaConsumer, oauthbearerSetTokenFailure);
 
 
 static const zend_function_entry class_RdKafka_KafkaConsumer_methods[] = {
@@ -187,6 +211,9 @@ static const zend_function_entry class_RdKafka_KafkaConsumer_methods[] = {
 	ZEND_ME(RdKafka_KafkaConsumer, offsetsForTimes, arginfo_class_RdKafka_KafkaConsumer_offsetsForTimes, ZEND_ACC_PUBLIC)
 	ZEND_ME(RdKafka_KafkaConsumer, pausePartitions, arginfo_class_RdKafka_KafkaConsumer_pausePartitions, ZEND_ACC_PUBLIC)
 	ZEND_ME(RdKafka_KafkaConsumer, resumePartitions, arginfo_class_RdKafka_KafkaConsumer_resumePartitions, ZEND_ACC_PUBLIC)
+	ZEND_ME(RdKafka_KafkaConsumer, poll, arginfo_class_RdKafka_KafkaConsumer_poll, ZEND_ACC_PUBLIC)
+	ZEND_ME(RdKafka_KafkaConsumer, oauthbearerSetToken, arginfo_class_RdKafka_KafkaConsumer_oauthbearerSetToken, ZEND_ACC_PUBLIC)
+	ZEND_ME(RdKafka_KafkaConsumer, oauthbearerSetTokenFailure, arginfo_class_RdKafka_KafkaConsumer_oauthbearerSetTokenFailure, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
