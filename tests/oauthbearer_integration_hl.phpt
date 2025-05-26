@@ -91,8 +91,8 @@ $confConsumer->setOauthbearerTokenRefreshCb(function ($consumer) {
 $consumer = new \RdKafka\KafkaConsumer($confConsumer);
 $consumer->subscribe([$topicName]);
 echo "Reading data\n";
-$message = $consumer->consume(500);
-echo ($message->err === RD_KAFKA_RESP_ERR_NO_ERROR) ? "Read successful\n" : "Read Error\n";
+$message = $consumer->consume(10*1000);
+echo ($message->err === RD_KAFKA_RESP_ERR_NO_ERROR) ? "Read successful\n" : "Read Error: " . $message->errstr() . "\n";
 echo $message->payload . "\n";
 
 // Test that refresh token with setting token failure will fail when trying to read data
@@ -106,7 +106,7 @@ $consumer = new \RdKafka\KafkaConsumer($confConsumer);
 $consumer->subscribe([$topicName]);
 echo "Reading data\n";
 
-$message = $consumer->consume(500);
+$message = $consumer->consume(10*1000);
 echo $message->err === -185 ? "Received empty message when reading data after not setting or refreshing any token\n" :
     "FAIL: Did receive a message after not setting or refreshing any token\n";
 
