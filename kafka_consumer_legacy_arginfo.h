@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 19d0e5f9de1e91016dd8e8c87e88c3d17e0c094f */
+ * Stub hash: c992beb679f8970a0d6af9fb06592d8c3c4cb232 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_KafkaConsumer___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, conf)
@@ -82,6 +82,24 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_RdKafka_KafkaConsumer_resumePartitions arginfo_class_RdKafka_KafkaConsumer_getOffsetPositions
 
+#define arginfo_class_RdKafka_KafkaConsumer_poll arginfo_class_RdKafka_KafkaConsumer_consume
+
+#if defined(HAS_RD_KAFKA_OAUTHBEARER)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_KafkaConsumer_oauthbearerSetToken, 0, 0, 3)
+	ZEND_ARG_INFO(0, token_value)
+	ZEND_ARG_INFO(0, lifetime_ms)
+	ZEND_ARG_INFO(0, principal_name)
+	ZEND_ARG_INFO(0, extensions)
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(HAS_RD_KAFKA_OAUTHBEARER)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_KafkaConsumer_oauthbearerSetTokenFailure, 0, 0, 1)
+	ZEND_ARG_INFO(0, error)
+ZEND_END_ARG_INFO()
+#endif
+
+
 ZEND_METHOD(RdKafka_KafkaConsumer, __construct);
 ZEND_METHOD(RdKafka_KafkaConsumer, assign);
 #if defined(HAS_RD_KAFKA_INCREMENTAL_ASSIGN)
@@ -109,6 +127,14 @@ ZEND_METHOD(RdKafka_KafkaConsumer, queryWatermarkOffsets);
 ZEND_METHOD(RdKafka_KafkaConsumer, offsetsForTimes);
 ZEND_METHOD(RdKafka_KafkaConsumer, pausePartitions);
 ZEND_METHOD(RdKafka_KafkaConsumer, resumePartitions);
+ZEND_METHOD(RdKafka_KafkaConsumer, poll);
+#if defined(HAS_RD_KAFKA_OAUTHBEARER)
+ZEND_METHOD(RdKafka_KafkaConsumer, oauthbearerSetToken);
+#endif
+#if defined(HAS_RD_KAFKA_OAUTHBEARER)
+ZEND_METHOD(RdKafka_KafkaConsumer, oauthbearerSetTokenFailure);
+#endif
+
 
 static const zend_function_entry class_RdKafka_KafkaConsumer_methods[] = {
 	ZEND_ME(RdKafka_KafkaConsumer, __construct, arginfo_class_RdKafka_KafkaConsumer___construct, ZEND_ACC_PUBLIC)
@@ -138,6 +164,13 @@ static const zend_function_entry class_RdKafka_KafkaConsumer_methods[] = {
 	ZEND_ME(RdKafka_KafkaConsumer, offsetsForTimes, arginfo_class_RdKafka_KafkaConsumer_offsetsForTimes, ZEND_ACC_PUBLIC)
 	ZEND_ME(RdKafka_KafkaConsumer, pausePartitions, arginfo_class_RdKafka_KafkaConsumer_pausePartitions, ZEND_ACC_PUBLIC)
 	ZEND_ME(RdKafka_KafkaConsumer, resumePartitions, arginfo_class_RdKafka_KafkaConsumer_resumePartitions, ZEND_ACC_PUBLIC)
+	ZEND_ME(RdKafka_KafkaConsumer, poll, arginfo_class_RdKafka_KafkaConsumer_poll, ZEND_ACC_PUBLIC)
+#if defined(HAS_RD_KAFKA_OAUTHBEARER)
+	ZEND_ME(RdKafka_KafkaConsumer, oauthbearerSetToken, arginfo_class_RdKafka_KafkaConsumer_oauthbearerSetToken, ZEND_ACC_PUBLIC)
+#endif
+#if defined(HAS_RD_KAFKA_OAUTHBEARER)
+	ZEND_ME(RdKafka_KafkaConsumer, oauthbearerSetTokenFailure, arginfo_class_RdKafka_KafkaConsumer_oauthbearerSetTokenFailure, ZEND_ACC_PUBLIC)
+#endif
 	ZEND_FE_END
 };
 
@@ -146,11 +179,7 @@ static zend_class_entry *register_class_RdKafka_KafkaConsumer(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "RdKafka", "KafkaConsumer", class_RdKafka_KafkaConsumer_methods);
-#if (PHP_VERSION_ID >= 80400)
-	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
-#else
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-#endif
 
 	zval property_error_cb_default_value;
 	ZVAL_NULL(&property_error_cb_default_value);
