@@ -20,7 +20,7 @@
 
 void oauthbearer_set_token(rd_kafka_t *rk,
     const char *token_value,
-    zend_long lifetime_ms,
+    int64_t lifetime_ms,
     const char *principal_name,
     const HashTable *extensions_hash
 );
