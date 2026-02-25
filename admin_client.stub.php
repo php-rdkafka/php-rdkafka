@@ -37,11 +37,13 @@ class AdminClient
      */
     public function createPartitions(array $new_partitions, ?AdminOptions $options = null): array {}
 
+#ifdef HAS_RD_KAFKA_DESCRIBE_TOPICS
     /**
      * @param string[] $topics
      * @tentative-return-type
      */
     public function describeTopics(array $topics, ?AdminOptions $options = null): array {}
+#endif
 
     /**
      * @param \RdKafka\TopicPartition[] $topic_partitions
@@ -65,8 +67,10 @@ class AdminOptions
     /** @tentative-return-type */
     public function setBrokerId(int $broker_id): void {}
 
+#ifdef HAS_RD_KAFKA_DESCRIBE_TOPICS
     /** @tentative-return-type */
     public function setIncludeAuthorizedOperations(bool $include): void {}
+#endif
 }
 
 class NewTopic
@@ -111,6 +115,7 @@ class TopicResult
     public function getName(): string {}
 }
 
+#ifdef HAS_RD_KAFKA_DESCRIBE_TOPICS
 class Node
 {
     public int $id;
@@ -150,3 +155,4 @@ class TopicDescription
     /** @var TopicPartitionInfo[] */
     public array $partitions;
 }
+#endif

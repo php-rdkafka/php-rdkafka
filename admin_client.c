@@ -40,9 +40,11 @@ zend_class_entry *ce_kafka_new_topic;
 zend_class_entry *ce_kafka_delete_topic;
 zend_class_entry *ce_kafka_new_partitions;
 zend_class_entry *ce_kafka_topic_result;
+#ifdef HAS_RD_KAFKA_DESCRIBE_TOPICS
 zend_class_entry *ce_kafka_node;
 zend_class_entry *ce_kafka_topic_partition_info;
 zend_class_entry *ce_kafka_topic_description;
+#endif
 
 /* Object handlers */
 static zend_object_handlers admin_client_object_handlers;
@@ -702,6 +704,7 @@ ZEND_METHOD(RdKafka_Admin_AdminOptions, setBrokerId)
 }
 /* }}} */
 
+#ifdef HAS_RD_KAFKA_DESCRIBE_TOPICS
 /* {{{ AdminOptions::setIncludeAuthorizedOperations(bool $include): void */
 ZEND_METHOD(RdKafka_Admin_AdminOptions, setIncludeAuthorizedOperations)
 {
@@ -726,6 +729,7 @@ ZEND_METHOD(RdKafka_Admin_AdminOptions, setIncludeAuthorizedOperations)
     }
 }
 /* }}} */
+#endif
 
 /* {{{ NewTopic::__construct(string $topic, int $num_partitions, int $replication_factor) */
 ZEND_METHOD(RdKafka_Admin_NewTopic, __construct)
@@ -940,6 +944,7 @@ ZEND_METHOD(RdKafka_Admin_TopicResult, getName)
 }
 /* }}} */
 
+#ifdef HAS_RD_KAFKA_DESCRIBE_TOPICS
 /* {{{ Helper: convert rd_kafka_Node_t to PHP Node object */
 static void kafka_node_to_zval(zval *return_value, const rd_kafka_Node_t *node)
 {
@@ -1169,6 +1174,7 @@ ZEND_METHOD(RdKafka_Admin_AdminClient, describeTopics)
     rd_kafka_event_destroy(event);
 }
 /* }}} */
+#endif /* HAS_RD_KAFKA_DESCRIBE_TOPICS */
 
 /* {{{ AdminClient::deleteRecords(array $topic_partitions, ?AdminOptions $options = null): array */
 ZEND_METHOD(RdKafka_Admin_AdminClient, deleteRecords)
@@ -1304,6 +1310,7 @@ void kafka_admin_client_minit(INIT_FUNC_ARGS)
     /* TopicResult - no custom object handler needed, uses default */
     ce_kafka_topic_result = register_class_RdKafka_Admin_TopicResult();
 
+#ifdef HAS_RD_KAFKA_DESCRIBE_TOPICS
     /* Node - property-based, no custom handler */
     ce_kafka_node = register_class_RdKafka_Admin_Node();
 
@@ -1312,6 +1319,7 @@ void kafka_admin_client_minit(INIT_FUNC_ARGS)
 
     /* TopicDescription - property-based, no custom handler */
     ce_kafka_topic_description = register_class_RdKafka_Admin_TopicDescription();
+#endif
 
     /* Register RD_KAFKA_ADMIN_OP_* constants */
     REGISTER_LONG_CONSTANT("RD_KAFKA_ADMIN_OP_ANY", RD_KAFKA_ADMIN_OP_ANY, CONST_CS | CONST_PERSISTENT);
@@ -1320,7 +1328,9 @@ void kafka_admin_client_minit(INIT_FUNC_ARGS)
     REGISTER_LONG_CONSTANT("RD_KAFKA_ADMIN_OP_CREATEPARTITIONS", RD_KAFKA_ADMIN_OP_CREATEPARTITIONS, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("RD_KAFKA_ADMIN_OP_ALTERCONFIGS", RD_KAFKA_ADMIN_OP_ALTERCONFIGS, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("RD_KAFKA_ADMIN_OP_DESCRIBECONFIGS", RD_KAFKA_ADMIN_OP_DESCRIBECONFIGS, CONST_CS | CONST_PERSISTENT);
-    REGISTER_LONG_CONSTANT("RD_KAFKA_ADMIN_OP_DESCRIBETOPICS", RD_KAFKA_ADMIN_OP_DESCRIBETOPICS, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("RD_KAFKA_ADMIN_OP_DELETERECORDS", RD_KAFKA_ADMIN_OP_DELETERECORDS, CONST_CS | CONST_PERSISTENT);
+#ifdef HAS_RD_KAFKA_DESCRIBE_TOPICS
+    REGISTER_LONG_CONSTANT("RD_KAFKA_ADMIN_OP_DESCRIBETOPICS", RD_KAFKA_ADMIN_OP_DESCRIBETOPICS, CONST_CS | CONST_PERSISTENT);
+#endif
 }
 /* }}} */

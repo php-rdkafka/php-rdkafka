@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 25ab027d283f03dff7882b7ef3ba7411f0343388 */
+ * Stub hash: b9a38eeed3b493978fd9ca8f177ac8bdee720492 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_Admin_AdminClient___construct, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, conf, RdKafka\\Conf, 0)
@@ -40,6 +40,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_Admin_AdminClient_createPartitions,
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, options, RdKafka\\Admin\\AdminOptions, 1, "null")
 ZEND_END_ARG_INFO()
 
+#if defined(HAS_RD_KAFKA_DESCRIBE_TOPICS)
 #if (PHP_VERSION_ID >= 80100)
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_RdKafka_Admin_AdminClient_describeTopics, 0, 1, IS_ARRAY, 0)
 #else
@@ -48,6 +49,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_Admin_AdminClient_describeTopics, 0
 	ZEND_ARG_TYPE_INFO(0, topics, IS_ARRAY, 0)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, options, RdKafka\\Admin\\AdminOptions, 1, "null")
 ZEND_END_ARG_INFO()
+#endif
 
 #if (PHP_VERSION_ID >= 80100)
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_RdKafka_Admin_AdminClient_deleteRecords, 0, 1, IS_ARRAY, 0)
@@ -84,6 +86,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_Admin_AdminOptions_setBrokerId, 0, 
 	ZEND_ARG_TYPE_INFO(0, broker_id, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
+#if defined(HAS_RD_KAFKA_DESCRIBE_TOPICS)
 #if (PHP_VERSION_ID >= 80100)
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_RdKafka_Admin_AdminOptions_setIncludeAuthorizedOperations, 0, 1, IS_VOID, 0)
 #else
@@ -91,6 +94,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_Admin_AdminOptions_setIncludeAuthor
 #endif
 	ZEND_ARG_TYPE_INFO(0, include, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
+#endif
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_Admin_NewTopic___construct, 0, 0, 3)
 	ZEND_ARG_TYPE_INFO(0, topic, IS_STRING, 0)
@@ -160,13 +164,17 @@ ZEND_METHOD(RdKafka_Admin_AdminClient, newAdminOptions);
 ZEND_METHOD(RdKafka_Admin_AdminClient, createTopics);
 ZEND_METHOD(RdKafka_Admin_AdminClient, deleteTopics);
 ZEND_METHOD(RdKafka_Admin_AdminClient, createPartitions);
+#if defined(HAS_RD_KAFKA_DESCRIBE_TOPICS)
 ZEND_METHOD(RdKafka_Admin_AdminClient, describeTopics);
+#endif
 ZEND_METHOD(RdKafka_Admin_AdminClient, deleteRecords);
 ZEND_METHOD(RdKafka_Admin_AdminOptions, setRequestTimeout);
 ZEND_METHOD(RdKafka_Admin_AdminOptions, setOperationTimeout);
 ZEND_METHOD(RdKafka_Admin_AdminOptions, setValidateOnly);
 ZEND_METHOD(RdKafka_Admin_AdminOptions, setBrokerId);
+#if defined(HAS_RD_KAFKA_DESCRIBE_TOPICS)
 ZEND_METHOD(RdKafka_Admin_AdminOptions, setIncludeAuthorizedOperations);
+#endif
 ZEND_METHOD(RdKafka_Admin_NewTopic, __construct);
 ZEND_METHOD(RdKafka_Admin_NewTopic, setReplicaAssignment);
 ZEND_METHOD(RdKafka_Admin_NewTopic, setConfig);
@@ -183,7 +191,9 @@ static const zend_function_entry class_RdKafka_Admin_AdminClient_methods[] = {
 	ZEND_ME(RdKafka_Admin_AdminClient, createTopics, arginfo_class_RdKafka_Admin_AdminClient_createTopics, ZEND_ACC_PUBLIC)
 	ZEND_ME(RdKafka_Admin_AdminClient, deleteTopics, arginfo_class_RdKafka_Admin_AdminClient_deleteTopics, ZEND_ACC_PUBLIC)
 	ZEND_ME(RdKafka_Admin_AdminClient, createPartitions, arginfo_class_RdKafka_Admin_AdminClient_createPartitions, ZEND_ACC_PUBLIC)
+#if defined(HAS_RD_KAFKA_DESCRIBE_TOPICS)
 	ZEND_ME(RdKafka_Admin_AdminClient, describeTopics, arginfo_class_RdKafka_Admin_AdminClient_describeTopics, ZEND_ACC_PUBLIC)
+#endif
 	ZEND_ME(RdKafka_Admin_AdminClient, deleteRecords, arginfo_class_RdKafka_Admin_AdminClient_deleteRecords, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
@@ -193,7 +203,9 @@ static const zend_function_entry class_RdKafka_Admin_AdminOptions_methods[] = {
 	ZEND_ME(RdKafka_Admin_AdminOptions, setOperationTimeout, arginfo_class_RdKafka_Admin_AdminOptions_setOperationTimeout, ZEND_ACC_PUBLIC)
 	ZEND_ME(RdKafka_Admin_AdminOptions, setValidateOnly, arginfo_class_RdKafka_Admin_AdminOptions_setValidateOnly, ZEND_ACC_PUBLIC)
 	ZEND_ME(RdKafka_Admin_AdminOptions, setBrokerId, arginfo_class_RdKafka_Admin_AdminOptions_setBrokerId, ZEND_ACC_PUBLIC)
+#if defined(HAS_RD_KAFKA_DESCRIBE_TOPICS)
 	ZEND_ME(RdKafka_Admin_AdminOptions, setIncludeAuthorizedOperations, arginfo_class_RdKafka_Admin_AdminOptions_setIncludeAuthorizedOperations, ZEND_ACC_PUBLIC)
+#endif
 	ZEND_FE_END
 };
 
@@ -336,6 +348,7 @@ static zend_class_entry *register_class_RdKafka_Admin_TopicResult(void)
 	return class_entry;
 }
 
+#if defined(HAS_RD_KAFKA_DESCRIBE_TOPICS)
 static zend_class_entry *register_class_RdKafka_Admin_Node(void)
 {
 	zend_class_entry ce, *class_entry;
@@ -373,7 +386,9 @@ static zend_class_entry *register_class_RdKafka_Admin_Node(void)
 
 	return class_entry;
 }
+#endif
 
+#if defined(HAS_RD_KAFKA_DESCRIBE_TOPICS)
 static zend_class_entry *register_class_RdKafka_Admin_TopicPartitionInfo(void)
 {
 	zend_class_entry ce, *class_entry;
@@ -412,7 +427,9 @@ static zend_class_entry *register_class_RdKafka_Admin_TopicPartitionInfo(void)
 
 	return class_entry;
 }
+#endif
 
+#if defined(HAS_RD_KAFKA_DESCRIBE_TOPICS)
 static zend_class_entry *register_class_RdKafka_Admin_TopicDescription(void)
 {
 	zend_class_entry ce, *class_entry;
@@ -462,3 +479,4 @@ static zend_class_entry *register_class_RdKafka_Admin_TopicDescription(void)
 
 	return class_entry;
 }
+#endif

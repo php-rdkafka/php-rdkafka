@@ -65,6 +65,12 @@ if test "$PHP_RDKAFKA" != "no"; then
     AC_MSG_WARN([no rd_kafka_incremental_(un)assign, incremental rebalance support will not be available])
   ])
 
+  AC_CHECK_LIB($LIBNAME,[rd_kafka_DescribeTopics],[
+    AC_DEFINE(HAS_RD_KAFKA_DESCRIBE_TOPICS,1,[ ])
+  ],[
+    AC_MSG_WARN([no rd_kafka_DescribeTopics, DescribeTopics support will not be available])
+  ])
+
   LDFLAGS="$ORIG_LDFLAGS"
   CPPFLAGS="$ORIG_CPPFLAGS"
 

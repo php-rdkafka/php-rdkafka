@@ -53,8 +53,10 @@ extern zend_class_entry *ce_kafka_new_topic;
 extern zend_class_entry *ce_kafka_delete_topic;
 extern zend_class_entry *ce_kafka_new_partitions;
 extern zend_class_entry *ce_kafka_topic_result;
+#ifdef HAS_RD_KAFKA_DESCRIBE_TOPICS
 extern zend_class_entry *ce_kafka_node;
 extern zend_class_entry *ce_kafka_topic_partition_info;
 extern zend_class_entry *ce_kafka_topic_description;
+#endif
 
 #endif /* KAFKA_ADMIN_CLIENT_H */
