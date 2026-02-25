@@ -36,6 +36,19 @@ class AdminClient
      * @tentative-return-type
      */
     public function createPartitions(array $new_partitions, ?AdminOptions $options = null): array {}
+
+    /**
+     * @param string[] $topics
+     * @tentative-return-type
+     */
+    public function describeTopics(array $topics, ?AdminOptions $options = null): array {}
+
+    /**
+     * @param \RdKafka\TopicPartition[] $topic_partitions
+     * @return \RdKafka\TopicPartition[]
+     * @tentative-return-type
+     */
+    public function deleteRecords(array $topic_partitions, ?AdminOptions $options = null): array {}
 }
 
 class AdminOptions
@@ -51,6 +64,9 @@ class AdminOptions
 
     /** @tentative-return-type */
     public function setBrokerId(int $broker_id): void {}
+
+    /** @tentative-return-type */
+    public function setIncludeAuthorizedOperations(bool $include): void {}
 }
 
 class NewTopic
@@ -93,4 +109,44 @@ class TopicResult
 
     /** @tentative-return-type */
     public function getName(): string {}
+}
+
+class Node
+{
+    public int $id;
+
+    public string $host;
+
+    public int $port;
+
+    public ?string $rack;
+}
+
+class TopicPartitionInfo
+{
+    public int $partition;
+
+    public ?Node $leader;
+
+    /** @var Node[] */
+    public array $isr;
+
+    /** @var Node[] */
+    public array $replicas;
+}
+
+class TopicDescription
+{
+    public string $name;
+
+    public ?string $topic_id;
+
+    public bool $is_internal;
+
+    public int $error;
+
+    public ?string $error_string;
+
+    /** @var TopicPartitionInfo[] */
+    public array $partitions;
 }

@@ -27,6 +27,7 @@
 #include "Zend/zend_exceptions.h"
 #include "admin_client.h"
 #include "conf.h"
+#include "topic_partition.h"
 #include "admin_client_arginfo.h"
 
 /* Default timeout for queue poll in milliseconds */
@@ -39,6 +40,9 @@ zend_class_entry *ce_kafka_new_topic;
 zend_class_entry *ce_kafka_delete_topic;
 zend_class_entry *ce_kafka_new_partitions;
 zend_class_entry *ce_kafka_topic_result;
+zend_class_entry *ce_kafka_node;
+zend_class_entry *ce_kafka_topic_partition_info;
+zend_class_entry *ce_kafka_topic_description;
 
 /* Object handlers */
 static zend_object_handlers admin_client_object_handlers;
@@ -698,6 +702,31 @@ ZEND_METHOD(RdKafka_Admin_AdminOptions, setBrokerId)
 }
 /* }}} */
 
+/* {{{ AdminOptions::setIncludeAuthorizedOperations(bool $include): void */
+ZEND_METHOD(RdKafka_Admin_AdminOptions, setIncludeAuthorizedOperations)
+{
+    zend_bool include;
+    kafka_admin_options_object *intern;
+    rd_kafka_error_t *error;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &include) == FAILURE) {
+        return;
+    }
+
+    intern = get_admin_options_object(getThis());
+    if (!intern->options) {
+        zend_throw_exception(ce_kafka_exception, "AdminOptions is not properly initialized", 0);
+        return;
+    }
+
+    error = rd_kafka_AdminOptions_set_include_authorized_operations(intern->options, (int)include);
+    if (error) {
+        zend_throw_exception(ce_kafka_exception, rd_kafka_error_string(error), rd_kafka_error_code(error));
+        rd_kafka_error_destroy(error);
+    }
+}
+/* }}} */
+
 /* {{{ NewTopic::__construct(string $topic, int $num_partitions, int $replication_factor) */
 ZEND_METHOD(RdKafka_Admin_NewTopic, __construct)
 {
@@ -911,6 +940,319 @@ ZEND_METHOD(RdKafka_Admin_TopicResult, getName)
 }
 /* }}} */
 
+/* {{{ Helper: convert rd_kafka_Node_t to PHP Node object */
+static void kafka_node_to_zval(zval *return_value, const rd_kafka_Node_t *node)
+{
+    const char *rack;
+
+    object_init_ex(return_value, ce_kafka_node);
+
+    zend_update_property_long(NULL, Z_OBJ_P(return_value), "id", sizeof("id") - 1,
+        rd_kafka_Node_id(node));
+    zend_update_property_string(NULL, Z_OBJ_P(return_value), "host", sizeof("host") - 1,
+        rd_kafka_Node_host(node));
+    zend_update_property_long(NULL, Z_OBJ_P(return_value), "port", sizeof("port") - 1,
+        (zend_long)rd_kafka_Node_port(node));
+
+    rack = rd_kafka_Node_rack(node);
+    if (rack) {
+        zend_update_property_string(NULL, Z_OBJ_P(return_value), "rack", sizeof("rack") - 1, rack);
+    } else {
+        zend_update_property_null(NULL, Z_OBJ_P(return_value), "rack", sizeof("rack") - 1);
+    }
+}
+/* }}} */
+
+/* {{{ Helper: convert rd_kafka_Node_t** array to PHP array */
+static void kafka_node_array_to_zval(zval *return_value, const rd_kafka_Node_t **nodes, size_t cnt)
+{
+    size_t i;
+    array_init_size(return_value, cnt);
+
+    for (i = 0; i < cnt; i++) {
+        zval node_zv;
+        kafka_node_to_zval(&node_zv, nodes[i]);
+        add_next_index_zval(return_value, &node_zv);
+    }
+}
+/* }}} */
+
+/* {{{ Helper: convert TopicPartitionInfo to PHP object */
+static void kafka_topic_partition_info_to_zval(zval *return_value, const rd_kafka_TopicPartitionInfo_t *partition)
+{
+    const rd_kafka_Node_t *leader;
+    const rd_kafka_Node_t **isr_nodes;
+    const rd_kafka_Node_t **replica_nodes;
+    size_t isr_cnt, replica_cnt;
+    zval isr_zv, replicas_zv;
+
+    object_init_ex(return_value, ce_kafka_topic_partition_info);
+
+    zend_update_property_long(NULL, Z_OBJ_P(return_value), "partition", sizeof("partition") - 1,
+        rd_kafka_TopicPartitionInfo_partition(partition));
+
+    leader = rd_kafka_TopicPartitionInfo_leader(partition);
+    if (leader) {
+        zval leader_zv;
+        kafka_node_to_zval(&leader_zv, leader);
+        zend_update_property(NULL, Z_OBJ_P(return_value), "leader", sizeof("leader") - 1, &leader_zv);
+        zval_ptr_dtor(&leader_zv);
+    } else {
+        zend_update_property_null(NULL, Z_OBJ_P(return_value), "leader", sizeof("leader") - 1);
+    }
+
+    isr_nodes = rd_kafka_TopicPartitionInfo_isr(partition, &isr_cnt);
+    kafka_node_array_to_zval(&isr_zv, isr_nodes, isr_cnt);
+    zend_update_property(NULL, Z_OBJ_P(return_value), "isr", sizeof("isr") - 1, &isr_zv);
+    zval_ptr_dtor(&isr_zv);
+
+    replica_nodes = rd_kafka_TopicPartitionInfo_replicas(partition, &replica_cnt);
+    kafka_node_array_to_zval(&replicas_zv, replica_nodes, replica_cnt);
+    zend_update_property(NULL, Z_OBJ_P(return_value), "replicas", sizeof("replicas") - 1, &replicas_zv);
+    zval_ptr_dtor(&replicas_zv);
+}
+/* }}} */
+
+/* {{{ Helper: convert TopicDescription to PHP object */
+static void kafka_topic_description_to_zval(zval *return_value, const rd_kafka_TopicDescription_t *topicdesc)
+{
+    const rd_kafka_error_t *error;
+    const rd_kafka_Uuid_t *topic_id;
+    const rd_kafka_TopicPartitionInfo_t **partitions;
+    size_t partition_cnt;
+    size_t i;
+    zval partitions_zv;
+
+    object_init_ex(return_value, ce_kafka_topic_description);
+
+    zend_update_property_string(NULL, Z_OBJ_P(return_value), "name", sizeof("name") - 1,
+        rd_kafka_TopicDescription_name(topicdesc));
+
+    topic_id = rd_kafka_TopicDescription_topic_id(topicdesc);
+    if (topic_id) {
+        const char *base64 = rd_kafka_Uuid_base64str(topic_id);
+        if (base64) {
+            zend_update_property_string(NULL, Z_OBJ_P(return_value), "topic_id", sizeof("topic_id") - 1, base64);
+        } else {
+            zend_update_property_null(NULL, Z_OBJ_P(return_value), "topic_id", sizeof("topic_id") - 1);
+        }
+    } else {
+        zend_update_property_null(NULL, Z_OBJ_P(return_value), "topic_id", sizeof("topic_id") - 1);
+    }
+
+    zend_update_property_bool(NULL, Z_OBJ_P(return_value), "is_internal", sizeof("is_internal") - 1,
+        rd_kafka_TopicDescription_is_internal(topicdesc));
+
+    error = rd_kafka_TopicDescription_error(topicdesc);
+    if (error) {
+        zend_update_property_long(NULL, Z_OBJ_P(return_value), "error", sizeof("error") - 1,
+            rd_kafka_error_code(error));
+        const char *errstr = rd_kafka_error_string(error);
+        if (errstr && rd_kafka_error_code(error) != RD_KAFKA_RESP_ERR_NO_ERROR) {
+            zend_update_property_string(NULL, Z_OBJ_P(return_value), "error_string", sizeof("error_string") - 1, errstr);
+        } else {
+            zend_update_property_null(NULL, Z_OBJ_P(return_value), "error_string", sizeof("error_string") - 1);
+        }
+    } else {
+        zend_update_property_long(NULL, Z_OBJ_P(return_value), "error", sizeof("error") - 1, 0);
+        zend_update_property_null(NULL, Z_OBJ_P(return_value), "error_string", sizeof("error_string") - 1);
+    }
+
+    partitions = rd_kafka_TopicDescription_partitions(topicdesc, &partition_cnt);
+    array_init_size(&partitions_zv, partition_cnt);
+    for (i = 0; i < partition_cnt; i++) {
+        zval part_zv;
+        kafka_topic_partition_info_to_zval(&part_zv, partitions[i]);
+        add_next_index_zval(&partitions_zv, &part_zv);
+    }
+    zend_update_property(NULL, Z_OBJ_P(return_value), "partitions", sizeof("partitions") - 1, &partitions_zv);
+    zval_ptr_dtor(&partitions_zv);
+}
+/* }}} */
+
+/* {{{ AdminClient::describeTopics(array $topics, ?AdminOptions $options = null): array */
+ZEND_METHOD(RdKafka_Admin_AdminClient, describeTopics)
+{
+    zval *ztopics, *zoptions = NULL;
+    kafka_admin_client_object *intern;
+    rd_kafka_AdminOptions_t *options = NULL;
+    rd_kafka_queue_t *queue = NULL;
+    rd_kafka_event_t *event = NULL;
+    rd_kafka_TopicCollection_t *topic_collection = NULL;
+    zval *zitem;
+    size_t i;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|O!", &ztopics, &zoptions, ce_kafka_admin_options) == FAILURE) {
+        return;
+    }
+
+    intern = get_admin_client_object(getThis());
+    if (!intern->rk) {
+        zend_throw_exception(ce_kafka_exception, "AdminClient is not properly initialized", 0);
+        return;
+    }
+
+    if (zoptions) {
+        kafka_admin_options_object *options_intern = get_admin_options_object(zoptions);
+        options = options_intern->options;
+    }
+
+    /* Build const char** array from PHP string array */
+    size_t topic_cnt = zend_hash_num_elements(Z_ARRVAL_P(ztopics));
+    if (topic_cnt == 0) {
+        zend_throw_exception(ce_kafka_exception, "topics array must not be empty", 0);
+        return;
+    }
+
+    const char **topic_names = ecalloc(topic_cnt, sizeof(const char *));
+    i = 0;
+    ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(ztopics), zitem) {
+        if (Z_TYPE_P(zitem) != IS_STRING) {
+            zend_throw_exception(ce_kafka_exception, "All items in topics must be strings", 0);
+            efree(topic_names);
+            return;
+        }
+        topic_names[i++] = Z_STRVAL_P(zitem);
+    } ZEND_HASH_FOREACH_END();
+
+    topic_collection = rd_kafka_TopicCollection_of_topic_names(topic_names, topic_cnt);
+    efree(topic_names);
+
+    if (!topic_collection) {
+        zend_throw_exception(ce_kafka_exception, "Failed to create TopicCollection", 0);
+        return;
+    }
+
+    queue = rd_kafka_queue_new(intern->rk);
+    if (!queue) {
+        rd_kafka_TopicCollection_destroy(topic_collection);
+        zend_throw_exception(ce_kafka_exception, "Failed to create admin queue", 0);
+        return;
+    }
+
+    rd_kafka_DescribeTopics(intern->rk, topic_collection, options, queue);
+    rd_kafka_TopicCollection_destroy(topic_collection);
+
+    event = rd_kafka_queue_poll(queue, ADMIN_DEFAULT_TIMEOUT_MS);
+    rd_kafka_queue_destroy(queue);
+
+    if (!event) {
+        zend_throw_exception(ce_kafka_exception, "Timed out waiting for DescribeTopics result", RD_KAFKA_RESP_ERR__TIMED_OUT);
+        return;
+    }
+
+    if (rd_kafka_event_error(event)) {
+        zend_throw_exception(ce_kafka_exception,
+            rd_kafka_event_error_string(event),
+            rd_kafka_event_error(event));
+        rd_kafka_event_destroy(event);
+        return;
+    }
+
+    const rd_kafka_DescribeTopics_result_t *result = rd_kafka_event_DescribeTopics_result(event);
+    if (!result) {
+        zend_throw_exception(ce_kafka_exception, "Unexpected event type in DescribeTopics result", 0);
+        rd_kafka_event_destroy(event);
+        return;
+    }
+
+    size_t result_cnt;
+    const rd_kafka_TopicDescription_t **descriptions = rd_kafka_DescribeTopics_result_topics(result, &result_cnt);
+
+    array_init_size(return_value, result_cnt);
+    for (i = 0; i < result_cnt; i++) {
+        zval desc_zv;
+        kafka_topic_description_to_zval(&desc_zv, descriptions[i]);
+        add_next_index_zval(return_value, &desc_zv);
+    }
+
+    rd_kafka_event_destroy(event);
+}
+/* }}} */
+
+/* {{{ AdminClient::deleteRecords(array $topic_partitions, ?AdminOptions $options = null): array */
+ZEND_METHOD(RdKafka_Admin_AdminClient, deleteRecords)
+{
+    zval *ztopic_partitions, *zoptions = NULL;
+    kafka_admin_client_object *intern;
+    rd_kafka_AdminOptions_t *options = NULL;
+    rd_kafka_queue_t *queue = NULL;
+    rd_kafka_event_t *event = NULL;
+    rd_kafka_DeleteRecords_t *del_records = NULL;
+    rd_kafka_DeleteRecords_t *del_records_arr[1];
+    rd_kafka_topic_partition_list_t *partitions;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|O!", &ztopic_partitions, &zoptions, ce_kafka_admin_options) == FAILURE) {
+        return;
+    }
+
+    intern = get_admin_client_object(getThis());
+    if (!intern->rk) {
+        zend_throw_exception(ce_kafka_exception, "AdminClient is not properly initialized", 0);
+        return;
+    }
+
+    if (zoptions) {
+        kafka_admin_options_object *options_intern = get_admin_options_object(zoptions);
+        options = options_intern->options;
+    }
+
+    /* Convert PHP TopicPartition[] to rd_kafka_topic_partition_list_t */
+    partitions = array_arg_to_kafka_topic_partition_list(1, Z_ARRVAL_P(ztopic_partitions));
+    if (!partitions) {
+        return; /* Exception already thrown by array_arg_to_kafka_topic_partition_list */
+    }
+
+    del_records = rd_kafka_DeleteRecords_new(partitions);
+    rd_kafka_topic_partition_list_destroy(partitions);
+
+    if (!del_records) {
+        zend_throw_exception(ce_kafka_exception, "Failed to create DeleteRecords", 0);
+        return;
+    }
+
+    queue = rd_kafka_queue_new(intern->rk);
+    if (!queue) {
+        rd_kafka_DeleteRecords_destroy(del_records);
+        zend_throw_exception(ce_kafka_exception, "Failed to create admin queue", 0);
+        return;
+    }
+
+    del_records_arr[0] = del_records;
+    rd_kafka_DeleteRecords(intern->rk, del_records_arr, 1, options, queue);
+
+    event = rd_kafka_queue_poll(queue, ADMIN_DEFAULT_TIMEOUT_MS);
+
+    rd_kafka_DeleteRecords_destroy(del_records);
+    rd_kafka_queue_destroy(queue);
+
+    if (!event) {
+        zend_throw_exception(ce_kafka_exception, "Timed out waiting for DeleteRecords result", RD_KAFKA_RESP_ERR__TIMED_OUT);
+        return;
+    }
+
+    if (rd_kafka_event_error(event)) {
+        zend_throw_exception(ce_kafka_exception,
+            rd_kafka_event_error_string(event),
+            rd_kafka_event_error(event));
+        rd_kafka_event_destroy(event);
+        return;
+    }
+
+    const rd_kafka_DeleteRecords_result_t *result = rd_kafka_event_DeleteRecords_result(event);
+    if (!result) {
+        zend_throw_exception(ce_kafka_exception, "Unexpected event type in DeleteRecords result", 0);
+        rd_kafka_event_destroy(event);
+        return;
+    }
+
+    const rd_kafka_topic_partition_list_t *result_offsets = rd_kafka_DeleteRecords_result_offsets(result);
+    kafka_topic_partition_list_to_array(return_value, (rd_kafka_topic_partition_list_t *)result_offsets);
+
+    rd_kafka_event_destroy(event);
+}
+/* }}} */
+
 /* {{{ kafka_admin_client_minit */
 void kafka_admin_client_minit(INIT_FUNC_ARGS)
 {
@@ -962,6 +1304,15 @@ void kafka_admin_client_minit(INIT_FUNC_ARGS)
     /* TopicResult - no custom object handler needed, uses default */
     ce_kafka_topic_result = register_class_RdKafka_Admin_TopicResult();
 
+    /* Node - property-based, no custom handler */
+    ce_kafka_node = register_class_RdKafka_Admin_Node();
+
+    /* TopicPartitionInfo - property-based, no custom handler */
+    ce_kafka_topic_partition_info = register_class_RdKafka_Admin_TopicPartitionInfo();
+
+    /* TopicDescription - property-based, no custom handler */
+    ce_kafka_topic_description = register_class_RdKafka_Admin_TopicDescription();
+
     /* Register RD_KAFKA_ADMIN_OP_* constants */
     REGISTER_LONG_CONSTANT("RD_KAFKA_ADMIN_OP_ANY", RD_KAFKA_ADMIN_OP_ANY, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("RD_KAFKA_ADMIN_OP_CREATETOPICS", RD_KAFKA_ADMIN_OP_CREATETOPICS, CONST_CS | CONST_PERSISTENT);
@@ -969,5 +1320,7 @@ void kafka_admin_client_minit(INIT_FUNC_ARGS)
     REGISTER_LONG_CONSTANT("RD_KAFKA_ADMIN_OP_CREATEPARTITIONS", RD_KAFKA_ADMIN_OP_CREATEPARTITIONS, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("RD_KAFKA_ADMIN_OP_ALTERCONFIGS", RD_KAFKA_ADMIN_OP_ALTERCONFIGS, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("RD_KAFKA_ADMIN_OP_DESCRIBECONFIGS", RD_KAFKA_ADMIN_OP_DESCRIBECONFIGS, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("RD_KAFKA_ADMIN_OP_DESCRIBETOPICS", RD_KAFKA_ADMIN_OP_DESCRIBETOPICS, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("RD_KAFKA_ADMIN_OP_DELETERECORDS", RD_KAFKA_ADMIN_OP_DELETERECORDS, CONST_CS | CONST_PERSISTENT);
 }
 /* }}} */
