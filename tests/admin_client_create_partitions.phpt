@@ -28,8 +28,15 @@ printf("name matches: %s\n", $results[0]->name === $topicName ? 'true' : 'false'
 
 sleep(1);
 
-$descriptions = $admin->describeTopics([$topicName]);
-printf("partition count after increase: %d\n", count($descriptions[0]->partitions));
+$producer = new RdKafka\Producer($conf);
+$topic = $producer->newTopic($topicName);
+$metadata = $producer->getMetadata(false, $topic, 10*1000);
+$topics = $metadata->getTopics();
+foreach ($topics as $t) {
+    if ($t->getTopic() === $topicName) {
+        printf("partition count after increase: %d\n", count($t->getPartitions()));
+    }
+}
 
 $admin->deleteTopics([new RdKafka\Admin\DeleteTopic($topicName)]);
 
