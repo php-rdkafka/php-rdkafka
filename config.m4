@@ -27,7 +27,7 @@ if test "$PHP_RDKAFKA" != "no"; then
 
   PHP_ADD_INCLUDE($RDKAFKA_DIR/include)
 
-  SOURCES="rdkafka.c metadata.c metadata_broker.c metadata_topic.c metadata_partition.c metadata_collection.c conf.c topic.c queue.c message.c fun.c kafka_consumer.c topic_partition.c kafka_error_exception.c oauthbearer.c"
+  SOURCES="rdkafka.c metadata.c metadata_broker.c metadata_topic.c metadata_partition.c metadata_collection.c conf.c topic.c queue.c message.c fun.c kafka_consumer.c topic_partition.c kafka_error_exception.c oauthbearer.c admin_client.c"
 
   LIBNAME=rdkafka
   LIBSYMBOL=rd_kafka_new

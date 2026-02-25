@@ -41,6 +41,7 @@
 #include "rdkafka_arginfo.h"
 #include "fun_arginfo.h"
 #include "kafka_error_exception.h"
+#include "admin_client.h"
 
 #if PHP_VERSION_ID < 80100
 #   error "PHP version 8.1.0 or greater required"
@@ -1029,6 +1030,7 @@ PHP_MINIT_FUNCTION(rdkafka)
     kafka_metadata_topic_partition_minit(INIT_FUNC_ARGS_PASSTHRU);
     kafka_queue_minit(INIT_FUNC_ARGS_PASSTHRU);
     kafka_topic_minit(INIT_FUNC_ARGS_PASSTHRU);
+    kafka_admin_client_minit(INIT_FUNC_ARGS_PASSTHRU);
 
     return SUCCESS;
 }
