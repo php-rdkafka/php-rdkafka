@@ -2,10 +2,10 @@
 Bug 74
 --SKIPIF--
 <?php
-require __DIR__ . '/integration-tests-check.php';
+require __DIR__ . '/helpers/integration-tests-check.php';
 --FILE--
 <?php
-require __DIR__ . '/integration-tests-check.php';
+require __DIR__ . '/helpers/integration-tests-check.php';
 
 $conf = new RdKafka\Conf();
 $conf->set('metadata.broker.list', getenv('TEST_KAFKA_BROKERS'));

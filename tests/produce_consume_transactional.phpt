@@ -2,21 +2,18 @@
 Produce, consume
 --SKIPIF--
 <?php
-require __DIR__ . '/integration-tests-check.php';
+require __DIR__ . '/helpers/integration-tests-check.php';
 if (!class_exists("RdKafka\\KafkaErrorException")) {
     echo "skip";
 }
 --FILE--
 <?php
-require __DIR__ . '/integration-tests-check.php';
+require __DIR__ . '/helpers/integration-tests-check.php';
 
 $delivered = 0;
 
 $conf = new RdKafka\Conf();
 $conf->set('transactional.id', 'transactional-producer');
-if (false !== getenv('TEST_KAFKA_BROKER_VERSION')) {
-    $conf->set('broker.version.fallback', getenv('TEST_KAFKA_BROKER_VERSION'));
-}
 $conf->setLogCb(function ($kafka, $level, $facility, $message) {});
 $conf->setErrorCb(function ($producer, $err, $errstr) {
     printf("%s: %s\n", rd_kafka_err2str($err), $errstr);

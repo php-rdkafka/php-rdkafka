@@ -1,0 +1,43 @@
+#!/bin/sh
+set -e
+
+VERSION=$1
+
+if [ -z "$VERSION" ]; then
+    echo "Usage: use-librdkafka <version>"
+    echo "Available: $(ls /opt/librdkafka | tr '\n' ' ')"
+    exit 1
+fi
+
+PREFIX=/opt/librdkafka/$VERSION
+
+if [ ! -d "$PREFIX" ]; then
+    echo "Error: $VERSION not found"
+    echo "Available: $(ls /opt/librdkafka | tr '\n' ' ')"
+    exit 1
+fi
+
+# Libraries
+for f in "$PREFIX"/lib/librdkafka*; do
+    [ -e "$f" ] || continue
+    ln -sf "$f" /usr/local/lib/"$(basename "$f")"
+done
+
+# Headers
+mkdir -p /usr/local/include/librdkafka
+for f in "$PREFIX"/include/librdkafka/*; do
+    [ -e "$f" ] || continue
+    ln -sf "$f" /usr/local/include/librdkafka/"$(basename "$f")"
+done
+
+# pkg-config
+mkdir -p /usr/local/lib/pkgconfig
+for f in "$PREFIX"/lib/pkgconfig/rdkafka*.pc; do
+    [ -e "$f" ] || continue
+    ln -sf "$f" /usr/local/lib/pkgconfig/"$(basename "$f")"
+done
+
+ldconfig
+
+echo "librdkafka $VERSION is now active"
+echo "Rebuild: phpize --clean && ./configure --with-rdkafka && make -j\$(nproc)"

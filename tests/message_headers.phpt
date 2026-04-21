@@ -2,11 +2,11 @@
 Message headers
 --SKIPIF--
 <?php
-require __DIR__ . '/integration-tests-check.php';
+require __DIR__ . '/helpers/integration-tests-check.php';
 ?>
 --FILE--
 <?php
-require __DIR__ . '/integration-tests-check.php';
+require __DIR__ . '/helpers/integration-tests-check.php';
 
 $delivered = 0;
 

@@ -2,17 +2,14 @@
 Produce, consume
 --SKIPIF--
 <?php
-require __DIR__ . '/integration-tests-check.php';
+require __DIR__ . '/helpers/integration-tests-check.php';
 --FILE--
 <?php
-require __DIR__ . '/integration-tests-check.php';
+require __DIR__ . '/helpers/integration-tests-check.php';
 
 $delivered = 0;
 
 $conf = new RdKafka\Conf();
-if (false !== getenv('TEST_KAFKA_BROKER_VERSION')) {
-    $conf->set('broker.version.fallback', getenv('TEST_KAFKA_BROKER_VERSION'));
-}
 $conf->setErrorCb(function ($producer, $err, $errstr) {
     printf("%s: %s\n", rd_kafka_err2str($err), $errstr);
     exit;

@@ -2,18 +2,15 @@
 RdKafka\Conf
 --SKIPIF--
 <?php
-(!isset($_ENV['TESTS_DONT_SKIP_RISKY']) || $_ENV['TESTS_DONT_SKIP_RISKY']) && die("skip Risky/broken test");
-require __DIR__ . '/integration-tests-check.php';
+!getenv('TESTS_DONT_SKIP_RISKY') && die("skip Risky/broken test");
+require __DIR__ . '/helpers/integration-tests-check.php';
 --FILE--
 <?php
-require __DIR__ . '/integration-tests-check.php';
+require __DIR__ . '/helpers/integration-tests-check.php';
 
 $conf = new RdKafka\Conf();
 
-$conf->set('auto.offset.reset', 'earliest');
 $conf->set('metadata.broker.list', getenv('TEST_KAFKA_BROKERS'));
-
-$conf->set('group.id', sprintf("test_rdkafka_group_%s", uniqid()));
 
 $producer = new RdKafka\Producer($conf);
 
@@ -38,6 +35,7 @@ $conf->set('auto.offset.reset', 'earliest');
 $conf->set('metadata.broker.list', getenv('TEST_KAFKA_BROKERS'));
 $conf->set('group.id', sprintf("test_rdkafka_group_%s", uniqid()));
 $conf->set('statistics.interval.ms', 10);
+$conf->set('enable.partition.eof', 'true');
 
 $conf->setOffsetCommitCb(function ($consumer, $error, $topicPartitions) {
     echo "Offset " . $topicPartitions[0]->getOffset() . " committed.\n";
