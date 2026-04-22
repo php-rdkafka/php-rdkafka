@@ -10,15 +10,14 @@
   <email>arnaud.lb@gmail.com</email>
   <active>yes</active>
  </lead>
- <date>2024-11-04</date>
- <time>11:24:15</time>
+ <date>2026-04-20</date>
  <version>
-  <release>6.0.5</release>
-  <api>6.0.0</api>
+  <release>7.0.0alpha1</release>
+  <api>7.0.0</api>
  </version>
  <stability>
-  <release>stable</release>
-  <api>stable</api>
+  <release>alpha</release>
+  <api>alpha</api>
  </stability>
  <license uri="http://opensource.org/licenses/mit-license.php">MIT License</license>
  <notes>
@@ -114,7 +113,10 @@
     <file role="test" name="controller_id.phpt"/>
     <file role="test" name="err2name.phpt"/>
     <file role="test" name="init_transaction_not_configured.phpt"/>
-    <file role="test" name="integration-tests-check.php"/>
+    <dir name="helpers">
+     <file role="test" name="integration-tests-check.php"/>
+     <file role="test" name="oauth-integration-tests-check.php"/>
+    </dir>
     <file role="test" name="kafka_error_exception.phpt"/>
     <file role="test" name="message_headers.phpt"/>
     <file role="test" name="metadata_001.phpt"/>

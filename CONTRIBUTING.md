@@ -67,3 +67,95 @@ Here is the full design/style guide:
  - Do not change librdkafka's default behavior
  - Be safe: No user error should cause a crash or a memory leak.
 
+## Local development environment
+
+A Docker-based environment is provided via `docker-compose.yml` and `.docker/Dockerfile`. It starts a Kafka broker (+ Zookeeper) and a `build-env` container built from phusion/baseimage noble with PHP (ondrej/php PPA) and librdkafka compiled from source.
+
+**Prerequisites:** Docker with Compose v2.
+
+### First-time setup
+
+Build the image and start all services:
+
+```sh
+docker compose up -d --build
+```
+
+The `build-env` image build takes a few minutes the first time (compiles librdkafka from source). Subsequent starts are instant.
+
+### Building the extension
+
+Open a shell in the build container:
+
+```sh
+docker compose exec build-env bash
+```
+
+Then inside the container:
+
+```sh
+cd /src
+phpize --clean
+phpize
+./configure --with-rdkafka
+make -j$(nproc)
+```
+
+`phpize --clean` is important if you have previously run `phpize` on the host (macOS): the generated `configure` script is platform-specific and the Linux toolchain will reject a macOS-generated one with a libtool syntax error. Re-run `phpize && ./configure` only when `config.m4` changes; otherwise incremental `make` is enough.
+
+### Running tests
+
+```sh
+# Inside the build-env container
+cp tests/test_env.php.sample tests/test_env.php
+make test
+```
+
+`TEST_KAFKA_BROKERS` and `TEST_KAFKA_BROKER_VERSION` are already set in the container's environment, so the copied sample file works without edits.
+
+To run a single test:
+
+```sh
+php run-tests.php tests/name-of-test.phpt
+```
+
+### Running the OAuth integration tests
+
+The two `oauthbearer_integration*.phpt` tests require a second broker with SASL/OAUTHBEARER. Start it with the `oauth` profile:
+
+```sh
+# From the host, restart with the oauth profile
+docker compose --profile oauth up -d
+```
+
+`TEST_KAFKA_OAUTH_BROKERS` is already set correctly in the container's environment, so no additional configuration is needed.
+
+### Stopping the environment
+
+```sh
+docker compose down
+```
+
+### Switching librdkafka versions
+
+The build container ships with v1.7.0, v1.9.2, v2.6.0, and v2.14.1 pre-built under `/opt/librdkafka/`.
+Use the `use-librdkafka` script to switch the active version:
+
+```sh
+use-librdkafka v1.9.2
+```
+
+The script symlinks headers, libraries, and pkg-config files into `/usr/local`, then runs `ldconfig`.
+After switching you must rebuild the extension:
+
+```sh
+phpize --clean && phpize && ./configure --with-rdkafka && make -j$(nproc)
+```
+
+### Changing the PHP version
+
+Edit the `PHP_VERSION` arg in the `build-env` service in `docker-compose.yml`, then rebuild:
+
+```sh
+docker compose build build-env
+```

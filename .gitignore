@@ -40,5 +40,8 @@ tests/*/*.exp
 tests/*/*.log
 tests/*/*.out
 tests/*/*.php
+!tests/helpers/*.php
 tests/*/*.sh
 tmp-php.ini
+php_test_results_*.txt
+configure~

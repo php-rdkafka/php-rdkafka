@@ -1,0 +1,61 @@
+services:
+
+  build-env:
+    build:
+      context: .
+      dockerfile: .docker/Dockerfile
+      args:
+        PHP_VERSION: "8.3"
+    volumes:
+      - .:/src
+    environment:
+      TEST_KAFKA_BROKERS: kafka:9092
+      TEST_KAFKA_OAUTH_BROKERS: kafka_oauth2:29092
+      TEST_KAFKA_BROKER_VERSION: "2.6"
+    depends_on:
+      - kafka
+
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
+
+  kafka:
+    image: wurstmeister/kafka:latest
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_CREATE_TOPICS: "test-topic:1:1:compact"
+      KAFKA_BROKER_ID: 1
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181/kafka
+      KAFKA_ADVERTISED_PORT: 9092
+    depends_on:
+      - zookeeper
+
+  # Optional: only needed for oauthbearer_integration*.phpt tests.
+  # Start with: docker compose --profile oauth up -d
+  kafka-oauth:
+    image: wurstmeister/kafka:latest
+    hostname: kafka_oauth2
+    ports:
+      - "29092:29092"
+    networks:
+      default:
+        aliases:
+          - kafka_oauth2
+    environment:
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_CREATE_TOPICS: "test-topic:1:1:compact"
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181/kafka_oauth2
+      KAFKA_LISTENERS: SASLPLAINTEXT://kafka_oauth2:29092
+      KAFKA_ADVERTISED_LISTENERS: SASLPLAINTEXT://kafka_oauth2:29092
+      KAFKA_LISTENER_NAME_SASLPLAINTEXT_OAUTHBEARER_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required unsecuredValidatorRequiredScope=\"required-scope\" unsecuredLoginStringClaim_scope=\"required-scope\" unsecuredLoginStringClaim_sub=\"admin\";"
+      KAFKA_INTER_BROKER_LISTENER_NAME: SASLPLAINTEXT
+      KAFKA_SASL_ENABLED_MECHANISMS: OAUTHBEARER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: SASLPLAINTEXT:SASL_PLAINTEXT
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: OAUTHBEARER
+    depends_on:
+      - zookeeper
+    profiles:
+      - oauth

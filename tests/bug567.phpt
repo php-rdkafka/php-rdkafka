@@ -7,10 +7,6 @@ RD_KAFKA_VERSION >= 0x01010000 || die("skip librdkafka too old does not support 
 <?php
 
 $conf = new RdKafka\Conf();
-if (RD_KAFKA_VERSION >= 0x090000 && false !== getenv('TEST_KAFKA_BROKER_VERSION')) {
-    $conf->set('broker.version.fallback', getenv('TEST_KAFKA_BROKER_VERSION'));
-}
-
 $conf->set('metadata.broker.list', 'foobar');
 $conf->set('security.protocol', 'SASL_PLAINTEXT');
 $conf->set('sasl.mechanisms', 'OAUTHBEARER');

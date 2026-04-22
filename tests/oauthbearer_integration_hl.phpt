@@ -2,11 +2,11 @@
 Oauthbearer
 --SKIPIF--
 <?php
-require __DIR__ . '/integration-tests-check.php';
+require __DIR__ . '/helpers/oauth-integration-tests-check.php';
 RD_KAFKA_VERSION >= 0x01010000 || die("skip librdkafka too old does not support oauthbearer");
 --FILE--
 <?php
-require __DIR__ . '/integration-tests-check.php';
+require __DIR__ . '/helpers/oauth-integration-tests-check.php';
 
 function generateJws($scope = 'required-scope', $expiresInSeconds = 60)
 {
@@ -37,9 +37,6 @@ function generateJws($scope = 'required-scope', $expiresInSeconds = 60)
 
 // Set up tests
 $conf = new RdKafka\Conf();
-if (RD_KAFKA_VERSION >= 0x090000 && false !== getenv('TEST_KAFKA_BROKER_VERSION')) {
-    $conf->set('broker.version.fallback', getenv('TEST_KAFKA_BROKER_VERSION'));
-}
 $conf->set('metadata.broker.list', getenv('TEST_KAFKA_OAUTH_BROKERS'));
 $conf->set('security.protocol', 'SASL_PLAINTEXT');
 $conf->set('sasl.mechanisms', 'OAUTHBEARER');
@@ -67,9 +64,6 @@ $result = $producer->flush(10000);
 echo RD_KAFKA_RESP_ERR_NO_ERROR === $result ? "Write successful\n" : "Write error\n";
 
 $confConsumer = new RdKafka\Conf();
-if (RD_KAFKA_VERSION >= 0x090000 && false !== getenv('TEST_KAFKA_BROKER_VERSION')) {
-    $confConsumer->set('broker.version.fallback', getenv('TEST_KAFKA_BROKER_VERSION'));
-}
 $confConsumer->set('metadata.broker.list', getenv('TEST_KAFKA_OAUTH_BROKERS'));
 $confConsumer->set('security.protocol', 'SASL_PLAINTEXT');
 $confConsumer->set('sasl.mechanisms', 'OAUTHBEARER');

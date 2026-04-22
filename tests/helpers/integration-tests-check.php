@@ -1,7 +1,7 @@
 <?php
 
-if (file_exists(__DIR__ . "/test_env.php")) {
-    include __DIR__ . '/test_env.php';
+if (file_exists(__DIR__ . '/../test_env.php')) {
+    include __DIR__ . '/../test_env.php';
 }
 
 if (getenv('TEST_KAFKA_BROKERS')) {
