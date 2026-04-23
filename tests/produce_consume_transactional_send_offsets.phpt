@@ -109,6 +109,35 @@ while (true) {
 }
 
 printf("%d messages in output topic\n", $received);
+
+// Verify that the consumer group offsets were persisted: a new consumer with the
+// same group.id should start after the committed offsets and see no messages.
+$conf = new RdKafka\Conf();
+$conf->set('metadata.broker.list', getenv('TEST_KAFKA_BROKERS'));
+$conf->set('group.id', $groupId);
+$conf->set('auto.offset.reset', 'earliest');
+$conf->set('enable.auto.commit', 'false');
+$conf->setLogCb(function () {});
+$verifyConsumer = new RdKafka\KafkaConsumer($conf);
+$verifyConsumer->subscribe([$sourceTopic]);
+
+$reConsumed = 0;
+$deadline = time() + 10;
+while (time() < $deadline) {
+    $msg = $verifyConsumer->consume(1000);
+    if ($msg->err === RD_KAFKA_RESP_ERR__TIMED_OUT) {
+        break;
+    }
+    if ($msg->err === RD_KAFKA_RESP_ERR__PARTITION_EOF) {
+        break;
+    }
+    if ($msg->err === RD_KAFKA_RESP_ERR_NO_ERROR) {
+        $reConsumed++;
+    }
+}
+
+$verifyConsumer->close();
+printf("re-consumed messages (should be 0): %d\n", $reConsumed);
 --EXPECT--
 Transaction committed
 output: transformed source 0
@@ -117,3 +146,4 @@ output: transformed source 2
 output: transformed source 3
 output: transformed source 4
 5 messages in output topic
+re-consumed messages (should be 0): 0
