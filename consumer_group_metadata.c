@@ -279,6 +279,7 @@ void kafka_consumer_group_metadata_minit(INIT_FUNC_ARGS)
     memcpy(&handlers, &std_object_handlers, sizeof(handlers));
     handlers.free_obj = free_object;
     handlers.clone_obj = NULL;
+    handlers.offset = XtOffsetOf(kafka_consumer_group_metadata_object, std);
 #ifdef HAS_RD_KAFKA_CONSUMER_GROUP_METADATA_GETTERS
     handlers.get_debug_info = get_debug_info;
 #endif
