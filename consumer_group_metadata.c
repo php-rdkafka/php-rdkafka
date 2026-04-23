@@ -202,6 +202,36 @@ static HashTable *get_debug_info(zend_object *object, int *is_temp)
 }
 /* }}} */
 
+#else /* HAS_RD_KAFKA_CONSUMER_GROUP_METADATA_GETTERS */
+
+/* {{{ proto string RdKafka\ConsumerGroupMetadata::getGroupId() */
+PHP_METHOD(RdKafka_ConsumerGroupMetadata, getGroupId)
+{
+    zend_throw_exception(ce_kafka_exception, "RdKafka\\ConsumerGroupMetadata::getGroupId() requires librdkafka >= 2.0.0", 0);
+}
+/* }}} */
+
+/* {{{ proto string RdKafka\ConsumerGroupMetadata::getMemberId() */
+PHP_METHOD(RdKafka_ConsumerGroupMetadata, getMemberId)
+{
+    zend_throw_exception(ce_kafka_exception, "RdKafka\\ConsumerGroupMetadata::getMemberId() requires librdkafka >= 2.0.0", 0);
+}
+/* }}} */
+
+/* {{{ proto string|null RdKafka\ConsumerGroupMetadata::getGroupInstanceId() */
+PHP_METHOD(RdKafka_ConsumerGroupMetadata, getGroupInstanceId)
+{
+    zend_throw_exception(ce_kafka_exception, "RdKafka\\ConsumerGroupMetadata::getGroupInstanceId() requires librdkafka >= 2.0.0", 0);
+}
+/* }}} */
+
+/* {{{ proto int RdKafka\ConsumerGroupMetadata::getGenerationId() */
+PHP_METHOD(RdKafka_ConsumerGroupMetadata, getGenerationId)
+{
+    zend_throw_exception(ce_kafka_exception, "RdKafka\\ConsumerGroupMetadata::getGenerationId() requires librdkafka >= 2.0.0", 0);
+}
+/* }}} */
+
 #endif /* HAS_RD_KAFKA_CONSUMER_GROUP_METADATA_GETTERS */
 
 /* {{{ */

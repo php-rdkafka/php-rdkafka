@@ -3,7 +3,7 @@ RdKafka\ConsumerGroupMetadata constructor and getter methods
 --SKIPIF--
 <?php
 require __DIR__ . '/helpers/integration-tests-check.php';
-if (!method_exists('RdKafka\ConsumerGroupMetadata', 'getGroupId')) {
+if (!defined('RD_KAFKA_VERSION') || RD_KAFKA_VERSION < 0x02000000) {
     die('skip requires librdkafka >= 2.0.0');
 }
 --FILE--
