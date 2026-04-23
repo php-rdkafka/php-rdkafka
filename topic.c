@@ -53,6 +53,8 @@ static void kafka_topic_free(zend_object *object) /* {{{ */
         if (kafka_intern) {
             zend_hash_index_del(&kafka_intern->topics, (zend_ulong)intern);
         }
+    } else if (intern->rkt) {
+        rd_kafka_topic_destroy(intern->rkt);
     }
 
     zend_object_std_dtor(&intern->std);
