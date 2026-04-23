@@ -3,8 +3,8 @@ RdKafka\ConsumerGroupMetadata full constructor with generation_id, member_id, gr
 --SKIPIF--
 <?php
 require __DIR__ . '/helpers/integration-tests-check.php';
-if (!defined('RD_KAFKA_VERSION') || RD_KAFKA_VERSION < 0x02000000) {
-    die('skip requires librdkafka >= 2.0.0');
+if (!defined('RD_KAFKA_CONSUMER_GROUP_METADATA_GETTERS')) {
+    die('skip ConsumerGroupMetadata getters not available in this librdkafka build');
 }
 --FILE--
 <?php

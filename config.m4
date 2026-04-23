@@ -74,7 +74,7 @@ if test "$PHP_RDKAFKA" != "no"; then
   AC_CHECK_LIB($LIBNAME,[rd_kafka_consumer_group_metadata_group_id],[
     AC_DEFINE(HAS_RD_KAFKA_CONSUMER_GROUP_METADATA_GETTERS,1,[ ])
   ],[
-    AC_MSG_WARN([no rd_kafka_consumer_group_metadata_group_id, ConsumerGroupMetadata getters not available (requires librdkafka >= 2.0.0)])
+    AC_MSG_WARN([no rd_kafka_consumer_group_metadata_group_id, ConsumerGroupMetadata getters not available (requires librdkafka >= 2.8.0)])
   ])
 
   LDFLAGS="$ORIG_LDFLAGS"

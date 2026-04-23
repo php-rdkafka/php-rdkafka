@@ -78,9 +78,14 @@ while ($consumed < 5) {
 // Send consumer offsets as part of the transaction
 $metadata = $consumer->getConsumerGroupMetadata();
 $producer->sendOffsetsToTransaction($offsets, $metadata, 10000);
+unset($metadata);
 $producer->commitTransaction(10000);
 
 echo "Transaction committed\n";
+
+// Explicitly close consumers and producers before moving to verification
+$consumer->close();
+unset($consumer, $producer, $seedProducer);
 
 // Verify output topic contains transformed messages
 $conf = new RdKafka\Conf();

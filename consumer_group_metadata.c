@@ -182,11 +182,7 @@ static HashTable *get_debug_info(zend_object *object, int *is_temp)
     add_assoc_string(&ary, "group_id", str ? str : "");
 
     str = rd_kafka_consumer_group_metadata_member_id(intern->cgmd);
-    if (str) {
-        add_assoc_string(&ary, "member_id", str);
-    } else {
-        add_assoc_null(&ary, "member_id");
-    }
+    add_assoc_string(&ary, "member_id", str ? str : "");
 
     str = rd_kafka_consumer_group_metadata_group_instance_id(intern->cgmd);
     if (str) {
@@ -207,28 +203,28 @@ static HashTable *get_debug_info(zend_object *object, int *is_temp)
 /* {{{ proto string RdKafka\ConsumerGroupMetadata::getGroupId() */
 PHP_METHOD(RdKafka_ConsumerGroupMetadata, getGroupId)
 {
-    zend_throw_exception(ce_kafka_exception, "RdKafka\\ConsumerGroupMetadata::getGroupId() requires librdkafka >= 2.0.0", 0);
+    zend_throw_exception(ce_kafka_exception, "RdKafka\\ConsumerGroupMetadata::getGroupId() requires librdkafka >= 2.8.0", 0);
 }
 /* }}} */
 
 /* {{{ proto string RdKafka\ConsumerGroupMetadata::getMemberId() */
 PHP_METHOD(RdKafka_ConsumerGroupMetadata, getMemberId)
 {
-    zend_throw_exception(ce_kafka_exception, "RdKafka\\ConsumerGroupMetadata::getMemberId() requires librdkafka >= 2.0.0", 0);
+    zend_throw_exception(ce_kafka_exception, "RdKafka\\ConsumerGroupMetadata::getMemberId() requires librdkafka >= 2.8.0", 0);
 }
 /* }}} */
 
 /* {{{ proto string|null RdKafka\ConsumerGroupMetadata::getGroupInstanceId() */
 PHP_METHOD(RdKafka_ConsumerGroupMetadata, getGroupInstanceId)
 {
-    zend_throw_exception(ce_kafka_exception, "RdKafka\\ConsumerGroupMetadata::getGroupInstanceId() requires librdkafka >= 2.0.0", 0);
+    zend_throw_exception(ce_kafka_exception, "RdKafka\\ConsumerGroupMetadata::getGroupInstanceId() requires librdkafka >= 2.8.0", 0);
 }
 /* }}} */
 
 /* {{{ proto int RdKafka\ConsumerGroupMetadata::getGenerationId() */
 PHP_METHOD(RdKafka_ConsumerGroupMetadata, getGenerationId)
 {
-    zend_throw_exception(ce_kafka_exception, "RdKafka\\ConsumerGroupMetadata::getGenerationId() requires librdkafka >= 2.0.0", 0);
+    zend_throw_exception(ce_kafka_exception, "RdKafka\\ConsumerGroupMetadata::getGenerationId() requires librdkafka >= 2.8.0", 0);
 }
 /* }}} */
 
