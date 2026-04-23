@@ -27,7 +27,7 @@ if test "$PHP_RDKAFKA" != "no"; then
 
   PHP_ADD_INCLUDE($RDKAFKA_DIR/include)
 
-  SOURCES="rdkafka.c metadata.c metadata_broker.c metadata_topic.c metadata_partition.c metadata_collection.c conf.c topic.c queue.c message.c fun.c kafka_consumer.c topic_partition.c kafka_error_exception.c oauthbearer.c"
+  SOURCES="rdkafka.c metadata.c metadata_broker.c metadata_topic.c metadata_partition.c metadata_collection.c conf.c topic.c queue.c message.c fun.c kafka_consumer.c topic_partition.c kafka_error_exception.c oauthbearer.c consumer_group_metadata.c"
 
   LIBNAME=rdkafka
   LIBSYMBOL=rd_kafka_new
@@ -63,6 +63,12 @@ if test "$PHP_RDKAFKA" != "no"; then
     AC_DEFINE(HAS_RD_KAFKA_INCREMENTAL_ASSIGN,1,[ ])
   ],[
     AC_MSG_WARN([no rd_kafka_incremental_(un)assign, incremental rebalance support will not be available])
+  ])
+
+  AC_CHECK_LIB($LIBNAME,[rd_kafka_consumer_group_metadata_new_with_genid],[
+    AC_DEFINE(HAS_RD_KAFKA_CONSUMER_GROUP_METADATA_NEW_WITH_GENID,1,[ ])
+  ],[
+    AC_MSG_WARN([no rd_kafka_consumer_group_metadata_new_with_genid, ConsumerGroupMetadata constructor limited to group_id only (requires librdkafka >= 1.7.0 for full constructor)])
   ])
 
   LDFLAGS="$ORIG_LDFLAGS"

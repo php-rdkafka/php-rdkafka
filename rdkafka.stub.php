@@ -109,5 +109,10 @@ namespace RdKafka {
 
         /** @tentative-return-type */
         public function abortTransaction(int $timeout_ms): void {}
+
+        /** @tentative-return-type */
+        public function sendOffsetsToTransaction(array $offsets, ConsumerGroupMetadata $metadata, int $timeout_ms): void {}
     }
+
+    final class ConsumerGroupMetadata {}
 }

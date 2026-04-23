@@ -32,6 +32,7 @@
 #include "message.h"
 #include "metadata.h"
 #include "oauthbearer.h"
+#include "consumer_group_metadata.h"
 #include "kafka_consumer_arginfo.h"
 
 typedef struct _object_intern {
@@ -944,6 +945,31 @@ PHP_METHOD(RdKafka_KafkaConsumer, oauthbearerSetTokenFailure)
     }
 
     oauthbearer_set_token_failure(intern->rk, errstr);
+}
+/* }}} */
+
+/* {{{ proto RdKafka\ConsumerGroupMetadata RdKafka\KafkaConsumer::getConsumerGroupMetadata() */
+PHP_METHOD(RdKafka_KafkaConsumer, getConsumerGroupMetadata)
+{
+    object_intern *intern;
+    kafka_consumer_group_metadata_object *cgmd_intern;
+    rd_kafka_consumer_group_metadata_t *cgmd;
+
+    intern = get_object(getThis());
+    if (!intern) {
+        return;
+    }
+
+    cgmd = rd_kafka_consumer_group_metadata(intern->rk);
+
+    if (!cgmd) {
+        zend_throw_exception(ce_kafka_exception, "Failed to get consumer group metadata", 0);
+        return;
+    }
+
+    object_init_ex(return_value, ce_kafka_consumer_group_metadata);
+    cgmd_intern = Z_RDKAFKA_P(kafka_consumer_group_metadata_object, return_value);
+    cgmd_intern->cgmd = cgmd;
 }
 /* }}} */
 
