@@ -85,6 +85,8 @@ PHP_METHOD(RdKafka_ConsumerGroupMetadata, __construct)
 }
 /* }}} */
 
+#ifdef HAS_RD_KAFKA_CONSUMER_GROUP_METADATA_GETTERS
+
 /* {{{ proto string RdKafka\ConsumerGroupMetadata::getGroupId() */
 PHP_METHOD(RdKafka_ConsumerGroupMetadata, getGroupId)
 {
@@ -200,6 +202,8 @@ static HashTable *get_debug_info(zend_object *object, int *is_temp)
 }
 /* }}} */
 
+#endif /* HAS_RD_KAFKA_CONSUMER_GROUP_METADATA_GETTERS */
+
 /* {{{ */
 static void free_object(zend_object *object)
 {
@@ -249,7 +253,9 @@ void kafka_consumer_group_metadata_minit(INIT_FUNC_ARGS)
     memcpy(&handlers, &std_object_handlers, sizeof(handlers));
     handlers.free_obj = free_object;
     handlers.clone_obj = NULL;
+#ifdef HAS_RD_KAFKA_CONSUMER_GROUP_METADATA_GETTERS
     handlers.get_debug_info = get_debug_info;
+#endif
 
     ce_kafka_consumer_group_metadata = register_class_RdKafka_ConsumerGroupMetadata();
     ce_kafka_consumer_group_metadata->create_object = create_object;

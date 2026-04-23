@@ -114,5 +114,4 @@ namespace RdKafka {
         public function sendOffsetsToTransaction(array $offsets, ConsumerGroupMetadata $metadata, int $timeout_ms): void {}
     }
 
-    final class ConsumerGroupMetadata {}
 }

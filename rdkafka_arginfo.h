@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2018698a34d9afa6feacde08feaddc95fd1f1108 */
+ * Stub hash: 59bbc712df4fc5c69f9c1058a02312dfd5a43b90 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -244,11 +244,6 @@ static const zend_function_entry class_RdKafka_Producer_methods[] = {
 	ZEND_FE_END
 };
 
-
-static const zend_function_entry class_RdKafka_ConsumerGroupMetadata_methods[] = {
-	ZEND_FE_END
-};
-
 static zend_class_entry *register_class_RdKafka(void)
 {
 	zend_class_entry ce, *class_entry;
@@ -298,17 +293,6 @@ static zend_class_entry *register_class_RdKafka_Producer(zend_class_entry *class
 
 	INIT_NS_CLASS_ENTRY(ce, "RdKafka", "Producer", class_RdKafka_Producer_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_RdKafka);
-
-	return class_entry;
-}
-
-static zend_class_entry *register_class_RdKafka_ConsumerGroupMetadata(void)
-{
-	zend_class_entry ce, *class_entry;
-
-	INIT_NS_CLASS_ENTRY(ce, "RdKafka", "ConsumerGroupMetadata", class_RdKafka_ConsumerGroupMetadata_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
 
 	return class_entry;
 }
