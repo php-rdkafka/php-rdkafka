@@ -433,6 +433,58 @@ PHP_METHOD(RdKafka_Conf, dump)
 }
 /* }}} */
 
+/* {{{ proto string RdKafka\Conf::get(string $name)
+   Retrieve a configuration property value. */
+PHP_METHOD(RdKafka_Conf, get)
+{
+    char *name;
+    size_t name_len;
+    kafka_conf_object *intern;
+    char *dest;
+    size_t dest_size;
+    rd_kafka_conf_res_t ret;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
+        return;
+    }
+
+    intern = get_kafka_conf_object(getThis());
+    if (!intern) {
+        return;
+    }
+
+    switch (intern->type) {
+        case KAFKA_CONF:
+            ret = rd_kafka_conf_get(intern->u.conf, name, NULL, &dest_size);
+            break;
+        case KAFKA_TOPIC_CONF:
+            ret = rd_kafka_topic_conf_get(intern->u.topic_conf, name, NULL, &dest_size);
+            break;
+        default:
+            return;
+    }
+
+    if (ret == RD_KAFKA_CONF_UNKNOWN) {
+        zend_throw_exception_ex(ce_kafka_exception, RD_KAFKA_CONF_UNKNOWN, "Unknown configuration property \"%s\"", name);
+        return;
+    }
+
+    dest = emalloc(dest_size);
+
+    switch (intern->type) {
+        case KAFKA_CONF:
+            rd_kafka_conf_get(intern->u.conf, name, dest, &dest_size);
+            break;
+        case KAFKA_TOPIC_CONF:
+            rd_kafka_topic_conf_get(intern->u.topic_conf, name, dest, &dest_size);
+            break;
+    }
+
+    RETVAL_STRING(dest);
+    efree(dest);
+}
+/* }}} */
+
 /* {{{ proto void RdKafka\Conf::set(string $name, string $value)
    Sets a configuration property. */
 PHP_METHOD(RdKafka_Conf, set)
