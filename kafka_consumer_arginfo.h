@@ -52,7 +52,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_RdKafka_KafkaConsumer_commitAsync arginfo_class_RdKafka_KafkaConsumer_commit
 
 #if (PHP_VERSION_ID >= 80100)
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_RdKafka_KafkaConsumer_consume, 0, 1, RdKafka\\Message, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_RdKafka_KafkaConsumer_consume, 0, 1, RdKafka\\Message, 1)
 #else
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_KafkaConsumer_consume, 0, 0, 1)
 #endif

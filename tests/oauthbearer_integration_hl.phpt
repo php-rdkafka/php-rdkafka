@@ -101,7 +101,7 @@ $consumer->subscribe([$topicName]);
 echo "Reading data\n";
 
 $message = $consumer->consume(10*1000);
-echo $message->err === -185 ? "Received empty message when reading data after not setting or refreshing any token\n" :
+echo $message === null ? "Received empty message when reading data after not setting or refreshing any token\n" :
     "FAIL: Did receive a message after not setting or refreshing any token\n";
 
 // Test that metadata will be loaded before data consumption, under the condition that poll is called

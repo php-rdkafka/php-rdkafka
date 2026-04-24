@@ -16,6 +16,28 @@
 
 ## User-impacting changes
 
+### `KafkaConsumer::consume()` returns `null` on timeout
+
+Previously, `KafkaConsumer::consume()` returned a `Message` object with `err` set to `RD_KAFKA_RESP_ERR__TIMED_OUT` when no message arrived within the timeout window. It now returns `null` in that case, matching librdkafka's own behavior.
+
+**Before:**
+```php
+$msg = $consumer->consume(1000);
+if ($msg->err === RD_KAFKA_RESP_ERR__TIMED_OUT) {
+    // no message
+}
+```
+
+**After:**
+```php
+$msg = $consumer->consume(1000);
+if ($msg === null) {
+    // no message
+}
+```
+
+`RD_KAFKA_RESP_ERR__TIMED_OUT` on a returned `Message` now means an actual timeout error originating from librdkafka, not a poll window expiry.
+
 ### PHP 8.1 now required
 
 php-rdkafka 7.x requires PHP 8.1 or later. PHP 7.x is no longer supported.
