@@ -47,6 +47,10 @@ static void free_object(zend_object *object) /* {{{ */
         efree(intern->topic);
     }
 
+    if (intern->metadata) {
+        efree(intern->metadata);
+    }
+
     zend_object_std_dtor(&intern->std);
 }
 /* }}} */
@@ -141,10 +145,17 @@ void kafka_topic_partition_list_to_array(zval *return_value, rd_kafka_topic_part
     array_init_size(return_value, list->cnt);
 
     for (i = 0; i < list->cnt; i++) {
+        object_intern *tp_intern;
         topar = &list->elems[i];
         ZVAL_NULL(&ztopar);
         object_init_ex(&ztopar, ce_kafka_topic_partition);
         kafka_topic_partition_init(&ztopar, topar->topic, topar->partition, topar->offset, topar->err);
+        if (topar->metadata_size > 0 && topar->metadata) {
+            tp_intern = Z_RDKAFKA_P(object_intern, &ztopar);
+            tp_intern->metadata = emalloc(topar->metadata_size);
+            memcpy(tp_intern->metadata, topar->metadata, topar->metadata_size);
+            tp_intern->metadata_size = topar->metadata_size;
+        }
         add_next_index_zval(return_value, &ztopar);
     }
 } /* }}} */
@@ -184,6 +195,11 @@ rd_kafka_topic_partition_list_t * array_arg_to_kafka_topic_partition_list(int ar
 
         topar = rd_kafka_topic_partition_list_add(list, topar_intern->topic, topar_intern->partition);
         topar->offset = topar_intern->offset;
+        if (topar_intern->metadata && topar_intern->metadata_size > 0) {
+            topar->metadata = malloc(topar_intern->metadata_size);
+            memcpy(topar->metadata, topar_intern->metadata, topar_intern->metadata_size);
+            topar->metadata_size = topar_intern->metadata_size;
+        }
     }
 
     return list;
@@ -361,6 +377,62 @@ PHP_METHOD(RdKafka_TopicPartition, getErr)
     }
 
     RETURN_LONG((zend_long) intern->err);
+}
+/* }}} */
+
+/* {{{ proto ?string RdKafka\TopicPartition::getMetadata()
+   Returns committed offset metadata */
+PHP_METHOD(RdKafka_TopicPartition, getMetadata)
+{
+    object_intern *intern;
+
+    if (zend_parse_parameters_none() == FAILURE) {
+        return;
+    }
+
+    intern = get_object(getThis());
+    if (!intern) {
+        return;
+    }
+
+    if (intern->metadata) {
+        RETURN_STRINGL(intern->metadata, intern->metadata_size);
+    } else {
+        RETURN_NULL();
+    }
+}
+/* }}} */
+
+/* {{{ proto TopicPartition RdKafka\TopicPartition::setMetadata(?string $metadata)
+   Sets committed offset metadata */
+PHP_METHOD(RdKafka_TopicPartition, setMetadata)
+{
+    char *metadata = NULL;
+    size_t metadata_len = 0;
+    object_intern *intern;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!", &metadata, &metadata_len) == FAILURE) {
+        return;
+    }
+
+    intern = get_object(getThis());
+    if (!intern) {
+        return;
+    }
+
+    if (intern->metadata) {
+        efree(intern->metadata);
+        intern->metadata = NULL;
+        intern->metadata_size = 0;
+    }
+
+    if (metadata) {
+        intern->metadata = emalloc(metadata_len);
+        memcpy(intern->metadata, metadata, metadata_len);
+        intern->metadata_size = metadata_len;
+    }
+
+    RETURN_ZVAL(getThis(), 1, 0);
 }
 /* }}} */
 

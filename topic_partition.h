@@ -21,6 +21,8 @@ typedef struct _kafka_topic_partition_intern {
     int32_t     partition;
     int64_t     offset;
     rd_kafka_resp_err_t err;
+    char        *metadata;
+    size_t      metadata_size;
     zend_object std;
 } kafka_topic_partition_intern;
 

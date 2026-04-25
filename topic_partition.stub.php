@@ -32,4 +32,10 @@ class TopicPartition
 
     /** @tentative-return-type */
     public function getErr(): ?int {}
+
+    /** @tentative-return-type */
+    public function getMetadata(): ?string {}
+
+    /** @tentative-return-type */
+    public function setMetadata(?string $metadata): TopicPartition {}
 }
