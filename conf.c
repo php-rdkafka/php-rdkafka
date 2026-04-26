@@ -410,26 +410,38 @@ PHP_METHOD(RdKafka_Conf, dump)
         return;
     }
 
+    array_init(return_value);
+
     switch (intern->type) {
-        case KAFKA_CONF:
+        case KAFKA_CONF: {
+            rd_kafka_topic_conf_t *topic_conf;
+
             dump = rd_kafka_conf_dump(intern->u.conf, &cntp);
+            for (i = 0; i < cntp; i+=2) {
+                add_assoc_string(return_value, (char*)dump[i], (char*)dump[i+1]);
+            }
+            rd_kafka_conf_dump_free(dump, cntp);
+
+            topic_conf = rd_kafka_conf_get_default_topic_conf(intern->u.conf);
+            if (topic_conf) {
+                dump = rd_kafka_topic_conf_dump(topic_conf, &cntp);
+                for (i = 0; i < cntp; i+=2) {
+                    add_assoc_string(return_value, (char*)dump[i], (char*)dump[i+1]);
+                }
+                rd_kafka_conf_dump_free(dump, cntp);
+            }
             break;
+        }
         case KAFKA_TOPIC_CONF:
             dump = rd_kafka_topic_conf_dump(intern->u.topic_conf, &cntp);
+            for (i = 0; i < cntp; i+=2) {
+                add_assoc_string(return_value, (char*)dump[i], (char*)dump[i+1]);
+            }
+            rd_kafka_conf_dump_free(dump, cntp);
             break;
         default:
             return;
     }
-
-    array_init(return_value);
-
-    for (i = 0; i < cntp; i+=2) {
-        const char *key = dump[i];
-        const char *value = dump[i+1];
-        add_assoc_string(return_value, (char*)key, (char*)value);
-    }
-
-    rd_kafka_conf_dump_free(dump, cntp);
 }
 /* }}} */
 
