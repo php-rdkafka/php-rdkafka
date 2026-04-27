@@ -738,7 +738,10 @@ PHP_METHOD(RdKafka, setLogger)
             return;
     }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     rd_kafka_set_logger(intern->rk, logger);
+#pragma GCC diagnostic pop
 }
 /* }}} */
 

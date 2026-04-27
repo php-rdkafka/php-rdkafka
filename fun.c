@@ -136,7 +136,10 @@ PHP_FUNCTION(rd_kafka_errno2err)
         return;
     }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     RETURN_LONG(rd_kafka_errno2err(errnox));
+#pragma GCC diagnostic pop
 }
 /* }}} */
 
