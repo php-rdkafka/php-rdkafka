@@ -12,6 +12,21 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_Conf_dump, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 #if (PHP_VERSION_ID >= 80100)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_RdKafka_Conf_get, 0, 1, IS_STRING, 0)
+#else
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_Conf_get, 0, 0, 1)
+#endif
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#if (PHP_VERSION_ID >= 80100)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_RdKafka_Conf_getDefaultTopicConf, 0, 0, RdKafka\\TopicConf, 1)
+#else
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_Conf_getDefaultTopicConf, 0, 0, 0)
+#endif
+ZEND_END_ARG_INFO()
+
+#if (PHP_VERSION_ID >= 80100)
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_RdKafka_Conf_set, 0, 2, IS_VOID, 0)
 #else
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_Conf_set, 0, 0, 2)
@@ -54,6 +69,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_RdKafka_TopicConf_dump arginfo_class_RdKafka_Conf_dump
 
+#define arginfo_class_RdKafka_TopicConf_get arginfo_class_RdKafka_Conf_get
+
 #define arginfo_class_RdKafka_TopicConf_set arginfo_class_RdKafka_Conf_set
 
 #if (PHP_VERSION_ID >= 80100)
@@ -67,6 +84,8 @@ ZEND_END_ARG_INFO()
 
 ZEND_METHOD(RdKafka_Conf, __construct);
 ZEND_METHOD(RdKafka_Conf, dump);
+ZEND_METHOD(RdKafka_Conf, get);
+ZEND_METHOD(RdKafka_Conf, getDefaultTopicConf);
 ZEND_METHOD(RdKafka_Conf, set);
 ZEND_METHOD(RdKafka_Conf, setDefaultTopicConf);
 ZEND_METHOD(RdKafka_Conf, setErrorCb);
@@ -84,6 +103,8 @@ ZEND_METHOD(RdKafka_TopicConf, setPartitioner);
 static const zend_function_entry class_RdKafka_Conf_methods[] = {
 	ZEND_ME(RdKafka_Conf, __construct, arginfo_class_RdKafka_Conf___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(RdKafka_Conf, dump, arginfo_class_RdKafka_Conf_dump, ZEND_ACC_PUBLIC)
+	ZEND_ME(RdKafka_Conf, get, arginfo_class_RdKafka_Conf_get, ZEND_ACC_PUBLIC)
+	ZEND_ME(RdKafka_Conf, getDefaultTopicConf, arginfo_class_RdKafka_Conf_getDefaultTopicConf, ZEND_ACC_PUBLIC)
 	ZEND_ME(RdKafka_Conf, set, arginfo_class_RdKafka_Conf_set, ZEND_ACC_PUBLIC)
 	ZEND_ME(RdKafka_Conf, setDefaultTopicConf, arginfo_class_RdKafka_Conf_setDefaultTopicConf, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
 	ZEND_ME(RdKafka_Conf, setErrorCb, arginfo_class_RdKafka_Conf_setErrorCb, ZEND_ACC_PUBLIC)
@@ -101,6 +122,7 @@ static const zend_function_entry class_RdKafka_Conf_methods[] = {
 static const zend_function_entry class_RdKafka_TopicConf_methods[] = {
 	ZEND_ME(RdKafka_TopicConf, __construct, arginfo_class_RdKafka_TopicConf___construct, ZEND_ACC_PUBLIC)
 	ZEND_MALIAS(RdKafka_Conf, dump, dump, arginfo_class_RdKafka_TopicConf_dump, ZEND_ACC_PUBLIC)
+	ZEND_MALIAS(RdKafka_Conf, get, get, arginfo_class_RdKafka_TopicConf_get, ZEND_ACC_PUBLIC)
 	ZEND_MALIAS(RdKafka_Conf, set, set, arginfo_class_RdKafka_TopicConf_set, ZEND_ACC_PUBLIC)
 	ZEND_ME(RdKafka_TopicConf, setPartitioner, arginfo_class_RdKafka_TopicConf_setPartitioner, ZEND_ACC_PUBLIC)
 	ZEND_FE_END

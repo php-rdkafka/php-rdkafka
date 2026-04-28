@@ -99,7 +99,7 @@ static void kafka_conf_free(zend_object *object) /* {{{ */
             kafka_conf_callbacks_dtor(&intern->cbs);
             break;
         case KAFKA_TOPIC_CONF:
-            if (intern->u.topic_conf) {
+            if (intern->u.topic_conf && !intern->is_borrowed) {
                 rd_kafka_topic_conf_destroy(intern->u.topic_conf);
             }
             break;
@@ -410,38 +410,108 @@ PHP_METHOD(RdKafka_Conf, dump)
         return;
     }
 
-    array_init(return_value);
-
     switch (intern->type) {
-        case KAFKA_CONF: {
-            rd_kafka_topic_conf_t *topic_conf;
-
+        case KAFKA_CONF:
             dump = rd_kafka_conf_dump(intern->u.conf, &cntp);
-            for (i = 0; i < cntp; i+=2) {
-                add_assoc_string(return_value, (char*)dump[i], (char*)dump[i+1]);
-            }
-            rd_kafka_conf_dump_free(dump, cntp);
-
-            topic_conf = rd_kafka_conf_get_default_topic_conf(intern->u.conf);
-            if (topic_conf) {
-                dump = rd_kafka_topic_conf_dump(topic_conf, &cntp);
-                for (i = 0; i < cntp; i+=2) {
-                    add_assoc_string(return_value, (char*)dump[i], (char*)dump[i+1]);
-                }
-                rd_kafka_conf_dump_free(dump, cntp);
-            }
             break;
-        }
         case KAFKA_TOPIC_CONF:
             dump = rd_kafka_topic_conf_dump(intern->u.topic_conf, &cntp);
-            for (i = 0; i < cntp; i+=2) {
-                add_assoc_string(return_value, (char*)dump[i], (char*)dump[i+1]);
-            }
-            rd_kafka_conf_dump_free(dump, cntp);
             break;
         default:
             return;
     }
+
+    array_init(return_value);
+
+    for (i = 0; i < cntp; i+=2) {
+        const char *key = dump[i];
+        const char *value = dump[i+1];
+        add_assoc_string(return_value, (char*)key, (char*)value);
+    }
+
+    rd_kafka_conf_dump_free(dump, cntp);
+}
+/* }}} */
+
+/* {{{ proto string RdKafka\Conf::get(string $name)
+   Retrieve a single configuration property value. */
+PHP_METHOD(RdKafka_Conf, get)
+{
+    char *name;
+    size_t name_len;
+    kafka_conf_object *intern;
+    char *dest;
+    size_t dest_size;
+    rd_kafka_conf_res_t ret;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
+        return;
+    }
+
+    intern = get_kafka_conf_object(getThis());
+    if (!intern) {
+        return;
+    }
+
+    switch (intern->type) {
+        case KAFKA_CONF:
+            ret = rd_kafka_conf_get(intern->u.conf, name, NULL, &dest_size);
+            break;
+        case KAFKA_TOPIC_CONF:
+            ret = rd_kafka_topic_conf_get(intern->u.topic_conf, name, NULL, &dest_size);
+            break;
+        default:
+            return;
+    }
+
+    if (ret == RD_KAFKA_CONF_UNKNOWN) {
+        zend_throw_exception_ex(ce_kafka_exception, RD_KAFKA_CONF_UNKNOWN, "Unknown configuration property \"%s\"", name);
+        return;
+    }
+
+    dest = emalloc(dest_size);
+
+    switch (intern->type) {
+        case KAFKA_CONF:
+            rd_kafka_conf_get(intern->u.conf, name, dest, &dest_size);
+            break;
+        case KAFKA_TOPIC_CONF:
+            rd_kafka_topic_conf_get(intern->u.topic_conf, name, dest, &dest_size);
+            break;
+    }
+
+    RETVAL_STRING(dest);
+    efree(dest);
+}
+/* }}} */
+
+/* {{{ proto ?TopicConf RdKafka\Conf::getDefaultTopicConf()
+   Returns the default topic conf embedded in this Conf, or null if none exists. */
+PHP_METHOD(RdKafka_Conf, getDefaultTopicConf)
+{
+    kafka_conf_object *intern;
+    kafka_conf_object *topic_intern;
+    rd_kafka_topic_conf_t *topic_conf;
+
+    if (zend_parse_parameters_none() == FAILURE) {
+        return;
+    }
+
+    intern = get_kafka_conf_object(getThis());
+    if (!intern || intern->type != KAFKA_CONF) {
+        return;
+    }
+
+    topic_conf = rd_kafka_conf_get_default_topic_conf(intern->u.conf);
+    if (!topic_conf) {
+        RETURN_NULL();
+    }
+
+    object_init_ex(return_value, ce_kafka_topic_conf);
+    topic_intern = Z_RDKAFKA_P(kafka_conf_object, return_value);
+    topic_intern->type = KAFKA_TOPIC_CONF;
+    topic_intern->is_borrowed = 1;
+    topic_intern->u.topic_conf = topic_conf;
 }
 /* }}} */
 

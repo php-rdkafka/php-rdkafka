@@ -51,6 +51,7 @@ typedef struct _kafka_conf_callbacks {
 
 typedef struct _kafka_conf_object {
     kafka_conf_type type;
+    int             is_borrowed;
     union {
         rd_kafka_conf_t         *conf;
         rd_kafka_topic_conf_t   *topic_conf;

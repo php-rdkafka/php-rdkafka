@@ -16,6 +16,12 @@ class Conf
     public function dump(): array {}
 
     /** @tentative-return-type */
+    public function get(string $name): string {}
+
+    /** @tentative-return-type */
+    public function getDefaultTopicConf(): ?TopicConf {}
+
+    /** @tentative-return-type */
     public function set(string $name, string $value): void {}
 
     /**
@@ -58,6 +64,12 @@ class TopicConf
      * @implementation-alias RdKafka\Conf::dump
      */
     public function dump(): array {}
+
+    /**
+     * @tentative-return-type
+     * @implementation-alias RdKafka\Conf::get
+     */
+    public function get(string $name): string {}
 
     /**
      * @tentative-return-type

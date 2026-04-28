@@ -1,29 +1,36 @@
 --TEST--
-RdKafka\Conf::dump includes topic-level properties
+RdKafka\Conf::dump returns global properties only; topic-level properties via getDefaultTopicConf()
 --SKIPIF--
 <?php
 if (!extension_loaded('rdkafka')) die('skip rdkafka extension not loaded');
 --FILE--
 <?php
 $conf = new RdKafka\Conf();
-
-// global-level property
-$conf->set('socket.timeout.ms', '60000');
-
-// topic-level property (stored in the embedded default_topic_conf)
-$conf->set('auto.offset.reset', 'earliest');
+$conf->set('group.id', 'test-group');         // global
+$conf->set('auto.offset.reset', 'earliest'); // topic-level
 
 $dump = $conf->dump();
 
-var_dump(isset($dump['socket.timeout.ms']));
+// global property appears in dump()
+var_dump(isset($dump['group.id']));
+
+// topic-level property does NOT appear in dump()
 var_dump(isset($dump['auto.offset.reset']));
 
-// TopicConf::dump() should still work independently
-$topicConf = new RdKafka\TopicConf();
-$topicConf->set('auto.offset.reset', 'latest');
+// topic-level property is accessible via getDefaultTopicConf()
+$topicConf = $conf->getDefaultTopicConf();
+var_dump($topicConf instanceof RdKafka\TopicConf);
 $topicDump = $topicConf->dump();
 var_dump(isset($topicDump['auto.offset.reset']));
+
+// TopicConf::dump() still works independently
+$standalone = new RdKafka\TopicConf();
+$standalone->set('auto.offset.reset', 'latest');
+$standaloneDump = $standalone->dump();
+var_dump(isset($standaloneDump['auto.offset.reset']));
 --EXPECT--
+bool(true)
+bool(false)
 bool(true)
 bool(true)
 bool(true)
