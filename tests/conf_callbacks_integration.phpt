@@ -1,8 +1,7 @@
 --TEST--
-RdKafka\Conf
+Conf callbacks: offsetCommitCb and statsCb fire correctly
 --SKIPIF--
 <?php
-!getenv('TESTS_DONT_SKIP_RISKY') && die("skip Risky/broken test");
 require __DIR__ . '/helpers/integration-tests-check.php';
 --FILE--
 <?php
@@ -25,9 +24,6 @@ for ($i = 0; $i < 10; $i++) {
 while ($producer->getOutQLen()) {
     $producer->poll(50);
 }
-
-// Make sure there is enough time for the stats_cb to pick up the consumer lag
-sleep(1);
 
 $conf = new RdKafka\Conf();
 
@@ -65,6 +61,12 @@ while (true) {
     }
 
     $consumer->commit($msg);
+}
+
+// Poll until statsCb fires (statistics.interval.ms=10 so it should be near-immediate)
+$deadline = time() + 5;
+while (!$statsCbCalled && time() < $deadline) {
+    $consumer->poll(100);
 }
 
 var_dump($statsCbCalled);
