@@ -42,7 +42,7 @@ class KafkaConsumer
     public function commitAsync(Message|array|null $message_or_offsets = null): void {}
 
     /** @tentative-return-type */
-    public function consume(int $timeout_ms): Message {}
+    public function consume(int $timeout_ms): ?Message {}
 
     /** @tentative-return-type */
     public function subscribe(array $topics): void {}

@@ -392,13 +392,13 @@ PHP_METHOD(RdKafka_KafkaConsumer, unsubscribe)
 }
 /* }}} */
 
-/* {{{ proto Message RdKafka\KafkaConsumer::consume()
-   Consume message or get error event, triggers callbacks */
+/* {{{ proto ?Message RdKafka\KafkaConsumer::consume()
+   Consume message or get error event, triggers callbacks. Returns null if no message is available within timeout_ms. */
 PHP_METHOD(RdKafka_KafkaConsumer, consume)
 {
     object_intern *intern;
     zend_long timeout_ms;
-    rd_kafka_message_t *rkmessage, rkmessage_tmp = {0};
+    rd_kafka_message_t *rkmessage;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &timeout_ms) == FAILURE) {
         return;
@@ -412,15 +412,11 @@ PHP_METHOD(RdKafka_KafkaConsumer, consume)
     rkmessage = rd_kafka_consumer_poll(intern->rk, timeout_ms);
 
     if (!rkmessage) {
-        rkmessage_tmp.err = RD_KAFKA_RESP_ERR__TIMED_OUT;
-        rkmessage = &rkmessage_tmp;
+        RETURN_NULL();
     }
 
     kafka_message_new(return_value, rkmessage, NULL);
-
-    if (rkmessage != &rkmessage_tmp) {
-        rd_kafka_message_destroy(rkmessage);
-    }
+    rd_kafka_message_destroy(rkmessage);
 }
 /* }}} */
 

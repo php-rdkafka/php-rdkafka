@@ -35,6 +35,12 @@ package.xml
 rdkafka-*.tgz
 run-tests.php
 gen_stub.php
+tests/*.diff
+tests/*.exp
+tests/*.log
+tests/*.out
+tests/*.php
+tests/*.sh
 tests/*/*.diff
 tests/*/*.exp
 tests/*/*.log
