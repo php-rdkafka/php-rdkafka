@@ -9,11 +9,21 @@ if (PHP_RDKAFKA != "no") {
 
 		EXTENSION("rdkafka", "rdkafka.c metadata.c metadata_broker.c metadata_topic.c \
 				metadata_partition.c metadata_collection.c conf.c \
-				topic.c queue.c message.c fun.c kafka_consumer.c topic_partition.c kafka_error_exception.c");
+				topic.c queue.c message.c fun.c kafka_consumer.c topic_partition.c \
+				kafka_error_exception.c oauthbearer.c consumer_group_metadata.c");
 
 		AC_DEFINE('HAVE_RDKAFKA', 1, '');
+
+		// Available since librdkafka 1.5.0, within the minimum requirement of 1.5.3
+		AC_DEFINE('HAS_RD_KAFKA_INCREMENTAL_ASSIGN', 1, '');
+
+		// Available since librdkafka 1.7.0; pecl/deps provides librdkafka-2.12.1 for Windows
+		AC_DEFINE('HAS_RD_KAFKA_CONSUMER_GROUP_METADATA_NEW_WITH_GENID', 1, '');
+
+		// Available since librdkafka 2.8.0; pecl/deps provides librdkafka-2.12.1 for Windows
+		AC_DEFINE('HAS_RD_KAFKA_CONSUMER_GROUP_METADATA_GETTERS', 1, '');
+
 	} else {
 		WARNING("rdkafka not enabled; libraries and headers not found");
 	}
 }
-

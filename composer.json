@@ -8,11 +8,12 @@
     },
     "php-ext": {
         "extension-name": "rdkafka",
+        "download-url-method": ["pre-packaged-binary", "composer-default"],
         "configure-options": [
             {
                 "name": "with-rdkafka",
-                "description": "Use system librdkafka",
-                "needs-value": true
+                "description": "Path to librdkafka installation (optional, auto-detected from /usr/local and /usr if omitted)",
+                "needs-value": false
             }
         ]
     }
