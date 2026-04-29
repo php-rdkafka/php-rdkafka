@@ -38,6 +38,7 @@
 #include "kafka_consumer.h"
 #include "oauthbearer.h"
 #include "topic_partition.h"
+#include "consumer_group_metadata.h"
 #include "rdkafka_arginfo.h"
 #include "fun_arginfo.h"
 #include "kafka_error_exception.h"
@@ -943,6 +944,46 @@ PHP_METHOD(RdKafka_Producer, abortTransaction)
 }
 /* }}} */
 
+/* {{{ proto void RdKafka\Producer::sendOffsetsToTransaction(array $offsets, RdKafka\ConsumerGroupMetadata $metadata, int $timeout_ms) */
+PHP_METHOD(RdKafka_Producer, sendOffsetsToTransaction)
+{
+    kafka_object *intern;
+    HashTable *hoffsets;
+    zval *zcgmd;
+    zend_long timeout_ms;
+    rd_kafka_topic_partition_list_t *offsets;
+    kafka_consumer_group_metadata_object *cgmd_intern;
+    const rd_kafka_error_t *error;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "hOl", &hoffsets, &zcgmd, ce_kafka_consumer_group_metadata, &timeout_ms) == FAILURE) {
+        return;
+    }
+
+    intern = get_kafka_object(getThis());
+    if (!intern) {
+        return;
+    }
+
+    offsets = array_arg_to_kafka_topic_partition_list(1, hoffsets);
+    if (!offsets) {
+        return;
+    }
+
+    cgmd_intern = Z_RDKAFKA_P(kafka_consumer_group_metadata_object, zcgmd);
+
+    error = rd_kafka_send_offsets_to_transaction(intern->rk, offsets, cgmd_intern->cgmd, timeout_ms);
+
+    rd_kafka_topic_partition_list_destroy(offsets);
+
+    if (NULL == error) {
+        return;
+    }
+
+    create_kafka_error(return_value, error);
+    zend_throw_exception_object(return_value);
+}
+/* }}} */
+
 #define COPY_CONSTANT(name) \
     REGISTER_LONG_CONSTANT(#name, name, CONST_CS | CONST_PERSISTENT)
 
@@ -988,6 +1029,9 @@ PHP_MINIT_FUNCTION(rdkafka)
     COPY_CONSTANT(RD_KAFKA_PURGE_F_NON_BLOCKING);
     REGISTER_LONG_CONSTANT("RD_KAFKA_VERSION", rd_kafka_version(), CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("RD_KAFKA_BUILD_VERSION", RD_KAFKA_VERSION, CONST_CS | CONST_PERSISTENT);
+#ifdef HAS_RD_KAFKA_CONSUMER_GROUP_METADATA_GETTERS
+    REGISTER_LONG_CONSTANT("RD_KAFKA_CONSUMER_GROUP_METADATA_GETTERS", 1, CONST_CS | CONST_PERSISTENT);
+#endif
 
     register_err_constants(INIT_FUNC_ARGS_PASSTHRU);
 
@@ -1023,6 +1067,7 @@ PHP_MINIT_FUNCTION(rdkafka)
 
     kafka_conf_minit(INIT_FUNC_ARGS_PASSTHRU);
     kafka_error_minit();
+    kafka_consumer_group_metadata_minit(INIT_FUNC_ARGS_PASSTHRU);
     kafka_kafka_consumer_minit(INIT_FUNC_ARGS_PASSTHRU);
     kafka_message_minit(INIT_FUNC_ARGS_PASSTHRU);
     kafka_metadata_minit(INIT_FUNC_ARGS_PASSTHRU);

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a7de61984c96ac34a70cd48ea1785a4ed5ed00d5 */
+ * Stub hash: 59bbc712df4fc5c69f9c1058a02312dfd5a43b90 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -160,6 +160,16 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_RdKafka_Producer_abortTransaction arginfo_class_RdKafka_Producer_initTransactions
 
+#if (PHP_VERSION_ID >= 80100)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_RdKafka_Producer_sendOffsetsToTransaction, 0, 3, IS_VOID, 0)
+#else
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_Producer_sendOffsetsToTransaction, 0, 0, 3)
+#endif
+	ZEND_ARG_TYPE_INFO(0, offsets, IS_ARRAY, 0)
+	ZEND_ARG_OBJ_INFO(0, metadata, RdKafka\\ConsumerGroupMetadata, 0)
+	ZEND_ARG_TYPE_INFO(0, timeout_ms, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
 
 ZEND_METHOD(RdKafka, __construct);
 ZEND_METHOD(RdKafka, addBrokers);
@@ -185,6 +195,7 @@ ZEND_METHOD(RdKafka_Producer, initTransactions);
 ZEND_METHOD(RdKafka_Producer, beginTransaction);
 ZEND_METHOD(RdKafka_Producer, commitTransaction);
 ZEND_METHOD(RdKafka_Producer, abortTransaction);
+ZEND_METHOD(RdKafka_Producer, sendOffsetsToTransaction);
 
 
 static const zend_function_entry class_RdKafka_methods[] = {
@@ -229,6 +240,7 @@ static const zend_function_entry class_RdKafka_Producer_methods[] = {
 	ZEND_ME(RdKafka_Producer, beginTransaction, arginfo_class_RdKafka_Producer_beginTransaction, ZEND_ACC_PUBLIC)
 	ZEND_ME(RdKafka_Producer, commitTransaction, arginfo_class_RdKafka_Producer_commitTransaction, ZEND_ACC_PUBLIC)
 	ZEND_ME(RdKafka_Producer, abortTransaction, arginfo_class_RdKafka_Producer_abortTransaction, ZEND_ACC_PUBLIC)
+	ZEND_ME(RdKafka_Producer, sendOffsetsToTransaction, arginfo_class_RdKafka_Producer_sendOffsetsToTransaction, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

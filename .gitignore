@@ -48,6 +48,7 @@ tests/*/*.out
 tests/*/*.php
 !tests/helpers/*.php
 tests/*/*.sh
+tests/test_env.php
 tmp-php.ini
 php_test_results_*.txt
 configure~

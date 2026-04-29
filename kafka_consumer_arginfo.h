@@ -183,6 +183,14 @@ ZEND_METHOD(RdKafka_KafkaConsumer, resumePartitions);
 ZEND_METHOD(RdKafka_KafkaConsumer, poll);
 ZEND_METHOD(RdKafka_KafkaConsumer, oauthbearerSetToken);
 ZEND_METHOD(RdKafka_KafkaConsumer, oauthbearerSetTokenFailure);
+ZEND_METHOD(RdKafka_KafkaConsumer, getConsumerGroupMetadata);
+
+#if (PHP_VERSION_ID >= 80100)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_RdKafka_KafkaConsumer_getConsumerGroupMetadata, 0, 0, RdKafka\\ConsumerGroupMetadata, 0)
+#else
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_KafkaConsumer_getConsumerGroupMetadata, 0, 0, 0)
+#endif
+ZEND_END_ARG_INFO()
 
 
 static const zend_function_entry class_RdKafka_KafkaConsumer_methods[] = {
@@ -214,6 +222,7 @@ static const zend_function_entry class_RdKafka_KafkaConsumer_methods[] = {
 	ZEND_ME(RdKafka_KafkaConsumer, poll, arginfo_class_RdKafka_KafkaConsumer_poll, ZEND_ACC_PUBLIC)
 	ZEND_ME(RdKafka_KafkaConsumer, oauthbearerSetToken, arginfo_class_RdKafka_KafkaConsumer_oauthbearerSetToken, ZEND_ACC_PUBLIC)
 	ZEND_ME(RdKafka_KafkaConsumer, oauthbearerSetTokenFailure, arginfo_class_RdKafka_KafkaConsumer_oauthbearerSetTokenFailure, ZEND_ACC_PUBLIC)
+	ZEND_ME(RdKafka_KafkaConsumer, getConsumerGroupMetadata, arginfo_class_RdKafka_KafkaConsumer_getConsumerGroupMetadata, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
