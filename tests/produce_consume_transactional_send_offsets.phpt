@@ -64,7 +64,7 @@ $consumed = 0;
 
 while ($consumed < 5) {
     $msg = $consumer->consume(10000);
-    if ($msg->err !== RD_KAFKA_RESP_ERR_NO_ERROR) {
+    if ($msg === null || $msg->err !== RD_KAFKA_RESP_ERR_NO_ERROR) {
         continue;
     }
 
@@ -125,7 +125,7 @@ $reConsumed = 0;
 $deadline = time() + 10;
 while (time() < $deadline) {
     $msg = $verifyConsumer->consume(1000);
-    if ($msg->err === RD_KAFKA_RESP_ERR__TIMED_OUT) {
+    if ($msg === null) {
         break;
     }
     if ($msg->err === RD_KAFKA_RESP_ERR__PARTITION_EOF) {
