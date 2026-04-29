@@ -31,6 +31,10 @@
    <file role="doc" name="CREDITS"/>
    <file role="doc" name="LICENSE"/>
    <file role="doc" name="README.md"/>
+   <file role="src" name="admin_client.c"/>
+   <file role="src" name="admin_client.h"/>
+   <file role="src" name="admin_client.stub.php"/>
+   <file role="src" name="admin_client_arginfo.h"/>
    <file role="src" name="conf.c"/>
    <file role="src" name="conf.h"/>
    <file role="src" name="conf.stub.php"/>
@@ -92,6 +96,11 @@
    <file role="src" name="topic_partition.stub.php"/>
    <file role="src" name="topic_partition_arginfo.h"/>
    <dir name="tests">
+    <file role="test" name="admin_client_001.phpt"/>
+    <file role="test" name="admin_client_create_delete_topics.phpt"/>
+    <file role="test" name="admin_client_create_partitions.phpt"/>
+    <file role="test" name="admin_client_delete_records.phpt"/>
+    <file role="test" name="admin_client_describe_topics.phpt"/>
     <file role="test" name="allow_null_payload_and_key.phpt"/>
     <file role="test" name="allow_null_payload.phpt"/>
     <file role="test" name="bug115.phpt"/>

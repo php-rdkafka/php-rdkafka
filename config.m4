@@ -27,7 +27,7 @@ if test "$PHP_RDKAFKA" != "no"; then
 
   PHP_ADD_INCLUDE($RDKAFKA_DIR/include)
 
-  SOURCES="rdkafka.c metadata.c metadata_broker.c metadata_topic.c metadata_partition.c metadata_collection.c conf.c topic.c queue.c message.c fun.c kafka_consumer.c topic_partition.c kafka_error_exception.c oauthbearer.c"
+  SOURCES="rdkafka.c metadata.c metadata_broker.c metadata_topic.c metadata_partition.c metadata_collection.c conf.c topic.c queue.c message.c fun.c kafka_consumer.c topic_partition.c kafka_error_exception.c oauthbearer.c admin_client.c"
 
   LIBNAME=rdkafka
   LIBSYMBOL=rd_kafka_new
@@ -63,6 +63,12 @@ if test "$PHP_RDKAFKA" != "no"; then
     AC_DEFINE(HAS_RD_KAFKA_INCREMENTAL_ASSIGN,1,[ ])
   ],[
     AC_MSG_WARN([no rd_kafka_incremental_(un)assign, incremental rebalance support will not be available])
+  ])
+
+  AC_CHECK_LIB($LIBNAME,[rd_kafka_DescribeTopics],[
+    AC_DEFINE(HAS_RD_KAFKA_DESCRIBE_TOPICS,1,[ ])
+  ],[
+    AC_MSG_WARN([no rd_kafka_DescribeTopics, DescribeTopics support will not be available])
   ])
 
   LDFLAGS="$ORIG_LDFLAGS"
