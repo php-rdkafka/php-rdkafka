@@ -13,7 +13,7 @@
             {
                 "name": "with-rdkafka",
                 "description": "Path to librdkafka installation (optional, auto-detected from /usr/local and /usr if omitted)",
-                "needs-value": false
+                "needs-value": true
             }
         ]
     }
