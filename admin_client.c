@@ -30,8 +30,6 @@
 #include "topic_partition.h"
 #include "admin_client_arginfo.h"
 
-/* Default timeout for queue poll in milliseconds */
-#define ADMIN_DEFAULT_TIMEOUT_MS 5000
 
 /* Class entries */
 zend_class_entry *ce_kafka_admin_client;
@@ -379,7 +377,7 @@ ZEND_METHOD(RdKafka_Admin_AdminClient, createTopics)
     rd_kafka_CreateTopics(intern->rk, new_topics, new_topic_cnt, options, queue);
 
     /* Poll for result */
-    event = rd_kafka_queue_poll(queue, ADMIN_DEFAULT_TIMEOUT_MS);
+    event = rd_kafka_queue_poll(queue, -1);
 
     efree(new_topics);
     rd_kafka_queue_destroy(queue);
@@ -475,7 +473,7 @@ ZEND_METHOD(RdKafka_Admin_AdminClient, deleteTopics)
 
     rd_kafka_DeleteTopics(intern->rk, delete_topics, delete_topic_cnt, options, queue);
 
-    event = rd_kafka_queue_poll(queue, ADMIN_DEFAULT_TIMEOUT_MS);
+    event = rd_kafka_queue_poll(queue, -1);
 
     efree(delete_topics);
     rd_kafka_queue_destroy(queue);
@@ -570,7 +568,7 @@ ZEND_METHOD(RdKafka_Admin_AdminClient, createPartitions)
 
     rd_kafka_CreatePartitions(intern->rk, new_partitions, new_partitions_cnt, options, queue);
 
-    event = rd_kafka_queue_poll(queue, ADMIN_DEFAULT_TIMEOUT_MS);
+    event = rd_kafka_queue_poll(queue, -1);
 
     efree(new_partitions);
     rd_kafka_queue_destroy(queue);
@@ -1138,7 +1136,7 @@ ZEND_METHOD(RdKafka_Admin_AdminClient, describeTopics)
     rd_kafka_DescribeTopics(intern->rk, topic_collection, options, queue);
     rd_kafka_TopicCollection_destroy(topic_collection);
 
-    event = rd_kafka_queue_poll(queue, ADMIN_DEFAULT_TIMEOUT_MS);
+    event = rd_kafka_queue_poll(queue, -1);
     rd_kafka_queue_destroy(queue);
 
     if (!event) {
@@ -1227,7 +1225,7 @@ ZEND_METHOD(RdKafka_Admin_AdminClient, deleteRecords)
     del_records_arr[0] = del_records;
     rd_kafka_DeleteRecords(intern->rk, del_records_arr, 1, options, queue);
 
-    event = rd_kafka_queue_poll(queue, ADMIN_DEFAULT_TIMEOUT_MS);
+    event = rd_kafka_queue_poll(queue, -1);
 
     rd_kafka_DeleteRecords_destroy(del_records);
     rd_kafka_queue_destroy(queue);

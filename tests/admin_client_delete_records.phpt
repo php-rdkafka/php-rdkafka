@@ -2,10 +2,10 @@
 AdminClient - deleteRecords integration
 --SKIPIF--
 <?php
-require __DIR__ . '/integration-tests-check.php';
+require __DIR__ . '/helpers/integration-tests-check.php';
 --FILE--
 <?php
-require __DIR__ . '/integration-tests-check.php';
+require __DIR__ . '/helpers/integration-tests-check.php';
 
 $conf = new RdKafka\Conf();
 $conf->set('metadata.broker.list', getenv('TEST_KAFKA_BROKERS'));
@@ -33,11 +33,7 @@ for ($i = 0; $i < 10; $i++) {
     $producer->poll(0);
 }
 
-while ($producer->getOutQLen()) {
-    $producer->poll(50);
-}
-
-sleep(1);
+$producer->flush(10 * 1000);
 
 $topicPartition = new RdKafka\TopicPartition($topicName, 0, 5);
 $results = $admin->deleteRecords([$topicPartition]);

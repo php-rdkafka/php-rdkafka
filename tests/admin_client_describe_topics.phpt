@@ -2,13 +2,13 @@
 AdminClient - describeTopics integration
 --SKIPIF--
 <?php
-require __DIR__ . '/integration-tests-check.php';
+require __DIR__ . '/helpers/integration-tests-check.php';
 if (!method_exists(RdKafka\Admin\AdminClient::class, 'describeTopics')) {
     die('skip describeTopics not available (requires librdkafka >= 2.3.0)');
 }
 --FILE--
 <?php
-require __DIR__ . '/integration-tests-check.php';
+require __DIR__ . '/helpers/integration-tests-check.php';
 
 $conf = new RdKafka\Conf();
 $conf->set('metadata.broker.list', getenv('TEST_KAFKA_BROKERS'));

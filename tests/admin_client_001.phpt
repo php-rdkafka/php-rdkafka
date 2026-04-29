@@ -3,7 +3,8 @@ AdminClient - basic object creation and configuration
 --FILE--
 <?php
 $conf = new RdKafka\Conf();
-$conf->set('bootstrap.servers', 'localhost:9092');
+$conf->set('metadata.broker.list', 'localhost:9092');
+$conf->setLogCb(function () {});
 $admin = new RdKafka\Admin\AdminClient($conf);
 var_dump($admin instanceof RdKafka\Admin\AdminClient);
 
