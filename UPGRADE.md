@@ -38,6 +38,49 @@ if ($msg === null) {
 
 `RD_KAFKA_RESP_ERR__TIMED_OUT` on a returned `Message` now means an actual timeout error originating from librdkafka, not a poll window expiry.
 
+### Conf::dump() does not include topic-level properties
+
+`Conf::set()` accepts both global and topic-level properties, silently routing topic-level properties to an embedded `default_topic_conf`. However, `Conf::dump()` only returns global configuration properties.
+
+**If you were using Conf::dump() for debugging or testing** and expecting to see topic-level properties (like `auto.offset.reset`, `compression.codec`, `auto.commit.enable`, etc.), you must now explicitly access them via `getDefaultTopicConf()`.
+
+```php
+// Before (incorrect assumption):
+$conf = new RdKafka\Conf;
+$conf->set('group.id', 'my-group');           // global property
+$conf->set('auto.offset.reset', 'earliest');  // topic-level property
+
+$dump = $conf->dump();
+// Incorrectly assumed 'auto.offset.reset' would appear here
+
+// After (correct usage):
+$conf = new RdKafka\Conf;
+$conf->set('group.id', 'my-group');           // global property
+$conf->set('auto.offset.reset', 'earliest');  // topic-level property
+
+// Get global properties:
+$globalProps = $conf->dump();
+echo $globalProps['group.id'];  // 'my-group'
+
+// Get topic-level properties:
+$topicConf = $conf->getDefaultTopicConf();
+
+if ($topicConf !== null) {
+    $topicProps = $topicConf->dump();
+    echo $topicProps['auto.offset.reset'];  // 'earliest'
+
+    // Or get a single topic-level property:
+    $value = $topicConf->get('auto.offset.reset');  // 'earliest'
+}
+
+// Alternatively, use Conf::get() for global properties and Conf::getDefaultTopicConf()->get() for topic-level properties:
+$groupId = $conf->get('group.id');                                          // global
+$autoOffsetReset = $conf->getDefaultTopicConf()->get('auto.offset.reset');  // topic-level
+```
+
+Note: This behavior existed in php-rdkafka 6.x but was not well-documented. Tests or debugging code that relied on dump() containing topic-level properties will need to be updated.
+Refer to librdkafka CONFIGURATION.md (https://github.com/confluentinc/librdkafka/blob/master/CONFIGURATION.md) to determine which properties are topic-level (marked with * in the C/P column) vs global.
+
 ### PHP 8.1 now required
 
 php-rdkafka 7.x requires PHP 8.1 or later. PHP 7.x is no longer supported.
