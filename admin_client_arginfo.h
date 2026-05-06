@@ -1,64 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b9a38eeed3b493978fd9ca8f177ac8bdee720492 */
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_Admin_AdminClient___construct, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, conf, RdKafka\\Conf, 0)
-ZEND_END_ARG_INFO()
-
-#if (PHP_VERSION_ID >= 80100)
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_RdKafka_Admin_AdminClient_newAdminOptions, 0, 1, RdKafka\\Admin\\AdminOptions, 0)
-#else
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_Admin_AdminClient_newAdminOptions, 0, 0, 1)
-#endif
-	ZEND_ARG_TYPE_INFO(0, for_api, IS_LONG, 0)
-ZEND_END_ARG_INFO()
-
-#if (PHP_VERSION_ID >= 80100)
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_RdKafka_Admin_AdminClient_createTopics, 0, 1, IS_ARRAY, 0)
-#else
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_Admin_AdminClient_createTopics, 0, 0, 1)
-#endif
-	ZEND_ARG_TYPE_INFO(0, new_topics, IS_ARRAY, 0)
-	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, options, RdKafka\\Admin\\AdminOptions, 1, "null")
-ZEND_END_ARG_INFO()
-
-#if (PHP_VERSION_ID >= 80100)
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_RdKafka_Admin_AdminClient_deleteTopics, 0, 1, IS_ARRAY, 0)
-#else
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_Admin_AdminClient_deleteTopics, 0, 0, 1)
-#endif
-	ZEND_ARG_TYPE_INFO(0, delete_topics, IS_ARRAY, 0)
-	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, options, RdKafka\\Admin\\AdminOptions, 1, "null")
-ZEND_END_ARG_INFO()
-
-#if (PHP_VERSION_ID >= 80100)
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_RdKafka_Admin_AdminClient_createPartitions, 0, 1, IS_ARRAY, 0)
-#else
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_Admin_AdminClient_createPartitions, 0, 0, 1)
-#endif
-	ZEND_ARG_TYPE_INFO(0, new_partitions, IS_ARRAY, 0)
-	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, options, RdKafka\\Admin\\AdminOptions, 1, "null")
-ZEND_END_ARG_INFO()
-
-#if defined(HAS_RD_KAFKA_DESCRIBE_TOPICS)
-#if (PHP_VERSION_ID >= 80100)
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_RdKafka_Admin_AdminClient_describeTopics, 0, 1, IS_ARRAY, 0)
-#else
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_Admin_AdminClient_describeTopics, 0, 0, 1)
-#endif
-	ZEND_ARG_TYPE_INFO(0, topics, IS_ARRAY, 0)
-	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, options, RdKafka\\Admin\\AdminOptions, 1, "null")
-ZEND_END_ARG_INFO()
-#endif
-
-#if (PHP_VERSION_ID >= 80100)
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_RdKafka_Admin_AdminClient_deleteRecords, 0, 1, IS_ARRAY, 0)
-#else
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_Admin_AdminClient_deleteRecords, 0, 0, 1)
-#endif
-	ZEND_ARG_TYPE_INFO(0, topic_partitions, IS_ARRAY, 0)
-	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, options, RdKafka\\Admin\\AdminOptions, 1, "null")
-ZEND_END_ARG_INFO()
+ * Stub hash: d583887405bbe376ebb4f502921cc4021fe9b8e4 */
 
 #if (PHP_VERSION_ID >= 80100)
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_RdKafka_Admin_AdminOptions_setRequestTimeout, 0, 1, IS_VOID, 0)
@@ -159,15 +100,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_Admin_TopicResult_getName, 0, 0, 0)
 #endif
 ZEND_END_ARG_INFO()
 
-ZEND_METHOD(RdKafka_Admin_AdminClient, __construct);
-ZEND_METHOD(RdKafka_Admin_AdminClient, newAdminOptions);
-ZEND_METHOD(RdKafka_Admin_AdminClient, createTopics);
-ZEND_METHOD(RdKafka_Admin_AdminClient, deleteTopics);
-ZEND_METHOD(RdKafka_Admin_AdminClient, createPartitions);
-#if defined(HAS_RD_KAFKA_DESCRIBE_TOPICS)
-ZEND_METHOD(RdKafka_Admin_AdminClient, describeTopics);
-#endif
-ZEND_METHOD(RdKafka_Admin_AdminClient, deleteRecords);
 ZEND_METHOD(RdKafka_Admin_AdminOptions, setRequestTimeout);
 ZEND_METHOD(RdKafka_Admin_AdminOptions, setOperationTimeout);
 ZEND_METHOD(RdKafka_Admin_AdminOptions, setValidateOnly);
@@ -184,19 +116,6 @@ ZEND_METHOD(RdKafka_Admin_NewPartitions, setReplicaAssignment);
 ZEND_METHOD(RdKafka_Admin_TopicResult, getError);
 ZEND_METHOD(RdKafka_Admin_TopicResult, getErrorString);
 ZEND_METHOD(RdKafka_Admin_TopicResult, getName);
-
-static const zend_function_entry class_RdKafka_Admin_AdminClient_methods[] = {
-	ZEND_ME(RdKafka_Admin_AdminClient, __construct, arginfo_class_RdKafka_Admin_AdminClient___construct, ZEND_ACC_PUBLIC)
-	ZEND_ME(RdKafka_Admin_AdminClient, newAdminOptions, arginfo_class_RdKafka_Admin_AdminClient_newAdminOptions, ZEND_ACC_PUBLIC)
-	ZEND_ME(RdKafka_Admin_AdminClient, createTopics, arginfo_class_RdKafka_Admin_AdminClient_createTopics, ZEND_ACC_PUBLIC)
-	ZEND_ME(RdKafka_Admin_AdminClient, deleteTopics, arginfo_class_RdKafka_Admin_AdminClient_deleteTopics, ZEND_ACC_PUBLIC)
-	ZEND_ME(RdKafka_Admin_AdminClient, createPartitions, arginfo_class_RdKafka_Admin_AdminClient_createPartitions, ZEND_ACC_PUBLIC)
-#if defined(HAS_RD_KAFKA_DESCRIBE_TOPICS)
-	ZEND_ME(RdKafka_Admin_AdminClient, describeTopics, arginfo_class_RdKafka_Admin_AdminClient_describeTopics, ZEND_ACC_PUBLIC)
-#endif
-	ZEND_ME(RdKafka_Admin_AdminClient, deleteRecords, arginfo_class_RdKafka_Admin_AdminClient_deleteRecords, ZEND_ACC_PUBLIC)
-	ZEND_FE_END
-};
 
 static const zend_function_entry class_RdKafka_Admin_AdminOptions_methods[] = {
 	ZEND_ME(RdKafka_Admin_AdminOptions, setRequestTimeout, arginfo_class_RdKafka_Admin_AdminOptions_setRequestTimeout, ZEND_ACC_PUBLIC)
@@ -233,32 +152,6 @@ static const zend_function_entry class_RdKafka_Admin_TopicResult_methods[] = {
 	ZEND_ME(RdKafka_Admin_TopicResult, getName, arginfo_class_RdKafka_Admin_TopicResult_getName, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
-static zend_class_entry *register_class_RdKafka_Admin_AdminClient(void)
-{
-	zend_class_entry ce, *class_entry;
-
-	INIT_NS_CLASS_ENTRY(ce, "RdKafka\\Admin", "AdminClient", class_RdKafka_Admin_AdminClient_methods);
-#if (PHP_VERSION_ID >= 80400)
-	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
-#else
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-#endif
-
-	zval property_error_cb_default_value;
-	ZVAL_UNDEF(&property_error_cb_default_value);
-	zend_string *property_error_cb_name = zend_string_init("error_cb", sizeof("error_cb") - 1, 1);
-	zend_declare_typed_property(class_entry, property_error_cb_name, &property_error_cb_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_CALLABLE|MAY_BE_NULL));
-	zend_string_release(property_error_cb_name);
-
-	zval property_dr_msg_cb_default_value;
-	ZVAL_UNDEF(&property_dr_msg_cb_default_value);
-	zend_string *property_dr_msg_cb_name = zend_string_init("dr_msg_cb", sizeof("dr_msg_cb") - 1, 1);
-	zend_declare_typed_property(class_entry, property_dr_msg_cb_name, &property_dr_msg_cb_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_CALLABLE|MAY_BE_NULL));
-	zend_string_release(property_dr_msg_cb_name);
-
-	return class_entry;
-}
 
 static zend_class_entry *register_class_RdKafka_Admin_AdminOptions(void)
 {

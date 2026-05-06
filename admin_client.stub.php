@@ -8,51 +8,6 @@
 
 namespace RdKafka\Admin;
 
-class AdminClient
-{
-    private ?callable $error_cb;
-
-    private ?callable $dr_msg_cb;
-
-    public function __construct(\RdKafka\Conf $conf) {}
-
-    /** @tentative-return-type */
-    public function newAdminOptions(int $for_api): AdminOptions {}
-
-    /**
-     * @param NewTopic[] $new_topics
-     * @tentative-return-type
-     */
-    public function createTopics(array $new_topics, ?AdminOptions $options = null): array {}
-
-    /**
-     * @param DeleteTopic[] $delete_topics
-     * @tentative-return-type
-     */
-    public function deleteTopics(array $delete_topics, ?AdminOptions $options = null): array {}
-
-    /**
-     * @param NewPartitions[] $new_partitions
-     * @tentative-return-type
-     */
-    public function createPartitions(array $new_partitions, ?AdminOptions $options = null): array {}
-
-#ifdef HAS_RD_KAFKA_DESCRIBE_TOPICS
-    /**
-     * @param string[] $topics
-     * @tentative-return-type
-     */
-    public function describeTopics(array $topics, ?AdminOptions $options = null): array {}
-#endif
-
-    /**
-     * @param \RdKafka\TopicPartition[] $topic_partitions
-     * @return \RdKafka\TopicPartition[]
-     * @tentative-return-type
-     */
-    public function deleteRecords(array $topic_partitions, ?AdminOptions $options = null): array {}
-}
-
 class AdminOptions
 {
     /** @tentative-return-type */

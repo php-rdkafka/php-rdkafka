@@ -19,12 +19,6 @@
 #ifndef KAFKA_ADMIN_CLIENT_H
 #define KAFKA_ADMIN_CLIENT_H
 
-typedef struct _kafka_admin_client_object {
-    rd_kafka_t              *rk;
-    kafka_conf_callbacks    cbs;
-    zend_object             std;
-} kafka_admin_client_object;
-
 typedef struct _kafka_admin_options_object {
     rd_kafka_AdminOptions_t *options;
     zend_object              std;
@@ -47,8 +41,6 @@ typedef struct _kafka_new_partitions_object {
 
 void kafka_admin_client_minit(INIT_FUNC_ARGS);
 
-#define get_admin_client_object(zv) \
-    ((kafka_admin_client_object*)((char*)(Z_OBJ_P(zv)) - XtOffsetOf(kafka_admin_client_object, std)))
 #define get_admin_options_object(zv) \
     ((kafka_admin_options_object*)((char*)(Z_OBJ_P(zv)) - XtOffsetOf(kafka_admin_options_object, std)))
 #define get_new_topic_object(zv) \
@@ -68,7 +60,6 @@ void kafka_topic_partition_info_to_zval(zval *return_value, const rd_kafka_Topic
 void kafka_topic_description_to_zval(zval *return_value, const rd_kafka_TopicDescription_t *topicdesc);
 #endif
 
-extern zend_class_entry *ce_kafka_admin_client;
 extern zend_class_entry *ce_kafka_admin_options;
 extern zend_class_entry *ce_kafka_new_topic;
 extern zend_class_entry *ce_kafka_delete_topic;
