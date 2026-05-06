@@ -106,6 +106,7 @@
     <file role="test" name="admin_create_partitions.phpt"/>
     <file role="test" name="admin_delete_records.phpt"/>
     <file role="test" name="admin_describe_topics.phpt"/>
+    <file role="test" name="admin_event_type_mismatch.phpt"/>
     <file role="test" name="allow_null_payload_and_key.phpt"/>
     <file role="test" name="allow_null_payload.phpt"/>
     <file role="test" name="bug115.phpt"/>
