@@ -30,6 +30,7 @@
 #include "topic.h"
 #include "queue.h"
 #include "message.h"
+#include "event.h"
 #include "queue_arginfo.h"
 
 zend_class_entry * ce_kafka_queue;
@@ -111,6 +112,34 @@ PHP_METHOD(RdKafka_Queue, consume)
     kafka_message_new(return_value, message, NULL);
 
     rd_kafka_message_destroy(message);
+}
+/* }}} */
+
+/* {{{ proto ?RdKafka\Event RdKafka\Queue::poll(int $timeout_ms)
+   Wait for an event on the queue. Returns null on timeout. The returned
+   Event takes ownership of the librdkafka event and frees it on destruction. */
+PHP_METHOD(RdKafka_Queue, poll)
+{
+    kafka_queue_object *intern;
+    zend_long timeout_ms;
+    rd_kafka_event_t *rkev;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &timeout_ms) == FAILURE) {
+        return;
+    }
+
+    intern = get_kafka_queue_object(getThis());
+    if (!intern) {
+        return;
+    }
+
+    rkev = rd_kafka_queue_poll(intern->rkqu, (int)timeout_ms);
+
+    if (!rkev) {
+        return;
+    }
+
+    kafka_event_new(return_value, rkev);
 }
 /* }}} */
 
