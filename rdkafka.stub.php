@@ -81,6 +81,12 @@ namespace {
         
         /** @tentative-return-type */
         public function oauthbearerSetTokenFailure(string $error): void {}
+
+        /** @tentative-return-type */
+        public function newQueue(): RdKafka\Queue {}
+
+        /** @tentative-return-type */
+        public function newAdminOptions(int $for_api): RdKafka\Admin\AdminOptions {}
     }
 }
 
@@ -90,9 +96,6 @@ namespace RdKafka {
 
     class Consumer extends \RdKafka {
         public function __construct(?Conf $conf = null) {}
-
-        /** @tentative-return-type */
-        public function newQueue(): Queue {}
     }
 
     class Producer extends \RdKafka {

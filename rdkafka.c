@@ -89,13 +89,13 @@ static void kafka_free(zend_object *object) /* {{{ */
         if (intern->type == RD_KAFKA_CONSUMER) {
             stop_consuming(intern);
             zend_hash_destroy(&intern->consuming);
-            zend_hash_destroy(&intern->queues);
         } else if (intern->type == RD_KAFKA_PRODUCER) {
             // Force internal delivery callbacks for queued messages, as we rely
             // on these to free msg_opaques
             rd_kafka_purge(intern->rk, RD_KAFKA_PURGE_F_QUEUE | RD_KAFKA_PURGE_F_INFLIGHT);
             rd_kafka_flush(intern->rk, 0);
         }
+        zend_hash_destroy(&intern->queues);
         zend_hash_destroy(&intern->topics);
 
         rd_kafka_destroy(intern->rk);
@@ -168,8 +168,8 @@ static void kafka_init(zval *this_ptr, rd_kafka_type_t type, zval *zconf) /* {{{
 
     if (type == RD_KAFKA_CONSUMER) {
         zend_hash_init(&intern->consuming, 0, NULL, (dtor_func_t)toppar_pp_dtor, 0);
-        zend_hash_init(&intern->queues, 0, NULL, (dtor_func_t)kafka_queue_object_pre_free, 0);
     }
+    zend_hash_init(&intern->queues, 0, NULL, (dtor_func_t)kafka_queue_object_pre_free, 0);
 
     zend_hash_init(&intern->topics, 0, NULL, (dtor_func_t)kafka_topic_object_pre_free, 0);
 }
@@ -281,9 +281,9 @@ PHP_METHOD(RdKafka_Consumer, __construct)
 }
 /* }}} */
 
-/* {{{ proto RdKafka\Queue RdKafka\Consumer::newQueue()
+/* {{{ proto RdKafka\Queue RdKafka::newQueue()
    Returns a RdKafka\Queue object */
-PHP_METHOD(RdKafka_Consumer, newQueue)
+PHP_METHOD(RdKafka, newQueue)
 {
     rd_kafka_queue_t *rkqu;
     kafka_object *intern;
@@ -323,6 +323,36 @@ PHP_METHOD(RdKafka_Consumer, newQueue)
     Z_ADDREF_P(&queue_intern->zrk);
 
     zend_hash_index_add_ptr(&intern->queues, (zend_ulong)queue_intern, queue_intern);
+}
+/* }}} */
+
+/* {{{ proto RdKafka\Admin\AdminOptions RdKafka::newAdminOptions(int $for_api)
+   Returns an AdminOptions instance bound to this RdKafka handle. */
+PHP_METHOD(RdKafka, newAdminOptions)
+{
+    zend_long for_api;
+    kafka_object *intern;
+    kafka_admin_options_object *options_intern;
+    rd_kafka_AdminOptions_t *options;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &for_api) == FAILURE) {
+        return;
+    }
+
+    intern = get_kafka_object(getThis());
+    if (!intern) {
+        return;
+    }
+
+    options = rd_kafka_AdminOptions_new(intern->rk, (rd_kafka_admin_op_t)for_api);
+    if (!options) {
+        zend_throw_exception(ce_kafka_exception, "Failed to create AdminOptions: invalid for_api value", 0);
+        return;
+    }
+
+    object_init_ex(return_value, ce_kafka_admin_options);
+    options_intern = get_admin_options_object(return_value);
+    options_intern->options = options;
 }
 /* }}} */
 

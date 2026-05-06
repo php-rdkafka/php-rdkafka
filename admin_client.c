@@ -51,17 +51,7 @@ static zend_object_handlers new_topic_object_handlers;
 static zend_object_handlers delete_topic_object_handlers;
 static zend_object_handlers new_partitions_object_handlers;
 
-/* {{{ Accessor macros */
-#define get_admin_client_object(zv) \
-    ((kafka_admin_client_object*)((char*)(Z_OBJ_P(zv)) - XtOffsetOf(kafka_admin_client_object, std)))
-#define get_admin_options_object(zv) \
-    ((kafka_admin_options_object*)((char*)(Z_OBJ_P(zv)) - XtOffsetOf(kafka_admin_options_object, std)))
-#define get_new_topic_object(zv) \
-    ((kafka_new_topic_object*)((char*)(Z_OBJ_P(zv)) - XtOffsetOf(kafka_new_topic_object, std)))
-#define get_delete_topic_object(zv) \
-    ((kafka_delete_topic_object*)((char*)(Z_OBJ_P(zv)) - XtOffsetOf(kafka_delete_topic_object, std)))
-#define get_new_partitions_object(zv) \
-    ((kafka_new_partitions_object*)((char*)(Z_OBJ_P(zv)) - XtOffsetOf(kafka_new_partitions_object, std)))
+/* Accessor macros moved to admin_client.h */
 /* }}} */
 
 /* {{{ Object create/free: AdminClient */
@@ -207,7 +197,7 @@ static zend_object *new_partitions_new(zend_class_entry *class_type) /* {{{ */
 /* }}} */
 
 /* {{{ Helper: convert topic_result_t array to PHP array of TopicResult objects */
-static void kafka_topic_results_to_array(zval *return_value, const rd_kafka_topic_result_t **results, size_t cnt)
+void kafka_topic_results_to_array(zval *return_value, const rd_kafka_topic_result_t **results, size_t cnt)
 {
     size_t i;
 
@@ -944,7 +934,7 @@ ZEND_METHOD(RdKafka_Admin_TopicResult, getName)
 
 #ifdef HAS_RD_KAFKA_DESCRIBE_TOPICS
 /* {{{ Helper: convert rd_kafka_Node_t to PHP Node object */
-static void kafka_node_to_zval(zval *return_value, const rd_kafka_Node_t *node)
+void kafka_node_to_zval(zval *return_value, const rd_kafka_Node_t *node)
 {
     const char *rack;
 
@@ -967,7 +957,7 @@ static void kafka_node_to_zval(zval *return_value, const rd_kafka_Node_t *node)
 /* }}} */
 
 /* {{{ Helper: convert rd_kafka_Node_t** array to PHP array */
-static void kafka_node_array_to_zval(zval *return_value, const rd_kafka_Node_t **nodes, size_t cnt)
+void kafka_node_array_to_zval(zval *return_value, const rd_kafka_Node_t **nodes, size_t cnt)
 {
     size_t i;
     array_init_size(return_value, cnt);
@@ -981,7 +971,7 @@ static void kafka_node_array_to_zval(zval *return_value, const rd_kafka_Node_t *
 /* }}} */
 
 /* {{{ Helper: convert TopicPartitionInfo to PHP object */
-static void kafka_topic_partition_info_to_zval(zval *return_value, const rd_kafka_TopicPartitionInfo_t *partition)
+void kafka_topic_partition_info_to_zval(zval *return_value, const rd_kafka_TopicPartitionInfo_t *partition)
 {
     const rd_kafka_Node_t *leader;
     const rd_kafka_Node_t **isr_nodes;
@@ -1017,7 +1007,7 @@ static void kafka_topic_partition_info_to_zval(zval *return_value, const rd_kafk
 /* }}} */
 
 /* {{{ Helper: convert TopicDescription to PHP object */
-static void kafka_topic_description_to_zval(zval *return_value, const rd_kafka_TopicDescription_t *topicdesc)
+void kafka_topic_description_to_zval(zval *return_value, const rd_kafka_TopicDescription_t *topicdesc)
 {
     const rd_kafka_error_t *error;
     const rd_kafka_Uuid_t *topic_id;
