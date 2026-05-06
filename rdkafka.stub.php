@@ -87,6 +87,38 @@ namespace {
 
         /** @tentative-return-type */
         public function newAdminOptions(int $for_api): RdKafka\Admin\AdminOptions {}
+
+        /**
+         * @param RdKafka\Admin\NewTopic[] $new_topics
+         * @tentative-return-type
+         */
+        public function createTopics(array $new_topics, RdKafka\Queue $queue, ?RdKafka\Admin\AdminOptions $options = null): void {}
+
+        /**
+         * @param RdKafka\Admin\DeleteTopic[] $delete_topics
+         * @tentative-return-type
+         */
+        public function deleteTopics(array $delete_topics, RdKafka\Queue $queue, ?RdKafka\Admin\AdminOptions $options = null): void {}
+
+        /**
+         * @param RdKafka\Admin\NewPartitions[] $new_partitions
+         * @tentative-return-type
+         */
+        public function createPartitions(array $new_partitions, RdKafka\Queue $queue, ?RdKafka\Admin\AdminOptions $options = null): void {}
+
+#ifdef HAS_RD_KAFKA_DESCRIBE_TOPICS
+        /**
+         * @param string[] $topics
+         * @tentative-return-type
+         */
+        public function describeTopics(array $topics, RdKafka\Queue $queue, ?RdKafka\Admin\AdminOptions $options = null): void {}
+#endif
+
+        /**
+         * @param RdKafka\TopicPartition[] $topic_partitions
+         * @tentative-return-type
+         */
+        public function deleteRecords(array $topic_partitions, RdKafka\Queue $queue, ?RdKafka\Admin\AdminOptions $options = null): void {}
     }
 }
 

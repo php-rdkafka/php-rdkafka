@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 56e6b4c23579eea111939679c488994e961b4b0d */
+ * Stub hash: 827d9c78cfdc9d9a99419abecd0290e42faf89d6 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -143,6 +143,58 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_newAdminOptions, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, for_api, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
+#if (PHP_VERSION_ID >= 80100)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_RdKafka_createTopics, 0, 2, IS_VOID, 0)
+#else
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_createTopics, 0, 0, 2)
+#endif
+	ZEND_ARG_TYPE_INFO(0, new_topics, IS_ARRAY, 0)
+	ZEND_ARG_OBJ_INFO(0, queue, RdKafka\\Queue, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, options, RdKafka\\Admin\\AdminOptions, 1, "null")
+ZEND_END_ARG_INFO()
+
+#if (PHP_VERSION_ID >= 80100)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_RdKafka_deleteTopics, 0, 2, IS_VOID, 0)
+#else
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_deleteTopics, 0, 0, 2)
+#endif
+	ZEND_ARG_TYPE_INFO(0, delete_topics, IS_ARRAY, 0)
+	ZEND_ARG_OBJ_INFO(0, queue, RdKafka\\Queue, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, options, RdKafka\\Admin\\AdminOptions, 1, "null")
+ZEND_END_ARG_INFO()
+
+#if (PHP_VERSION_ID >= 80100)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_RdKafka_createPartitions, 0, 2, IS_VOID, 0)
+#else
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_createPartitions, 0, 0, 2)
+#endif
+	ZEND_ARG_TYPE_INFO(0, new_partitions, IS_ARRAY, 0)
+	ZEND_ARG_OBJ_INFO(0, queue, RdKafka\\Queue, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, options, RdKafka\\Admin\\AdminOptions, 1, "null")
+ZEND_END_ARG_INFO()
+
+#if defined(HAS_RD_KAFKA_DESCRIBE_TOPICS)
+#if (PHP_VERSION_ID >= 80100)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_RdKafka_describeTopics, 0, 2, IS_VOID, 0)
+#else
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_describeTopics, 0, 0, 2)
+#endif
+	ZEND_ARG_TYPE_INFO(0, topics, IS_ARRAY, 0)
+	ZEND_ARG_OBJ_INFO(0, queue, RdKafka\\Queue, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, options, RdKafka\\Admin\\AdminOptions, 1, "null")
+ZEND_END_ARG_INFO()
+#endif
+
+#if (PHP_VERSION_ID >= 80100)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_RdKafka_deleteRecords, 0, 2, IS_VOID, 0)
+#else
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_deleteRecords, 0, 0, 2)
+#endif
+	ZEND_ARG_TYPE_INFO(0, topic_partitions, IS_ARRAY, 0)
+	ZEND_ARG_OBJ_INFO(0, queue, RdKafka\\Queue, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, options, RdKafka\\Admin\\AdminOptions, 1, "null")
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_Consumer___construct, 0, 0, 0)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, conf, RdKafka\\Conf, 1, "null")
 ZEND_END_ARG_INFO()
@@ -187,6 +239,13 @@ ZEND_METHOD(RdKafka, oauthbearerSetToken);
 ZEND_METHOD(RdKafka, oauthbearerSetTokenFailure);
 ZEND_METHOD(RdKafka, newQueue);
 ZEND_METHOD(RdKafka, newAdminOptions);
+ZEND_METHOD(RdKafka, createTopics);
+ZEND_METHOD(RdKafka, deleteTopics);
+ZEND_METHOD(RdKafka, createPartitions);
+#if defined(HAS_RD_KAFKA_DESCRIBE_TOPICS)
+ZEND_METHOD(RdKafka, describeTopics);
+#endif
+ZEND_METHOD(RdKafka, deleteRecords);
 ZEND_METHOD(RdKafka_Consumer, __construct);
 ZEND_METHOD(RdKafka_Producer, __construct);
 ZEND_METHOD(RdKafka_Producer, initTransactions);
@@ -224,6 +283,13 @@ static const zend_function_entry class_RdKafka_methods[] = {
 	ZEND_ME(RdKafka, oauthbearerSetTokenFailure, arginfo_class_RdKafka_oauthbearerSetTokenFailure, ZEND_ACC_PUBLIC)
 	ZEND_ME(RdKafka, newQueue, arginfo_class_RdKafka_newQueue, ZEND_ACC_PUBLIC)
 	ZEND_ME(RdKafka, newAdminOptions, arginfo_class_RdKafka_newAdminOptions, ZEND_ACC_PUBLIC)
+	ZEND_ME(RdKafka, createTopics, arginfo_class_RdKafka_createTopics, ZEND_ACC_PUBLIC)
+	ZEND_ME(RdKafka, deleteTopics, arginfo_class_RdKafka_deleteTopics, ZEND_ACC_PUBLIC)
+	ZEND_ME(RdKafka, createPartitions, arginfo_class_RdKafka_createPartitions, ZEND_ACC_PUBLIC)
+#if defined(HAS_RD_KAFKA_DESCRIBE_TOPICS)
+	ZEND_ME(RdKafka, describeTopics, arginfo_class_RdKafka_describeTopics, ZEND_ACC_PUBLIC)
+#endif
+	ZEND_ME(RdKafka, deleteRecords, arginfo_class_RdKafka_deleteRecords, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

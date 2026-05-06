@@ -356,6 +356,301 @@ PHP_METHOD(RdKafka, newAdminOptions)
 }
 /* }}} */
 
+/* Helper used by every admin method below: resolves the kafka_object, the
+ * queue, and the optional AdminOptions. Returns 1 on success, 0 on failure
+ * (with an exception already thrown). */
+static int rdkafka_admin_resolve_args(zval *this_ptr, zval *zqueue, zval *zoptions,
+    kafka_object **out_intern,
+    rd_kafka_queue_t **out_queue,
+    rd_kafka_AdminOptions_t **out_options)
+{
+    kafka_object *intern;
+    kafka_queue_object *queue_intern;
+
+    intern = get_kafka_object(this_ptr);
+    if (!intern) {
+        return 0;
+    }
+
+    queue_intern = get_kafka_queue_object(zqueue);
+    if (!queue_intern) {
+        return 0;
+    }
+
+    *out_intern = intern;
+    *out_queue = queue_intern->rkqu;
+    *out_options = NULL;
+
+    if (zoptions) {
+        kafka_admin_options_object *options_intern = get_admin_options_object(zoptions);
+        if (!options_intern->options) {
+            zend_throw_exception(ce_kafka_exception, "AdminOptions is not properly initialized", 0);
+            return 0;
+        }
+        *out_options = options_intern->options;
+    }
+
+    return 1;
+}
+
+/* {{{ proto void RdKafka::createTopics(array $new_topics, RdKafka\Queue $queue, ?RdKafka\Admin\AdminOptions $options = null)
+   Submit a CreateTopics admin request. The result event is delivered to $queue. */
+PHP_METHOD(RdKafka, createTopics)
+{
+    zval *znew_topics, *zqueue, *zoptions = NULL;
+    kafka_object *intern;
+    rd_kafka_queue_t *queue;
+    rd_kafka_AdminOptions_t *options;
+    rd_kafka_NewTopic_t **new_topics = NULL;
+    size_t new_topic_cnt;
+    zval *zitem;
+    size_t i = 0;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "aO|O!",
+            &znew_topics,
+            &zqueue, ce_kafka_queue,
+            &zoptions, ce_kafka_admin_options) == FAILURE) {
+        return;
+    }
+
+    if (!rdkafka_admin_resolve_args(getThis(), zqueue, zoptions, &intern, &queue, &options)) {
+        return;
+    }
+
+    new_topic_cnt = zend_hash_num_elements(Z_ARRVAL_P(znew_topics));
+    if (new_topic_cnt == 0) {
+        zend_throw_exception(ce_kafka_exception, "new_topics array must not be empty", 0);
+        return;
+    }
+
+    new_topics = ecalloc(new_topic_cnt, sizeof(rd_kafka_NewTopic_t*));
+
+    ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(znew_topics), zitem) {
+        if (Z_TYPE_P(zitem) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(zitem), ce_kafka_new_topic)) {
+            zend_throw_exception(ce_kafka_exception, "All items in new_topics must be instances of RdKafka\\Admin\\NewTopic", 0);
+            efree(new_topics);
+            return;
+        }
+        kafka_new_topic_object *topic_intern = get_new_topic_object(zitem);
+        if (!topic_intern->new_topic) {
+            zend_throw_exception(ce_kafka_exception, "NewTopic object is not properly initialized", 0);
+            efree(new_topics);
+            return;
+        }
+        new_topics[i++] = topic_intern->new_topic;
+    } ZEND_HASH_FOREACH_END();
+
+    rd_kafka_CreateTopics(intern->rk, new_topics, new_topic_cnt, options, queue);
+
+    efree(new_topics);
+}
+/* }}} */
+
+/* {{{ proto void RdKafka::deleteTopics(array $delete_topics, RdKafka\Queue $queue, ?RdKafka\Admin\AdminOptions $options = null)
+   Submit a DeleteTopics admin request. The result event is delivered to $queue. */
+PHP_METHOD(RdKafka, deleteTopics)
+{
+    zval *zdelete_topics, *zqueue, *zoptions = NULL;
+    kafka_object *intern;
+    rd_kafka_queue_t *queue;
+    rd_kafka_AdminOptions_t *options;
+    rd_kafka_DeleteTopic_t **delete_topics = NULL;
+    size_t delete_topic_cnt;
+    zval *zitem;
+    size_t i = 0;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "aO|O!",
+            &zdelete_topics,
+            &zqueue, ce_kafka_queue,
+            &zoptions, ce_kafka_admin_options) == FAILURE) {
+        return;
+    }
+
+    if (!rdkafka_admin_resolve_args(getThis(), zqueue, zoptions, &intern, &queue, &options)) {
+        return;
+    }
+
+    delete_topic_cnt = zend_hash_num_elements(Z_ARRVAL_P(zdelete_topics));
+    if (delete_topic_cnt == 0) {
+        zend_throw_exception(ce_kafka_exception, "delete_topics array must not be empty", 0);
+        return;
+    }
+
+    delete_topics = ecalloc(delete_topic_cnt, sizeof(rd_kafka_DeleteTopic_t*));
+
+    ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(zdelete_topics), zitem) {
+        if (Z_TYPE_P(zitem) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(zitem), ce_kafka_delete_topic)) {
+            zend_throw_exception(ce_kafka_exception, "All items in delete_topics must be instances of RdKafka\\Admin\\DeleteTopic", 0);
+            efree(delete_topics);
+            return;
+        }
+        kafka_delete_topic_object *topic_intern = get_delete_topic_object(zitem);
+        if (!topic_intern->delete_topic) {
+            zend_throw_exception(ce_kafka_exception, "DeleteTopic object is not properly initialized", 0);
+            efree(delete_topics);
+            return;
+        }
+        delete_topics[i++] = topic_intern->delete_topic;
+    } ZEND_HASH_FOREACH_END();
+
+    rd_kafka_DeleteTopics(intern->rk, delete_topics, delete_topic_cnt, options, queue);
+
+    efree(delete_topics);
+}
+/* }}} */
+
+/* {{{ proto void RdKafka::createPartitions(array $new_partitions, RdKafka\Queue $queue, ?RdKafka\Admin\AdminOptions $options = null)
+   Submit a CreatePartitions admin request. The result event is delivered to $queue. */
+PHP_METHOD(RdKafka, createPartitions)
+{
+    zval *znew_partitions, *zqueue, *zoptions = NULL;
+    kafka_object *intern;
+    rd_kafka_queue_t *queue;
+    rd_kafka_AdminOptions_t *options;
+    rd_kafka_NewPartitions_t **new_partitions = NULL;
+    size_t new_partitions_cnt;
+    zval *zitem;
+    size_t i = 0;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "aO|O!",
+            &znew_partitions,
+            &zqueue, ce_kafka_queue,
+            &zoptions, ce_kafka_admin_options) == FAILURE) {
+        return;
+    }
+
+    if (!rdkafka_admin_resolve_args(getThis(), zqueue, zoptions, &intern, &queue, &options)) {
+        return;
+    }
+
+    new_partitions_cnt = zend_hash_num_elements(Z_ARRVAL_P(znew_partitions));
+    if (new_partitions_cnt == 0) {
+        zend_throw_exception(ce_kafka_exception, "new_partitions array must not be empty", 0);
+        return;
+    }
+
+    new_partitions = ecalloc(new_partitions_cnt, sizeof(rd_kafka_NewPartitions_t*));
+
+    ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(znew_partitions), zitem) {
+        if (Z_TYPE_P(zitem) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(zitem), ce_kafka_new_partitions)) {
+            zend_throw_exception(ce_kafka_exception, "All items in new_partitions must be instances of RdKafka\\Admin\\NewPartitions", 0);
+            efree(new_partitions);
+            return;
+        }
+        kafka_new_partitions_object *part_intern = get_new_partitions_object(zitem);
+        if (!part_intern->new_partitions) {
+            zend_throw_exception(ce_kafka_exception, "NewPartitions object is not properly initialized", 0);
+            efree(new_partitions);
+            return;
+        }
+        new_partitions[i++] = part_intern->new_partitions;
+    } ZEND_HASH_FOREACH_END();
+
+    rd_kafka_CreatePartitions(intern->rk, new_partitions, new_partitions_cnt, options, queue);
+
+    efree(new_partitions);
+}
+/* }}} */
+
+#ifdef HAS_RD_KAFKA_DESCRIBE_TOPICS
+/* {{{ proto void RdKafka::describeTopics(array $topics, RdKafka\Queue $queue, ?RdKafka\Admin\AdminOptions $options = null)
+   Submit a DescribeTopics admin request. The result event is delivered to $queue. */
+PHP_METHOD(RdKafka, describeTopics)
+{
+    zval *ztopics, *zqueue, *zoptions = NULL;
+    kafka_object *intern;
+    rd_kafka_queue_t *queue;
+    rd_kafka_AdminOptions_t *options;
+    rd_kafka_TopicCollection_t *topic_collection;
+    const char **topic_names;
+    size_t topic_cnt;
+    zval *zitem;
+    size_t i = 0;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "aO|O!",
+            &ztopics,
+            &zqueue, ce_kafka_queue,
+            &zoptions, ce_kafka_admin_options) == FAILURE) {
+        return;
+    }
+
+    if (!rdkafka_admin_resolve_args(getThis(), zqueue, zoptions, &intern, &queue, &options)) {
+        return;
+    }
+
+    topic_cnt = zend_hash_num_elements(Z_ARRVAL_P(ztopics));
+    if (topic_cnt == 0) {
+        zend_throw_exception(ce_kafka_exception, "topics array must not be empty", 0);
+        return;
+    }
+
+    topic_names = ecalloc(topic_cnt, sizeof(const char *));
+    ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(ztopics), zitem) {
+        if (Z_TYPE_P(zitem) != IS_STRING) {
+            zend_throw_exception(ce_kafka_exception, "All items in topics must be strings", 0);
+            efree(topic_names);
+            return;
+        }
+        topic_names[i++] = Z_STRVAL_P(zitem);
+    } ZEND_HASH_FOREACH_END();
+
+    topic_collection = rd_kafka_TopicCollection_of_topic_names(topic_names, topic_cnt);
+    efree(topic_names);
+
+    if (!topic_collection) {
+        zend_throw_exception(ce_kafka_exception, "Failed to create TopicCollection", 0);
+        return;
+    }
+
+    rd_kafka_DescribeTopics(intern->rk, topic_collection, options, queue);
+    rd_kafka_TopicCollection_destroy(topic_collection);
+}
+/* }}} */
+#endif /* HAS_RD_KAFKA_DESCRIBE_TOPICS */
+
+/* {{{ proto void RdKafka::deleteRecords(array $topic_partitions, RdKafka\Queue $queue, ?RdKafka\Admin\AdminOptions $options = null)
+   Submit a DeleteRecords admin request. The result event is delivered to $queue. */
+PHP_METHOD(RdKafka, deleteRecords)
+{
+    zval *ztopic_partitions, *zqueue, *zoptions = NULL;
+    kafka_object *intern;
+    rd_kafka_queue_t *queue;
+    rd_kafka_AdminOptions_t *options;
+    rd_kafka_DeleteRecords_t *del_records;
+    rd_kafka_DeleteRecords_t *del_records_arr[1];
+    rd_kafka_topic_partition_list_t *partitions;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "aO|O!",
+            &ztopic_partitions,
+            &zqueue, ce_kafka_queue,
+            &zoptions, ce_kafka_admin_options) == FAILURE) {
+        return;
+    }
+
+    if (!rdkafka_admin_resolve_args(getThis(), zqueue, zoptions, &intern, &queue, &options)) {
+        return;
+    }
+
+    partitions = array_arg_to_kafka_topic_partition_list(1, Z_ARRVAL_P(ztopic_partitions));
+    if (!partitions) {
+        return; /* exception already thrown */
+    }
+
+    del_records = rd_kafka_DeleteRecords_new(partitions);
+    rd_kafka_topic_partition_list_destroy(partitions);
+
+    if (!del_records) {
+        zend_throw_exception(ce_kafka_exception, "Failed to create DeleteRecords", 0);
+        return;
+    }
+
+    del_records_arr[0] = del_records;
+    rd_kafka_DeleteRecords(intern->rk, del_records_arr, 1, options, queue);
+
+    rd_kafka_DeleteRecords_destroy(del_records);
+}
+/* }}} */
+
 /* {{{ proto int RdKafka::addBrokers(string $brokerList)
    Returns the number of brokers successfully added */
 PHP_METHOD(RdKafka, addBrokers)
