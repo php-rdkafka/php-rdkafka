@@ -100,11 +100,12 @@
    <file role="src" name="topic_partition.stub.php"/>
    <file role="src" name="topic_partition_arginfo.h"/>
    <dir name="tests">
-    <file role="test" name="admin_client_001.phpt"/>
-    <file role="test" name="admin_client_create_delete_topics.phpt"/>
-    <file role="test" name="admin_client_create_partitions.phpt"/>
-    <file role="test" name="admin_client_delete_records.phpt"/>
-    <file role="test" name="admin_client_describe_topics.phpt"/>
+    <file role="test" name="admin_001_dtos.phpt"/>
+    <file role="test" name="admin_002_event.phpt"/>
+    <file role="test" name="admin_create_delete_topics.phpt"/>
+    <file role="test" name="admin_create_partitions.phpt"/>
+    <file role="test" name="admin_delete_records.phpt"/>
+    <file role="test" name="admin_describe_topics.phpt"/>
     <file role="test" name="allow_null_payload_and_key.phpt"/>
     <file role="test" name="allow_null_payload.phpt"/>
     <file role="test" name="bug115.phpt"/>

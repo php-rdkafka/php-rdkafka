@@ -1,9 +1,9 @@
 --TEST--
-AdminClient - describeTopics integration
+Admin - describeTopics integration (queue/event API)
 --SKIPIF--
 <?php
 require __DIR__ . '/helpers/integration-tests-check.php';
-if (!method_exists(RdKafka\Admin\AdminClient::class, 'describeTopics')) {
+if (!method_exists(RdKafka::class, 'describeTopics')) {
     die('skip describeTopics not available (requires librdkafka >= 2.3.0)');
 }
 --FILE--
@@ -13,15 +13,26 @@ require __DIR__ . '/helpers/integration-tests-check.php';
 $conf = new RdKafka\Conf();
 $conf->set('metadata.broker.list', getenv('TEST_KAFKA_BROKERS'));
 
-$admin = new RdKafka\Admin\AdminClient($conf);
+$producer = new RdKafka\Producer($conf);
+$queue = $producer->newQueue();
 $topicName = sprintf("test_rdkafka_%s", uniqid());
 
-$newTopic = new RdKafka\Admin\NewTopic($topicName, 2, 1);
-$admin->createTopics([$newTopic]);
+// CREATE topic with 2 partitions
+$opts = $producer->newAdminOptions(RD_KAFKA_ADMIN_OP_CREATETOPICS);
+$opts->setRequestTimeout(5000);
+$producer->createTopics([new RdKafka\Admin\NewTopic($topicName, 2, 1)], $queue, $opts);
+$event = $queue->poll(10000);
+$event->getCreateTopicsResult();
+unset($event);
 
 sleep(1);
 
-$descriptions = $admin->describeTopics([$topicName]);
+// DESCRIBE
+$opts = $producer->newAdminOptions(RD_KAFKA_ADMIN_OP_DESCRIBETOPICS);
+$opts->setRequestTimeout(5000);
+$producer->describeTopics([$topicName], $queue, $opts);
+$event = $queue->poll(10000);
+$descriptions = $event->getDescribeTopicsResult();
 
 printf("result count: %d\n", count($descriptions));
 
@@ -46,8 +57,13 @@ printf("isr count >= 1: %s\n", count($part->isr) >= 1 ? 'true' : 'false');
 printf("isr[0] class: %s\n", get_class($part->isr[0]));
 printf("replicas count >= 1: %s\n", count($part->replicas) >= 1 ? 'true' : 'false');
 printf("replicas[0] class: %s\n", get_class($part->replicas[0]));
+unset($event);
 
-$admin->deleteTopics([new RdKafka\Admin\DeleteTopic($topicName)]);
+// CLEANUP
+$opts = $producer->newAdminOptions(RD_KAFKA_ADMIN_OP_DELETETOPICS);
+$opts->setRequestTimeout(5000);
+$producer->deleteTopics([new RdKafka\Admin\DeleteTopic($topicName)], $queue, $opts);
+$queue->poll(10000);
 
 echo "OK\n";
 --EXPECT--
