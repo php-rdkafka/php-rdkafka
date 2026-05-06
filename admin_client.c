@@ -49,8 +49,7 @@ static zend_object_handlers new_topic_object_handlers;
 static zend_object_handlers delete_topic_object_handlers;
 static zend_object_handlers new_partitions_object_handlers;
 
-/* Accessor macros moved to admin_client.h */
-/* }}} */
+/* Accessor macros are in admin_client.h. */
 
 /* {{{ Object create/free: AdminOptions */
 static void admin_options_free(zend_object *object) /* {{{ */

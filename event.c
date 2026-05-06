@@ -77,6 +77,7 @@ void kafka_event_new(zval *return_value, rd_kafka_event_t *rkev) /* {{{ */
     kafka_event_object *intern;
 
     if (object_init_ex(return_value, ce_kafka_event) != SUCCESS) {
+        rd_kafka_event_destroy(rkev);
         return;
     }
 
@@ -182,10 +183,11 @@ static const void *kafka_event_typed_result(kafka_event_object *intern, rd_kafka
         return NULL;
     }
 
-    if (rd_kafka_event_error(intern->rkev)) {
+    rd_kafka_resp_err_t err = rd_kafka_event_error(intern->rkev);
+    if (err != RD_KAFKA_RESP_ERR_NO_ERROR) {
         zend_throw_exception(ce_kafka_exception,
             rd_kafka_event_error_string(intern->rkev),
-            rd_kafka_event_error(intern->rkev));
+            err);
         return NULL;
     }
 

@@ -631,6 +631,11 @@ PHP_METHOD(RdKafka, deleteRecords)
         return;
     }
 
+    if (zend_hash_num_elements(Z_ARRVAL_P(ztopic_partitions)) == 0) {
+        zend_throw_exception(ce_kafka_exception, "topic_partitions array must not be empty", 0);
+        return;
+    }
+
     partitions = array_arg_to_kafka_topic_partition_list(1, Z_ARRVAL_P(ztopic_partitions));
     if (!partitions) {
         return; /* exception already thrown */
