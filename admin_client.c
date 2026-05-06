@@ -61,6 +61,8 @@ static void admin_options_free(zend_object *object) /* {{{ */
         intern->options = NULL;
     }
 
+    zval_ptr_dtor(&intern->zrk);
+
     zend_object_std_dtor(&intern->std);
 }
 /* }}} */

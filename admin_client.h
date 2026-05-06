@@ -21,6 +21,7 @@
 
 typedef struct _kafka_admin_options_object {
     rd_kafka_AdminOptions_t *options;
+    zval                     zrk;
     zend_object              std;
 } kafka_admin_options_object;
 

@@ -353,6 +353,7 @@ PHP_METHOD(RdKafka, newAdminOptions)
     object_init_ex(return_value, ce_kafka_admin_options);
     options_intern = get_admin_options_object(return_value);
     options_intern->options = options;
+    ZVAL_COPY(&options_intern->zrk, getThis());
 }
 /* }}} */
 
@@ -377,6 +378,12 @@ static int rdkafka_admin_resolve_args(zval *this_ptr, zval *zqueue, zval *zoptio
         return 0;
     }
 
+    if (Z_OBJ(queue_intern->zrk) != Z_OBJ_P(this_ptr)) {
+        zend_throw_exception(ce_kafka_exception,
+            "Queue was created from a different RdKafka handle", 0);
+        return 0;
+    }
+
     *out_intern = intern;
     *out_queue = queue_intern->rkqu;
     *out_options = NULL;
@@ -385,6 +392,11 @@ static int rdkafka_admin_resolve_args(zval *this_ptr, zval *zqueue, zval *zoptio
         kafka_admin_options_object *options_intern = get_admin_options_object(zoptions);
         if (!options_intern->options) {
             zend_throw_exception(ce_kafka_exception, "AdminOptions is not properly initialized", 0);
+            return 0;
+        }
+        if (Z_OBJ(options_intern->zrk) != Z_OBJ_P(this_ptr)) {
+            zend_throw_exception(ce_kafka_exception,
+                "AdminOptions was created from a different RdKafka handle", 0);
             return 0;
         }
         *out_options = options_intern->options;
