@@ -41,6 +41,10 @@
    <file role="src" name="conf_arginfo.h"/>
    <file role="src" name="config.m4"/>
    <file role="src" name="config.w32"/>
+   <file role="src" name="event.c"/>
+   <file role="src" name="event.h"/>
+   <file role="src" name="event.stub.php"/>
+   <file role="src" name="event_arginfo.h"/>
    <file role="src" name="fun.c"/>
    <file role="src" name="fun.stub.php"/>
    <file role="src" name="fun_arginfo.h"/>
