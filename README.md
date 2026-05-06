@@ -321,6 +321,70 @@ while ($producer->getOutQLen() > 0) {
 }
 ```
 
+## Admin API
+
+The admin API mirrors librdkafka's queue/event pattern: each admin method submits work asynchronously to a `RdKafka\Queue` you provide, and you poll that queue for an `RdKafka\Event` containing the result. The methods live on `RdKafka` itself (so `Producer` and `Consumer` both have them), and the input/result types live under the `RdKafka\Admin` namespace.
+
+Available operations: `createTopics`, `deleteTopics`, `createPartitions`, `describeTopics` (librdkafka >= 2.3.0), `deleteRecords`.
+
+``` php
+<?php
+
+$conf = new RdKafka\Conf();
+$conf->set('bootstrap.servers', '127.0.0.1:9092');
+
+$producer = new RdKafka\Producer($conf);
+$queue    = $producer->newQueue();
+$opts     = $producer->newAdminOptions(RD_KAFKA_ADMIN_OP_CREATETOPICS);
+$opts->setRequestTimeout(5000);
+
+$producer->createTopics(
+    [new RdKafka\Admin\NewTopic('my-topic', 3, 1)],
+    $queue,
+    $opts
+);
+
+// The caller drives the event loop. poll() returns null on timeout.
+$event = $queue->poll(10000);
+if ($event === null) {
+    throw new RuntimeException('Admin operation timed out');
+}
+if ($event->getError() !== RD_KAFKA_RESP_ERR_NO_ERROR) {
+    throw new RuntimeException($event->getErrorString());
+}
+
+foreach ($event->getCreateTopicsResult() as $result) {
+    if ($result->getError() !== RD_KAFKA_RESP_ERR_NO_ERROR) {
+        echo "{$result->getName()}: {$result->getErrorString()}\n";
+    } else {
+        echo "{$result->getName()}: created\n";
+    }
+}
+```
+
+The same shape applies to the other operations — submit on `RdKafka`, poll the queue, then call the matching `RdKafka\Event::get*Result()` accessor (`getDeleteTopicsResult`, `getCreatePartitionsResult`, `getDescribeTopicsResult`, `getDeleteRecordsResult`).
+
+If you want a synchronous wrapper, build it in userland:
+
+``` php
+<?php
+
+function adminSubmitAndWait(callable $submit, RdKafka\Queue $queue, int $timeoutMs = 10000): RdKafka\Event
+{
+    $submit();
+    $event = $queue->poll($timeoutMs);
+    if ($event === null) {
+        throw new RuntimeException("Admin operation timed out after {$timeoutMs}ms");
+    }
+    if ($event->getError() !== RD_KAFKA_RESP_ERR_NO_ERROR) {
+        throw new RuntimeException($event->getErrorString() ?? 'admin event error');
+    }
+    return $event;
+}
+```
+
+The same primitives — `Queue::poll(int $timeout_ms): ?Event` and the `RdKafka\Event` accessors — are also where future admin operations (consumer-group management, configs, ACLs, etc.) will plug in.
+
 ## Documentation
 
 https://arnaud-lb.github.io/php-rdkafka-doc/phpdoc/book.rdkafka.html  
