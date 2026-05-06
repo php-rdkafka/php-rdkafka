@@ -24,4 +24,36 @@ class Event
 
     /** @tentative-return-type */
     public function getErrorString(): ?string {}
+
+    /**
+     * @return Admin\TopicResult[]
+     * @tentative-return-type
+     */
+    public function getCreateTopicsResult(): array {}
+
+    /**
+     * @return Admin\TopicResult[]
+     * @tentative-return-type
+     */
+    public function getDeleteTopicsResult(): array {}
+
+    /**
+     * @return Admin\TopicResult[]
+     * @tentative-return-type
+     */
+    public function getCreatePartitionsResult(): array {}
+
+#ifdef HAS_RD_KAFKA_DESCRIBE_TOPICS
+    /**
+     * @return Admin\TopicDescription[]
+     * @tentative-return-type
+     */
+    public function getDescribeTopicsResult(): array {}
+#endif
+
+    /**
+     * @return TopicPartition[]
+     * @tentative-return-type
+     */
+    public function getDeleteRecordsResult(): array {}
 }

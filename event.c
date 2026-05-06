@@ -23,6 +23,8 @@
 #include "php_rdkafka_priv.h"
 #include "librdkafka/rdkafka.h"
 #include "Zend/zend_exceptions.h"
+#include "admin_client.h"
+#include "topic_partition.h"
 #include "event.h"
 #include "event_arginfo.h"
 
@@ -162,6 +164,187 @@ PHP_METHOD(RdKafka_Event, getErrorString)
     }
 
     RETURN_STRING(errstr);
+}
+/* }}} */
+
+/* Common preamble for the typed result getters: validate the event has the
+ * expected type and no error, return the typed result struct (cast to void*
+ * for the caller to re-cast). Returns NULL with an exception thrown on any
+ * mismatch. */
+static const void *kafka_event_typed_result(kafka_event_object *intern, rd_kafka_event_type_t expected, const char *operation)
+{
+    rd_kafka_event_type_t actual = rd_kafka_event_type(intern->rkev);
+
+    if (actual != expected) {
+        zend_throw_exception_ex(ce_kafka_exception, 0,
+            "Event is not a %s result (got type %d / %s)",
+            operation, (int)actual, rd_kafka_event_name(intern->rkev));
+        return NULL;
+    }
+
+    if (rd_kafka_event_error(intern->rkev)) {
+        zend_throw_exception(ce_kafka_exception,
+            rd_kafka_event_error_string(intern->rkev),
+            rd_kafka_event_error(intern->rkev));
+        return NULL;
+    }
+
+    /* The *_result accessors return a pointer into the event itself; they
+     * never allocate and don't need destroying separately. They return NULL
+     * if the event type doesn't match, but we already checked that. */
+    return intern->rkev;
+}
+
+/* {{{ proto array RdKafka\Event::getCreateTopicsResult()
+   Extracts the per-topic results from a CreateTopics event. */
+PHP_METHOD(RdKafka_Event, getCreateTopicsResult)
+{
+    kafka_event_object *intern;
+    const rd_kafka_CreateTopics_result_t *result;
+    const rd_kafka_topic_result_t **topic_results;
+    size_t result_cnt;
+
+    if (zend_parse_parameters_none() == FAILURE) {
+        return;
+    }
+
+    intern = get_kafka_event_object(getThis());
+    if (!intern) {
+        return;
+    }
+
+    if (!kafka_event_typed_result(intern, RD_KAFKA_EVENT_CREATETOPICS_RESULT, "CreateTopics")) {
+        return;
+    }
+
+    result = rd_kafka_event_CreateTopics_result(intern->rkev);
+    topic_results = rd_kafka_CreateTopics_result_topics(result, &result_cnt);
+
+    kafka_topic_results_to_array(return_value, topic_results, result_cnt);
+}
+/* }}} */
+
+/* {{{ proto array RdKafka\Event::getDeleteTopicsResult()
+   Extracts the per-topic results from a DeleteTopics event. */
+PHP_METHOD(RdKafka_Event, getDeleteTopicsResult)
+{
+    kafka_event_object *intern;
+    const rd_kafka_DeleteTopics_result_t *result;
+    const rd_kafka_topic_result_t **topic_results;
+    size_t result_cnt;
+
+    if (zend_parse_parameters_none() == FAILURE) {
+        return;
+    }
+
+    intern = get_kafka_event_object(getThis());
+    if (!intern) {
+        return;
+    }
+
+    if (!kafka_event_typed_result(intern, RD_KAFKA_EVENT_DELETETOPICS_RESULT, "DeleteTopics")) {
+        return;
+    }
+
+    result = rd_kafka_event_DeleteTopics_result(intern->rkev);
+    topic_results = rd_kafka_DeleteTopics_result_topics(result, &result_cnt);
+
+    kafka_topic_results_to_array(return_value, topic_results, result_cnt);
+}
+/* }}} */
+
+/* {{{ proto array RdKafka\Event::getCreatePartitionsResult()
+   Extracts the per-topic results from a CreatePartitions event. */
+PHP_METHOD(RdKafka_Event, getCreatePartitionsResult)
+{
+    kafka_event_object *intern;
+    const rd_kafka_CreatePartitions_result_t *result;
+    const rd_kafka_topic_result_t **topic_results;
+    size_t result_cnt;
+
+    if (zend_parse_parameters_none() == FAILURE) {
+        return;
+    }
+
+    intern = get_kafka_event_object(getThis());
+    if (!intern) {
+        return;
+    }
+
+    if (!kafka_event_typed_result(intern, RD_KAFKA_EVENT_CREATEPARTITIONS_RESULT, "CreatePartitions")) {
+        return;
+    }
+
+    result = rd_kafka_event_CreatePartitions_result(intern->rkev);
+    topic_results = rd_kafka_CreatePartitions_result_topics(result, &result_cnt);
+
+    kafka_topic_results_to_array(return_value, topic_results, result_cnt);
+}
+/* }}} */
+
+#ifdef HAS_RD_KAFKA_DESCRIBE_TOPICS
+/* {{{ proto array RdKafka\Event::getDescribeTopicsResult()
+   Extracts the topic descriptions from a DescribeTopics event. */
+PHP_METHOD(RdKafka_Event, getDescribeTopicsResult)
+{
+    kafka_event_object *intern;
+    const rd_kafka_DescribeTopics_result_t *result;
+    const rd_kafka_TopicDescription_t **descriptions;
+    size_t result_cnt;
+    size_t i;
+
+    if (zend_parse_parameters_none() == FAILURE) {
+        return;
+    }
+
+    intern = get_kafka_event_object(getThis());
+    if (!intern) {
+        return;
+    }
+
+    if (!kafka_event_typed_result(intern, RD_KAFKA_EVENT_DESCRIBETOPICS_RESULT, "DescribeTopics")) {
+        return;
+    }
+
+    result = rd_kafka_event_DescribeTopics_result(intern->rkev);
+    descriptions = rd_kafka_DescribeTopics_result_topics(result, &result_cnt);
+
+    array_init_size(return_value, result_cnt);
+    for (i = 0; i < result_cnt; i++) {
+        zval desc_zv;
+        kafka_topic_description_to_zval(&desc_zv, descriptions[i]);
+        add_next_index_zval(return_value, &desc_zv);
+    }
+}
+/* }}} */
+#endif /* HAS_RD_KAFKA_DESCRIBE_TOPICS */
+
+/* {{{ proto array RdKafka\Event::getDeleteRecordsResult()
+   Extracts the resulting TopicPartition[] (with new low watermarks) from a
+   DeleteRecords event. */
+PHP_METHOD(RdKafka_Event, getDeleteRecordsResult)
+{
+    kafka_event_object *intern;
+    const rd_kafka_DeleteRecords_result_t *result;
+    const rd_kafka_topic_partition_list_t *result_offsets;
+
+    if (zend_parse_parameters_none() == FAILURE) {
+        return;
+    }
+
+    intern = get_kafka_event_object(getThis());
+    if (!intern) {
+        return;
+    }
+
+    if (!kafka_event_typed_result(intern, RD_KAFKA_EVENT_DELETERECORDS_RESULT, "DeleteRecords")) {
+        return;
+    }
+
+    result = rd_kafka_event_DeleteRecords_result(intern->rkev);
+    result_offsets = rd_kafka_DeleteRecords_result_offsets(result);
+
+    kafka_topic_partition_list_to_array(return_value, (rd_kafka_topic_partition_list_t *)result_offsets);
 }
 /* }}} */
 
