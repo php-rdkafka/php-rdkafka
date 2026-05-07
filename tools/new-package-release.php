@@ -31,7 +31,7 @@ function printUsage(): void
 function generateReleaseNotes(string $newVersion): string
 {
     $cmd = sprintf(
-        'gh api repos/arnaud-lb/php-rdkafka/releases/generate-notes -f tag_name=%s -f target_commitish=%s',
+        'gh api repos/php-rdkafka/php-rdkafka/releases/generate-notes -f tag_name=%s -f target_commitish=%s',
         escapeshellcmd($newVersion),
         escapeshellcmd(exec("git rev-parse HEAD")),
     );
@@ -70,6 +70,25 @@ function generateReleaseNotes(string $newVersion): string
     return implode("\n", $newLines);
 }
 
+function deriveApiVersion(string $version): string
+{
+    if (!preg_match('/^(\d+)\.(\d+)/', $version, $m)) {
+        throw new \Exception("Cannot derive api version from $version");
+    }
+    return sprintf('%d.%d.0', $m[1], $m[2]);
+}
+
+function deriveStability(string $version): string
+{
+    if (preg_match('/(alpha|devel)/i', $version)) {
+        return 'alpha';
+    }
+    if (preg_match('/(beta|RC)/i', $version)) {
+        return 'beta';
+    }
+    return 'stable';
+}
+
 function updateCurrentRelease(DOMDocument $doc, string $newVersion, string $releaseNotes): void
 {
     $date = date('Y-m-d');
@@ -83,6 +102,15 @@ function updateCurrentRelease(DOMDocument $doc, string $newVersion, string $rele
 
     $versionElem = findOneElement($doc, '/ns:package/ns:version/ns:release');
     replaceContent($versionElem, $doc->createTextNode($newVersion));
+
+    $apiElem = findOneElement($doc, '/ns:package/ns:version/ns:api');
+    replaceContent($apiElem, $doc->createTextNode(deriveApiVersion($newVersion)));
+
+    $stability = deriveStability($newVersion);
+    $stabilityReleaseElem = findOneElement($doc, '/ns:package/ns:stability/ns:release');
+    replaceContent($stabilityReleaseElem, $doc->createTextNode($stability));
+    $stabilityApiElem = findOneElement($doc, '/ns:package/ns:stability/ns:api');
+    replaceContent($stabilityApiElem, $doc->createTextNode($stability));
 
     $notesElem = findOneElement($doc, '/ns:package/ns:notes');
     $releaseNotes = rtrim("\n  " . str_replace("\n", "\n  ", $releaseNotes))."\n ";
