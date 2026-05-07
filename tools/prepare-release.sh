@@ -3,7 +3,7 @@
 set -e
 
 version="$1"
-baseBranch=6.x
+baseBranch=7.x
 
 if [[ -z "$version" ]]; then
     printf "Missing version parameter" >&2
@@ -16,7 +16,7 @@ echo "Updating package.xml"
 pecl package-validate
 
 echo "Updating PHP_RDKAFKA_VERSION"
-sed -i 's/#define PHP_RDKAFKA_VERSION.*/#define PHP_RDKAFKA_VERSION "'"$1"'"/' php_rdkafka.h
+sed -i.bak 's/#define PHP_RDKAFKA_VERSION.*/#define PHP_RDKAFKA_VERSION "'"$1"'"/' php_rdkafka.h && rm php_rdkafka.h.bak
 
 echo "Printing diff"
 git diff
