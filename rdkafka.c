@@ -843,7 +843,7 @@ PHP_METHOD(RdKafka_Producer, initTransactions)
 {
     kafka_object *intern;
     zend_long timeout_ms;
-    const rd_kafka_error_t *error;
+    rd_kafka_error_t *error;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &timeout_ms) == FAILURE) {
         return;
@@ -861,6 +861,7 @@ PHP_METHOD(RdKafka_Producer, initTransactions)
     }
 
     create_kafka_error(return_value, error);
+    rd_kafka_error_destroy(error);
     zend_throw_exception_object(return_value);
 }
 /* }}} */
@@ -870,7 +871,7 @@ PHP_METHOD(RdKafka_Producer, initTransactions)
 PHP_METHOD(RdKafka_Producer, beginTransaction)
 {
     kafka_object *intern;
-    const rd_kafka_error_t *error;
+    rd_kafka_error_t *error;
 
     intern = get_kafka_object(getThis());
     if (!intern) {
@@ -884,6 +885,7 @@ PHP_METHOD(RdKafka_Producer, beginTransaction)
     }
 
     create_kafka_error(return_value, error);
+    rd_kafka_error_destroy(error);
     zend_throw_exception_object(return_value);
 }
 /* }}} */
@@ -894,7 +896,7 @@ PHP_METHOD(RdKafka_Producer, commitTransaction)
 {
     kafka_object *intern;
     zend_long timeout_ms;
-    const rd_kafka_error_t *error;
+    rd_kafka_error_t *error;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &timeout_ms) == FAILURE) {
         return;
@@ -912,6 +914,7 @@ PHP_METHOD(RdKafka_Producer, commitTransaction)
     }
 
     create_kafka_error(return_value, error);
+    rd_kafka_error_destroy(error);
     zend_throw_exception_object(return_value);
 }
 /* }}} */
@@ -922,7 +925,7 @@ PHP_METHOD(RdKafka_Producer, abortTransaction)
 {
     kafka_object *intern;
     zend_long timeout_ms;
-    const rd_kafka_error_t *error;
+    rd_kafka_error_t *error;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &timeout_ms) == FAILURE) {
         return;
@@ -940,6 +943,7 @@ PHP_METHOD(RdKafka_Producer, abortTransaction)
     }
 
     create_kafka_error(return_value, error);
+    rd_kafka_error_destroy(error);
     zend_throw_exception_object(return_value);
 }
 /* }}} */
@@ -953,7 +957,7 @@ PHP_METHOD(RdKafka_Producer, sendOffsetsToTransaction)
     zend_long timeout_ms;
     rd_kafka_topic_partition_list_t *offsets;
     kafka_consumer_group_metadata_object *cgmd_intern;
-    const rd_kafka_error_t *error;
+    rd_kafka_error_t *error;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS(), "hOl", &hoffsets, &zcgmd, ce_kafka_consumer_group_metadata, &timeout_ms) == FAILURE) {
         return;
@@ -980,6 +984,7 @@ PHP_METHOD(RdKafka_Producer, sendOffsetsToTransaction)
     }
 
     create_kafka_error(return_value, error);
+    rd_kafka_error_destroy(error);
     zend_throw_exception_object(return_value);
 }
 /* }}} */
