@@ -976,5 +976,5 @@ void kafka_kafka_consumer_minit(INIT_FUNC_ARGS) /* {{{ */
 
     handlers = kafka_default_object_handlers;
     handlers.free_obj = kafka_consumer_free;
-    handlers.offset = XtOffsetOf(object_intern, std);
+    handlers.offset = offsetof(object_intern, std);
 } /* }}} */

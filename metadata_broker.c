@@ -167,7 +167,7 @@ void kafka_metadata_broker_minit(INIT_FUNC_ARGS)
     handlers = kafka_default_object_handlers;
     handlers.get_debug_info = get_debug_info;
     handlers.free_obj = free_object;
-    handlers.offset = XtOffsetOf(object_intern, std);
+    handlers.offset = offsetof(object_intern, std);
 }
 
 void kafka_metadata_broker_ctor(zval *return_value, zval *zmetadata, const void *data)

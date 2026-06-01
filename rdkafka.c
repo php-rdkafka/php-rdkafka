@@ -1054,7 +1054,7 @@ PHP_MINIT_FUNCTION(rdkafka)
 
 	kafka_object_handlers = kafka_default_object_handlers;
     kafka_object_handlers.free_obj = kafka_free;
-    kafka_object_handlers.offset = XtOffsetOf(kafka_object, std);
+    kafka_object_handlers.offset = offsetof(kafka_object, std);
 
     ce_kafka = register_class_RdKafka();
     ce_kafka->create_object = kafka_new;
