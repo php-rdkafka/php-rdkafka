@@ -321,6 +321,21 @@ while ($producer->getOutQLen() > 0) {
 }
 ```
 
+## Known Issues
+
+### SASL/OAUTHBEARER: process segfault on exit with librdkafka < 2.10.0
+
+When using `sasl.mechanism=OAUTHBEARER` (including `enable.sasl.oauthbearer.unsecure.jwt=true`),
+processes that create and destroy multiple `KafkaConsumer` instances may segfault during PHP
+shutdown (exit code 139) even though all tests or application logic completed successfully.
+
+This is a librdkafka bug ([#4557](https://github.com/confluentinc/librdkafka/pull/4557)) where
+broker background threads are not fully joined before `rd_kafka_destroy()` returns. The orphaned
+threads access freed memory when the process exits.
+
+**Fix:** upgrade librdkafka to **>= 2.10.0**. The bug is present in all librdkafka versions up to
+and including 2.8.0 and was fixed in 2.10.0.
+
 ## Documentation
 
 https://arnaud-lb.github.io/php-rdkafka-doc/phpdoc/book.rdkafka.html  
