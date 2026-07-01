@@ -944,12 +944,12 @@ PHP_METHOD(RdKafka_KafkaConsumer, oauthbearerSetTokenFailure)
 }
 /* }}} */
 
-/* {{{ proto string|null RdKafka\KafkaConsumer::getRebalanceProtocol()
+#ifdef HAS_RD_KAFKA_REBALANCE_PROTOCOL
+/* {{{ proto string RdKafka\KafkaConsumer::getRebalanceProtocol()
    Returns the current consumer group rebalance protocol ("NONE", "EAGER", or "COOPERATIVE") */
 PHP_METHOD(RdKafka_KafkaConsumer, getRebalanceProtocol)
 {
     object_intern *intern;
-    const char *protocol;
 
     ZEND_PARSE_PARAMETERS_NONE();
 
@@ -958,15 +958,10 @@ PHP_METHOD(RdKafka_KafkaConsumer, getRebalanceProtocol)
         return;
     }
 
-    protocol = rd_kafka_rebalance_protocol(intern->rk);
-
-    if (protocol == NULL) {
-        RETURN_NULL();
-    }
-
-    RETURN_STRING(protocol);
+    RETURN_STRING(rd_kafka_rebalance_protocol(intern->rk));
 }
 /* }}} */
+#endif
 
 /* {{{ proto RdKafka\ConsumerGroupMetadata RdKafka\KafkaConsumer::getConsumerGroupMetadata() */
 PHP_METHOD(RdKafka_KafkaConsumer, getConsumerGroupMetadata)

@@ -77,6 +77,12 @@ if test "$PHP_RDKAFKA" != "no"; then
     AC_MSG_WARN([no rd_kafka_consumer_group_metadata_group_id, ConsumerGroupMetadata getters not available (requires librdkafka >= 2.8.0)])
   ])
 
+  AC_CHECK_LIB($LIBNAME,[rd_kafka_rebalance_protocol],[
+    AC_DEFINE(HAS_RD_KAFKA_REBALANCE_PROTOCOL,1,[ ])
+  ],[
+    AC_MSG_WARN([no rd_kafka_rebalance_protocol, KafkaConsumer::getRebalanceProtocol() not available (requires librdkafka >= 1.6.0)])
+  ])
+
   LDFLAGS="$ORIG_LDFLAGS"
   CPPFLAGS="$ORIG_CPPFLAGS"
 

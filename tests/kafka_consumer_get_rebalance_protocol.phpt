@@ -4,7 +4,6 @@ KafkaConsumer::getRebalanceProtocol() returns "NONE" before group join
 <?php
 
 $conf = new RdKafka\Conf();
-$conf->set('metadata.broker.list', 'localhost:9092');
 $conf->set('group.id', 'test-rebalance-protocol');
 $conf->setLogCb(function () {});
 

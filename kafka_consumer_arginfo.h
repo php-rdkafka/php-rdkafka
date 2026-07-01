@@ -152,12 +152,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_KafkaConsumer_oauthbearerSetTokenFa
 	ZEND_ARG_TYPE_INFO(0, error, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+#if defined(HAS_RD_KAFKA_REBALANCE_PROTOCOL)
 #if (PHP_VERSION_ID >= 80100)
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_RdKafka_KafkaConsumer_getRebalanceProtocol, 0, 0, IS_STRING, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_RdKafka_KafkaConsumer_getRebalanceProtocol, 0, 0, IS_STRING, 0)
 #else
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RdKafka_KafkaConsumer_getRebalanceProtocol, 0, 0, 0)
 #endif
 ZEND_END_ARG_INFO()
+#endif
 
 #if (PHP_VERSION_ID >= 80100)
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_RdKafka_KafkaConsumer_getConsumerGroupMetadata, 0, 0, RdKafka\\ConsumerGroupMetadata, 0)
@@ -192,7 +194,9 @@ ZEND_METHOD(RdKafka_KafkaConsumer, resumePartitions);
 ZEND_METHOD(RdKafka_KafkaConsumer, poll);
 ZEND_METHOD(RdKafka_KafkaConsumer, oauthbearerSetToken);
 ZEND_METHOD(RdKafka_KafkaConsumer, oauthbearerSetTokenFailure);
+#if defined(HAS_RD_KAFKA_REBALANCE_PROTOCOL)
 ZEND_METHOD(RdKafka_KafkaConsumer, getRebalanceProtocol);
+#endif
 ZEND_METHOD(RdKafka_KafkaConsumer, getConsumerGroupMetadata);
 
 static const zend_function_entry class_RdKafka_KafkaConsumer_methods[] = {
@@ -222,7 +226,9 @@ static const zend_function_entry class_RdKafka_KafkaConsumer_methods[] = {
 	ZEND_ME(RdKafka_KafkaConsumer, poll, arginfo_class_RdKafka_KafkaConsumer_poll, ZEND_ACC_PUBLIC)
 	ZEND_ME(RdKafka_KafkaConsumer, oauthbearerSetToken, arginfo_class_RdKafka_KafkaConsumer_oauthbearerSetToken, ZEND_ACC_PUBLIC)
 	ZEND_ME(RdKafka_KafkaConsumer, oauthbearerSetTokenFailure, arginfo_class_RdKafka_KafkaConsumer_oauthbearerSetTokenFailure, ZEND_ACC_PUBLIC)
+#if defined(HAS_RD_KAFKA_REBALANCE_PROTOCOL)
 	ZEND_ME(RdKafka_KafkaConsumer, getRebalanceProtocol, arginfo_class_RdKafka_KafkaConsumer_getRebalanceProtocol, ZEND_ACC_PUBLIC)
+#endif
 	ZEND_ME(RdKafka_KafkaConsumer, getConsumerGroupMetadata, arginfo_class_RdKafka_KafkaConsumer_getConsumerGroupMetadata, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
