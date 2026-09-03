@@ -354,7 +354,7 @@ PHP_METHOD(RdKafka_ConsumerTopic, consumeBatch)
         return;
     }
 
-    if (0 >= batch_size) {
+    if (batch_size <= 0 || (size_t) batch_size > SIZE_MAX / sizeof(*rkmessages)) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Out of range value '" ZEND_LONG_FMT "' for batch_size", batch_size);
         return;
     }
@@ -369,12 +369,12 @@ PHP_METHOD(RdKafka_ConsumerTopic, consumeBatch)
         return;
     }
 
-    rkmessages = malloc(sizeof(*rkmessages) * batch_size);
+    rkmessages = safe_emalloc(batch_size, sizeof(*rkmessages), 0);
 
     result = rd_kafka_consume_batch(intern->rkt, partition, timeout_ms, rkmessages, batch_size);
 
     if (result == -1) {
-        free(rkmessages);
+        efree(rkmessages);
         err = rd_kafka_last_error();
         zend_throw_exception(ce_kafka_exception, rd_kafka_err2str(err), err);
         return;
@@ -387,7 +387,7 @@ PHP_METHOD(RdKafka_ConsumerTopic, consumeBatch)
         }
     }
 
-    free(rkmessages);
+    efree(rkmessages);
 }
 /* }}} */
 
