@@ -1,10 +1,17 @@
 --TEST--
 RdKafka\Producer::initTransactions() does not leak the rd_kafka_error_t on error
+--SKIPIF--
+<?php
+require __DIR__ . '/helpers/integration-tests-check.php';
+if (!class_exists("RdKafka\\KafkaErrorException")) {
+    echo "skip";
+}
 --FILE--
 <?php
+require __DIR__ . '/helpers/integration-tests-check.php';
 
 $conf = new RdKafka\Conf();
-$conf->set('metadata.broker.list', '127.0.0.1:9092');
+$conf->set('metadata.broker.list', getenv('TEST_KAFKA_BROKERS'));
 
 $producer = new RdKafka\Producer($conf);
 
