@@ -912,7 +912,7 @@ void kafka_conf_minit(INIT_FUNC_ARGS)
 {
     handlers = kafka_default_object_handlers;
     handlers.free_obj = kafka_conf_free;
-    handlers.offset = XtOffsetOf(kafka_conf_object, std);
+    handlers.offset = offsetof(kafka_conf_object, std);
 
     ce_kafka_conf = register_class_RdKafka_Conf();
     ce_kafka_conf->create_object = kafka_conf_new;

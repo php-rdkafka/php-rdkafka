@@ -52,7 +52,7 @@ static void free_object(zend_object *object) /* {{{ */
     object_intern *intern = php_kafka_from_obj(object_intern, object);
 
     if (intern->metadata_topic) {
-        zval_dtor(&intern->zmetadata);
+        zval_ptr_dtor_nogc(&intern->zmetadata);
     }
 
     zend_object_std_dtor(&intern->std);
@@ -180,7 +180,7 @@ void kafka_metadata_topic_minit(INIT_FUNC_ARGS)
     handlers = kafka_default_object_handlers;
     handlers.get_debug_info = get_debug_info;
     handlers.free_obj = free_object;
-    handlers.offset = XtOffsetOf(object_intern, std);
+    handlers.offset = offsetof(object_intern, std);
 }
 
 void kafka_metadata_topic_ctor(zval *return_value, zval *zmetadata, const void *data)

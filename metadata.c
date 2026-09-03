@@ -206,7 +206,7 @@ void kafka_metadata_minit(INIT_FUNC_ARGS)
     handlers = kafka_default_object_handlers;
     handlers.get_debug_info = get_debug_info;
     handlers.free_obj = kafka_metadata_free;
-    handlers.offset = XtOffsetOf(object_intern, std);
+    handlers.offset = offsetof(object_intern, std);
 
     kafka_metadata_topic_minit(INIT_FUNC_ARGS_PASSTHRU);
     kafka_metadata_broker_minit(INIT_FUNC_ARGS_PASSTHRU);

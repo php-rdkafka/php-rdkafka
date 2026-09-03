@@ -22,7 +22,7 @@
 #define Z_RDKAFKA_P(php_kafka_type, zobject) php_kafka_from_obj(php_kafka_type, Z_OBJ_P(zobject))
 
 #define php_kafka_from_obj(php_kafka_type, object) \
-    ((php_kafka_type*)((char *)(object) - XtOffsetOf(php_kafka_type, std)))
+    ((php_kafka_type*)((char *)(object) - offsetof(php_kafka_type, std)))
 
 static inline void rdkafka_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache, zval *retval, uint32_t param_count, zval params[])
 {

@@ -599,7 +599,7 @@ void kafka_topic_minit(INIT_FUNC_ARGS) { /* {{{ */
     memcpy(&object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
     object_handlers.clone_obj = NULL;
     object_handlers.free_obj = kafka_topic_free;
-    object_handlers.offset = XtOffsetOf(kafka_topic_object, std);
+    object_handlers.offset = offsetof(kafka_topic_object, std);
 
     ce_kafka_topic = register_class_RdKafka_Topic();
     ce_kafka_topic->create_object = kafka_topic_new;
