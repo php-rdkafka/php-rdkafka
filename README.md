@@ -321,6 +321,37 @@ while ($producer->getOutQLen() > 0) {
 }
 ```
 
+## Known Issues
+
+### Topic handles are not freed until the client is destroyed
+
+`newTopic()` (on `Producer`, `Consumer`, and `KafkaConsumer`) creates a new
+`rd_kafka_topic_t` handle for each distinct topic name. Calling `unset()` on
+the returned `RdKafka\Topic` releases php-rdkafka's own reference, but
+librdkafka topic objects are refcounted internally as well as by the
+application, and librdkafka does not release its internal reference until the
+owning client handle itself is destroyed:
+
+> topic objects are refcounted (both internally and for the app) the topic
+> object might not actually be destroyed by this call, but the application
+> must consider the object destroyed.
+
+From the [`rd_kafka_topic_destroy()`](https://github.com/confluentinc/librdkafka/blob/master/src/rdkafka.h) header comment.
+
+In practice this means a long-lived `Producer`/`Consumer`/`KafkaConsumer` that
+calls `newTopic()` with many distinct, one-off topic names will see memory
+grow roughly linearly with the number of distinct names, and that memory is
+only reclaimed when the client itself is destroyed — not when the `Topic`
+object is unset, and not on any timer (this is unrelated to
+`metadata.max.age.ms`, which only governs the separate protocol-level
+metadata cache).
+
+Calling `newTopic()` repeatedly with the *same* name is fine and does not
+leak: librdkafka returns the existing cached handle rather than creating a
+new one. **Workaround:** if your application produces to or consumes from a
+bounded, known set of topics, create each `Topic` object once and reuse it
+rather than calling `newTopic()` per operation.
+
 ## Documentation
 
 https://arnaud-lb.github.io/php-rdkafka-doc/phpdoc/book.rdkafka.html  
