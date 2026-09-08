@@ -50,13 +50,13 @@ if test "$PHP_RDKAFKA" != "no"; then
   AC_MSG_CHECKING([for librdkafka version])
   AC_EGREP_CPP(yes,[
 #include <librdkafka/rdkafka.h>
-#if RD_KAFKA_VERSION >= 0x010503ff
+#if RD_KAFKA_VERSION >= 0x010600ff
   yes
 #endif
   ],[
-    AC_MSG_RESULT([>= 1.5.3])
+    AC_MSG_RESULT([>= 1.6.0])
   ],[
-    AC_MSG_ERROR([librdkafka version 1.5.3 or greater required.])
+    AC_MSG_ERROR([librdkafka version 1.6.0 or greater required.])
   ])
 
   AC_CHECK_LIB($LIBNAME,[rd_kafka_incremental_assign, rd_kafka_incremental_unassign],[
