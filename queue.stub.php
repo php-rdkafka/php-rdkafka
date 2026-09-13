@@ -15,4 +15,7 @@ class Queue
 
     /** @tentative-return-type */
     public function consume(int $timeout_ms): ?Message {}
+
+    /** @tentative-return-type */
+    public function poll(int $timeout_ms): ?Event {}
 }
