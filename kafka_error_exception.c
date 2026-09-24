@@ -73,20 +73,20 @@ PHP_METHOD(RdKafka_KafkaErrorException, __construct)
     Get name of error */
 PHP_METHOD(RdKafka_KafkaErrorException, getErrorString)
 {
-    zval *res;
+    zval res;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE) {
         return;
     }
 
-    res = rdkafka_read_property(ce_kafka_error, Z_OBJ_P(getThis()), ZEND_STRL("error_string"), 0);
+    rdkafka_read_property(ce_kafka_error, Z_OBJ_P(getThis()), ZEND_STRL("error_string"), 0, &res);
 
-    if (!res || Z_TYPE_P(res) != IS_STRING) {
+    if (Z_TYPE(res) != IS_STRING) {
+        zval_ptr_dtor(&res);
         return;
     }
 
-    ZVAL_DEREF(res);
-    ZVAL_COPY(return_value, res);
+    RETURN_COPY_VALUE(&res);
 }
 /* }}} */
 
@@ -95,20 +95,20 @@ PHP_METHOD(RdKafka_KafkaErrorException, getErrorString)
     Return true if error is fatal */
 PHP_METHOD(RdKafka_KafkaErrorException, isFatal)
 {
-    zval *res;
+    zval res;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE) {
         return;
     }
 
-    res = rdkafka_read_property(ce_kafka_error, Z_OBJ_P(getThis()), ZEND_STRL("isFatal"), 0);
+    rdkafka_read_property(ce_kafka_error, Z_OBJ_P(getThis()), ZEND_STRL("isFatal"), 0, &res);
 
-    if (!res || (Z_TYPE_P(res) != IS_TRUE && Z_TYPE_P(res) != IS_FALSE)) {
+    if (Z_TYPE(res) != IS_TRUE && Z_TYPE(res) != IS_FALSE) {
+        zval_ptr_dtor(&res);
         return;
     }
 
-    ZVAL_DEREF(res);
-    ZVAL_COPY(return_value, res);
+    RETURN_COPY_VALUE(&res);
 }
 /* }}} */
 
@@ -116,20 +116,20 @@ PHP_METHOD(RdKafka_KafkaErrorException, isFatal)
     Return true if error is fatal */
 PHP_METHOD(RdKafka_KafkaErrorException, isRetriable)
 {
-    zval *res;
+    zval res;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE) {
         return;
     }
 
-    res = rdkafka_read_property(ce_kafka_error, Z_OBJ_P(getThis()), ZEND_STRL("isRetriable"), 0);
+    rdkafka_read_property(ce_kafka_error, Z_OBJ_P(getThis()), ZEND_STRL("isRetriable"), 0, &res);
 
-    if (!res || (Z_TYPE_P(res) != IS_TRUE && Z_TYPE_P(res) != IS_FALSE)) {
+    if (Z_TYPE(res) != IS_TRUE && Z_TYPE(res) != IS_FALSE) {
+        zval_ptr_dtor(&res);
         return;
     }
 
-    ZVAL_DEREF(res);
-    ZVAL_COPY(return_value, res);
+    RETURN_COPY_VALUE(&res);
 }
 /* }}} */
 
@@ -137,20 +137,20 @@ PHP_METHOD(RdKafka_KafkaErrorException, isRetriable)
     Return true if error is fatal */
 PHP_METHOD(RdKafka_KafkaErrorException, transactionRequiresAbort)
 {
-    zval *res;
+    zval res;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE) {
         return;
     }
 
-    res = rdkafka_read_property(ce_kafka_error, Z_OBJ_P(getThis()), ZEND_STRL("transactionRequiresAbort"), 0);
+    rdkafka_read_property(ce_kafka_error, Z_OBJ_P(getThis()), ZEND_STRL("transactionRequiresAbort"), 0, &res);
 
-    if (!res || (Z_TYPE_P(res) != IS_TRUE && Z_TYPE_P(res) != IS_FALSE)) {
+    if (Z_TYPE(res) != IS_TRUE && Z_TYPE(res) != IS_FALSE) {
+        zval_ptr_dtor(&res);
         return;
     }
 
-    ZVAL_DEREF(res);
-    ZVAL_COPY(return_value, res);
+    RETURN_COPY_VALUE(&res);
 }
 /* }}} */
 

@@ -439,41 +439,58 @@ static void consumer_commit(int async, INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 
     if (zarg) {
         if (Z_TYPE_P(zarg) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zarg), ce_kafka_message)) {
-            zval *zerr;
-            zval *ztopic;
-            zval *zpartition;
-            zval *zoffset;
+            zval zerr;
+            zval ztopic;
+            zval zpartition;
+            zval zoffset;
             rd_kafka_topic_partition_t *rktpar;
 
-            zerr = rdkafka_read_property(NULL, Z_OBJ_P(zarg), ZEND_STRL("err"), 0);
-            if (zerr && Z_TYPE_P(zerr) != IS_NULL && (Z_TYPE_P(zerr) != IS_LONG || Z_LVAL_P(zerr) != RD_KAFKA_RESP_ERR_NO_ERROR)) {
+            rdkafka_read_property(NULL, Z_OBJ_P(zarg), ZEND_STRL("err"), 0, &zerr);
+            if (EG(exception)) {
+                zval_ptr_dtor(&zerr);
+                return;
+            }
+            if (Z_TYPE(zerr) != IS_NULL && (Z_TYPE(zerr) != IS_LONG || Z_LVAL(zerr) != RD_KAFKA_RESP_ERR_NO_ERROR)) {
+                zval_ptr_dtor(&zerr);
                 zend_throw_exception(ce_kafka_exception, "Invalid argument: Specified Message has an error", RD_KAFKA_RESP_ERR__INVALID_ARG);
                 return;
             }
 
-            ztopic = rdkafka_read_property(NULL, Z_OBJ_P(zarg), ZEND_STRL("topic_name"), 0);
-            if (!ztopic || Z_TYPE_P(ztopic) != IS_STRING) {
-                zend_throw_exception(ce_kafka_exception, "Invalid argument: Specified Message's topic_name is not a string", RD_KAFKA_RESP_ERR__INVALID_ARG);
+            rdkafka_read_property(NULL, Z_OBJ_P(zarg), ZEND_STRL("topic_name"), 0, &ztopic);
+            if (Z_TYPE(ztopic) != IS_STRING) {
+                zval_ptr_dtor(&ztopic);
+                if (!EG(exception)) {
+                    zend_throw_exception(ce_kafka_exception, "Invalid argument: Specified Message's topic_name is not a string", RD_KAFKA_RESP_ERR__INVALID_ARG);
+                }
                 return;
             }
 
-            zpartition = rdkafka_read_property(NULL, Z_OBJ_P(zarg), ZEND_STRL("partition"), 0);
-            if (!zpartition || Z_TYPE_P(zpartition) != IS_LONG) {
-                zend_throw_exception(ce_kafka_exception, "Invalid argument: Specified Message's partition is not an int", RD_KAFKA_RESP_ERR__INVALID_ARG);
+            rdkafka_read_property(NULL, Z_OBJ_P(zarg), ZEND_STRL("partition"), 0, &zpartition);
+            if (Z_TYPE(zpartition) != IS_LONG) {
+                zval_ptr_dtor(&ztopic);
+                zval_ptr_dtor(&zpartition);
+                if (!EG(exception)) {
+                    zend_throw_exception(ce_kafka_exception, "Invalid argument: Specified Message's partition is not an int", RD_KAFKA_RESP_ERR__INVALID_ARG);
+                }
                 return;
             }
 
-            zoffset = rdkafka_read_property(NULL, Z_OBJ_P(zarg), ZEND_STRL("offset"), 0);
-            if (!zoffset || Z_TYPE_P(zoffset) != IS_LONG) {
-                zend_throw_exception(ce_kafka_exception, "Invalid argument: Specified Message's offset is not an int", RD_KAFKA_RESP_ERR__INVALID_ARG);
+            rdkafka_read_property(NULL, Z_OBJ_P(zarg), ZEND_STRL("offset"), 0, &zoffset);
+            if (Z_TYPE(zoffset) != IS_LONG) {
+                zval_ptr_dtor(&ztopic);
+                zval_ptr_dtor(&zoffset);
+                if (!EG(exception)) {
+                    zend_throw_exception(ce_kafka_exception, "Invalid argument: Specified Message's offset is not an int", RD_KAFKA_RESP_ERR__INVALID_ARG);
+                }
                 return;
             }
 
             offsets = rd_kafka_topic_partition_list_new(1);
             rktpar = rd_kafka_topic_partition_list_add(
-                    offsets, Z_STRVAL_P(ztopic),
-                    Z_LVAL_P(zpartition));
-            rktpar->offset = Z_LVAL_P(zoffset)+1;
+                    offsets, Z_STRVAL(ztopic),
+                    Z_LVAL(zpartition));
+            rktpar->offset = Z_LVAL(zoffset)+1;
+            zval_ptr_dtor(&ztopic);
 
         } else if (Z_TYPE_P(zarg) == IS_ARRAY) {
             HashTable *ary = Z_ARRVAL_P(zarg);

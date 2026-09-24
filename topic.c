@@ -457,6 +457,9 @@ PHP_METHOD(RdKafka_ProducerTopic, produce)
     }
 
     intern = get_kafka_topic_object(getThis());
+    if (!intern) {
+        return;
+    }
 
     if (opaque != NULL) {
         zend_string_addref(opaque);
@@ -489,9 +492,14 @@ PHP_METHOD(RdKafka_ProducerTopic, producev)
     kafka_topic_object *intern;
     kafka_object *kafka_intern;
     HashTable *headersParam = NULL;
-    HashPosition headersParamPos;
-    char *header_key;
+    zend_ulong header_index;
+    zend_string *header_key;
+    zend_string *header_name;
+    zend_string *header_value_string;
+    zend_string *header_value_tmp;
     zval *header_value;
+    zval *header_pair_name;
+    zval *header_pair_value;
     rd_kafka_headers_t *headers;
     zend_long timestamp_ms = 0;
     zend_bool timestamp_ms_is_null = 0;
@@ -523,33 +531,89 @@ PHP_METHOD(RdKafka_ProducerTopic, producev)
     }
 
     intern = get_kafka_topic_object(getThis());
-
-    if (opaque != NULL) {
-        zend_string_addref(opaque);
-    }
-
-    if (headersParam != NULL && zend_hash_num_elements(headersParam) > 0) {
-        headers = rd_kafka_headers_new(zend_hash_num_elements(headersParam));
-        for (zend_hash_internal_pointer_reset_ex(headersParam, &headersParamPos);
-                (header_value = zend_hash_get_current_data_ex(headersParam, &headersParamPos)) != NULL &&
-                (header_key = rdkafka_hash_get_current_key_ex(headersParam, &headersParamPos)) != NULL;
-                zend_hash_move_forward_ex(headersParam, &headersParamPos)) {
-            convert_to_string_ex(header_value);
-            rd_kafka_header_add(
-                headers,
-                header_key,
-                -1, // Auto detect header title length
-                Z_STRVAL_P(header_value),
-                Z_STRLEN_P(header_value)
-            );
-        }
-    } else {
-        headers = rd_kafka_headers_new(0);
+    if (!intern) {
+        return;
     }
 
     kafka_intern = get_kafka_object(&intern->zrk);
     if (!kafka_intern) {
         return;
+    }
+
+    if (headersParam == NULL || zend_hash_num_elements(headersParam) == 0) {
+        headers = rd_kafka_headers_new(0);
+    } else if ((header_value = zend_hash_index_find_deref(headersParam, 0)) != NULL
+            && Z_TYPE_P(header_value) == IS_ARRAY && zend_array_is_list(headersParam)) {
+        /* A list of [name, value] pairs, which can repeat names and have null
+         * values. */
+        headers = rd_kafka_headers_new(zend_hash_num_elements(headersParam));
+        ZEND_HASH_FOREACH_NUM_KEY_VAL(headersParam, header_index, header_value) {
+            ZVAL_DEREF(header_value);
+            header_pair_name = NULL;
+            header_pair_value = NULL;
+
+            if (Z_TYPE_P(header_value) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL_P(header_value)) == 2) {
+                header_pair_name = zend_hash_index_find_deref(Z_ARRVAL_P(header_value), 0);
+                header_pair_value = zend_hash_index_find_deref(Z_ARRVAL_P(header_value), 1);
+            }
+
+            if (header_pair_name == NULL || Z_TYPE_P(header_pair_name) != IS_STRING
+                    || header_pair_value == NULL
+                    || (Z_TYPE_P(header_pair_value) != IS_STRING && Z_TYPE_P(header_pair_value) != IS_NULL)) {
+                rd_kafka_headers_destroy(headers);
+                zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Invalid header pair at index " ZEND_ULONG_FMT " for $headers, expected [string, ?string]", header_index);
+                return;
+            }
+
+            err = rd_kafka_header_add(
+                headers,
+                Z_STRVAL_P(header_pair_name),
+                Z_STRLEN_P(header_pair_name),
+                Z_TYPE_P(header_pair_value) == IS_STRING ? Z_STRVAL_P(header_pair_value) : NULL,
+                Z_TYPE_P(header_pair_value) == IS_STRING ? Z_STRLEN_P(header_pair_value) : 0
+            );
+
+            if (err != RD_KAFKA_RESP_ERR_NO_ERROR) {
+                rd_kafka_headers_destroy(headers);
+                zend_throw_exception(ce_kafka_exception, rd_kafka_err2str(err), err);
+                return;
+            }
+        } ZEND_HASH_FOREACH_END();
+    } else {
+        headers = rd_kafka_headers_new(zend_hash_num_elements(headersParam));
+        ZEND_HASH_FOREACH_KEY_VAL(headersParam, header_index, header_key, header_value) {
+            header_value_string = zval_try_get_tmp_string(header_value, &header_value_tmp);
+
+            if (header_value_string == NULL) {
+                /* The conversion exception is already pending. */
+                rd_kafka_headers_destroy(headers);
+                return;
+            }
+
+            header_name = header_key != NULL ? header_key : zend_long_to_str((zend_long) header_index);
+            err = rd_kafka_header_add(
+                headers,
+                ZSTR_VAL(header_name),
+                ZSTR_LEN(header_name),
+                ZSTR_VAL(header_value_string),
+                ZSTR_LEN(header_value_string)
+            );
+
+            zend_tmp_string_release(header_value_tmp);
+            if (header_key == NULL) {
+                zend_string_release(header_name);
+            }
+
+            if (err != RD_KAFKA_RESP_ERR_NO_ERROR) {
+                rd_kafka_headers_destroy(headers);
+                zend_throw_exception(ce_kafka_exception, rd_kafka_err2str(err), err);
+                return;
+            }
+        } ZEND_HASH_FOREACH_END();
+    }
+
+    if (opaque != NULL) {
+        zend_string_addref(opaque);
     }
 
     err = rd_kafka_producev(

@@ -46,6 +46,7 @@
    <file role="doc" name="CREDITS"/>
    <file role="doc" name="LICENSE"/>
    <file role="doc" name="README.md"/>
+   <file role="doc" name="UPGRADE.md"/>
    <file role="src" name="conf.c"/>
    <file role="src" name="conf.h"/>
    <file role="src" name="conf.stub.php"/>
@@ -136,9 +137,14 @@
      <file role="test" name="integration-tests-check.php"/>
      <file role="test" name="oauth-integration-tests-check.php"/>
     </dir>
+    <file role="test" name="kafka_consumer_commit_message_properties.phpt"/>
     <file role="test" name="kafka_consumer_get_rebalance_protocol.phpt"/>
     <file role="test" name="kafka_error_exception.phpt"/>
+    <file role="test" name="message_error_timestamp.phpt"/>
+    <file role="test" name="message_header_pairs.phpt"/>
+    <file role="test" name="message_header_pairs_map.phpt"/>
     <file role="test" name="message_headers.phpt"/>
+    <file role="test" name="message_tombstone_timestamp.phpt"/>
     <file role="test" name="metadata_001.phpt"/>
     <file role="test" name="metadata_broker_001.phpt"/>
     <file role="test" name="metadata_collection_001.phpt"/>
@@ -160,7 +166,11 @@
     <file role="test" name="produce_opaque.phpt"/>
     <file role="test" name="produce_opaque_purge_dr_callback.phpt"/>
     <file role="test" name="produce_opaque_purge.phpt"/>
+    <file role="test" name="producer_topic_unconstructed.phpt"/>
+    <file role="test" name="producev_header_conversion_exception.phpt"/>
+    <file role="test" name="producev_header_pairs.phpt"/>
     <file role="test" name="producev_opaque.phpt"/>
+    <file role="test" name="producev_preserves_header_values.phpt"/>
     <file role="test" name="rd_kafka_get_err_descs.phpt"/>
     <file role="test" name="test0.phpt"/>
     <file role="test" name="test_env.php.sample"/>
