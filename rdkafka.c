@@ -333,7 +333,7 @@ PHP_METHOD(RdKafka, addBrokers)
     size_t broker_list_len;
     kafka_object *intern;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &broker_list, &broker_list_len) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &broker_list, &broker_list_len) == FAILURE) {
         return;
     }
 
@@ -447,21 +447,33 @@ PHP_METHOD(RdKafka, oauthbearerSetToken)
     char *principal_name;
     size_t principal_len;
     HashTable *extensions_hash = NULL;
-    
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "szs|h", &token_value, &token_value_len, &zlifetime_ms, &principal_name, &principal_len, &extensions_hash) == FAILURE) {
+    char **extensions;
+    int extensions_size;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "pzp|h", &token_value, &token_value_len, &zlifetime_ms, &principal_name, &principal_len, &extensions_hash) == FAILURE) {
         return;
     }
 
     /* On 32-bits, it might be required to pass $lifetime_ms as a float or a
      * string */
-    lifetime_ms = zval_to_int64(zlifetime_ms, "Argument #2 ($lifetime_ms) must be a valid integer");
+    lifetime_ms = zval_to_int64(zlifetime_ms, 2);
+    if (EG(exception)) {
+        return;
+    }
+
+    extensions = oauthbearer_extensions_new(extensions_hash, &extensions_size);
+    if (EG(exception)) {
+        return;
+    }
 
     intern = get_kafka_object(getThis());
     if (!intern) {
+        oauthbearer_extensions_free(extensions, extensions_size);
         return;
-    }    
+    }
 
-    oauthbearer_set_token(intern->rk, token_value, lifetime_ms, principal_name, extensions_hash);
+    oauthbearer_set_token(intern->rk, token_value, lifetime_ms, principal_name, extensions, extensions_size);
+    oauthbearer_extensions_free(extensions, extensions_size);
 }
 /* }}} */
 
@@ -503,7 +515,7 @@ PHP_METHOD(RdKafka, newTopic)
     rd_kafka_topic_conf_t *conf = NULL;
     kafka_conf_object *conf_intern;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|O!", &topic, &topic_len, &zconf, ce_kafka_topic_conf) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|O!", &topic, &topic_len, &zconf, ce_kafka_topic_conf) == FAILURE) {
         return;
     }
 
@@ -645,7 +657,7 @@ PHP_METHOD(RdKafka, queryWatermarkOffsets)
     zval *lowResult, *highResult;
     rd_kafka_resp_err_t err;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "slzzl", &topic, &topic_length, &partition, &lowResult, &highResult, &timeout) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "plzzl", &topic, &topic_length, &partition, &lowResult, &highResult, &timeout) == FAILURE) {
         return;
     }
 

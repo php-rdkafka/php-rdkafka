@@ -135,7 +135,7 @@ PHP_METHOD(RdKafka_ConsumerTopic, consumeCallback)
         return;
     }
 
-    Z_ADDREF_P(&cb.fci.function_name);
+    Z_TRY_ADDREF_P(&cb.fci.function_name);
 
     result = rd_kafka_consume_callback(intern->rkt, partition, timeout_ms, consume_callback, &cb);
 

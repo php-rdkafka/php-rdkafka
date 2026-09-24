@@ -298,28 +298,42 @@ PHP_METHOD(RdKafka_KafkaConsumer, getAssignment)
 PHP_METHOD(RdKafka_KafkaConsumer, subscribe)
 {
     HashTable *htopics;
-    HashPosition pos;
     object_intern *intern;
     rd_kafka_topic_partition_list_t *topics;
     rd_kafka_resp_err_t err;
     zval *zv;
+    zend_string *topic;
+    zend_string *tmp_topic;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS(), "h", &htopics) == FAILURE) {
         return;
     }
 
-    intern = get_object(getThis());
-    if (!intern) {
-        return;
-    }
-
     topics = rd_kafka_topic_partition_list_new(zend_hash_num_elements(htopics));
 
-    for (zend_hash_internal_pointer_reset_ex(htopics, &pos);
-            (zv = zend_hash_get_current_data_ex(htopics, &pos)) != NULL;
-            zend_hash_move_forward_ex(htopics, &pos)) {
-        convert_to_string_ex(zv);
-        rd_kafka_topic_partition_list_add(topics, Z_STRVAL_P(zv), RD_KAFKA_PARTITION_UA);
+    ZEND_HASH_FOREACH_VAL(htopics, zv) {
+        topic = zval_try_get_tmp_string(zv, &tmp_topic);
+        if (!topic) {
+            rd_kafka_topic_partition_list_destroy(topics);
+            return;
+        }
+
+        if (CHECK_NULL_PATH(ZSTR_VAL(topic), ZSTR_LEN(topic))) {
+            zend_tmp_string_release(tmp_topic);
+            rd_kafka_topic_partition_list_destroy(topics);
+            zend_argument_value_error(1, "must not contain any null bytes");
+            return;
+        }
+
+        rd_kafka_topic_partition_list_add(topics, ZSTR_VAL(topic), RD_KAFKA_PARTITION_UA);
+        zend_tmp_string_release(tmp_topic);
+    } ZEND_HASH_FOREACH_END();
+
+    /* Converting the topics can run PHP code that closes the consumer */
+    intern = get_object(getThis());
+    if (!intern) {
+        rd_kafka_topic_partition_list_destroy(topics);
+        return;
     }
 
     err = rd_kafka_subscribe(intern->rk, topics);
@@ -432,11 +446,6 @@ static void consumer_commit(int async, INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
         return;
     }
 
-    intern = get_object(getThis());
-    if (!intern) {
-        return;
-    }
-
     if (zarg) {
         if (Z_TYPE_P(zarg) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zarg), ce_kafka_message)) {
             zval *zerr;
@@ -454,6 +463,11 @@ static void consumer_commit(int async, INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
             ztopic = rdkafka_read_property(NULL, Z_OBJ_P(zarg), ZEND_STRL("topic_name"), 0);
             if (!ztopic || Z_TYPE_P(ztopic) != IS_STRING) {
                 zend_throw_exception(ce_kafka_exception, "Invalid argument: Specified Message's topic_name is not a string", RD_KAFKA_RESP_ERR__INVALID_ARG);
+                return;
+            }
+
+            if (CHECK_ZVAL_NULL_PATH(ztopic)) {
+                zend_throw_exception(ce_kafka_exception, "Invalid argument: Specified Message's topic_name must not contain any null bytes", RD_KAFKA_RESP_ERR__INVALID_ARG);
                 return;
             }
 
@@ -482,14 +496,18 @@ static void consumer_commit(int async, INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
                 return;
             }
         } else if (Z_TYPE_P(zarg) != IS_NULL) {
-            php_error(E_ERROR,
-                    "RdKafka\\KafkaConsumer::%s() expects parameter %d to be %s, %s given",
-                    get_active_function_name(),
-                    1,
-                    "an instance of RdKafka\\Message or an array of RdKafka\\TopicPartition",
-                    zend_zval_type_name(zarg));
+            zend_argument_type_error(1, "must be of type RdKafka\\Message|array|null, %s given", zend_zval_type_name(zarg));
             return;
         }
+    }
+
+    /* Reading the Message properties can run PHP code that closes the consumer */
+    intern = get_object(getThis());
+    if (!intern) {
+        if (offsets) {
+            rd_kafka_topic_partition_list_destroy(offsets);
+        }
+        return;
     }
 
     err = rd_kafka_commit(intern->rk, offsets, async);
@@ -610,7 +628,7 @@ PHP_METHOD(RdKafka_KafkaConsumer, newTopic)
     rd_kafka_topic_conf_t *conf = NULL;
     kafka_conf_object *conf_intern;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|O!", &topic, &topic_len, &zconf, ce_kafka_topic_conf) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|O!", &topic, &topic_len, &zconf, ce_kafka_topic_conf) == FAILURE) {
         return;
     }
 
@@ -766,7 +784,7 @@ PHP_METHOD(RdKafka_KafkaConsumer, queryWatermarkOffsets)
     zval *lowResult, *highResult;
     rd_kafka_resp_err_t err;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "slzzl", &topic, &topic_length, &partition, &lowResult, &highResult, &timeout) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "plzzl", &topic, &topic_length, &partition, &lowResult, &highResult, &timeout) == FAILURE) {
         return;
     }
 
@@ -882,7 +900,7 @@ PHP_METHOD(RdKafka_KafkaConsumer, poll)
 }
 /* }}} */
 
-/* {{{ proto void RdKafka\KafkaConsumer::oauthbearerSetToken(string $token_value, int $lifetime_ms, string $principal_name, array $extensions = [])
+/* {{{ proto void RdKafka\KafkaConsumer::oauthbearerSetToken(string $token_value, int|float|string $lifetime_ms, string $principal_name, array $extensions = [])
  * Set SASL/OAUTHBEARER token and metadata
  *
  * The SASL/OAUTHBEARER token refresh callback or event handler should cause
@@ -904,19 +922,32 @@ PHP_METHOD(RdKafka_KafkaConsumer, oauthbearerSetToken)
     char *principal_name;
     size_t principal_len;
     HashTable *extensions_hash = NULL;
+    char **extensions;
+    int extensions_size;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "szs|h", &token_value, &token_value_len, &zlifetime_ms, &principal_name, &principal_len, &extensions_hash) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "pzp|h", &token_value, &token_value_len, &zlifetime_ms, &principal_name, &principal_len, &extensions_hash) == FAILURE) {
         return;
     }
 
-    lifetime_ms = zval_to_int64(zlifetime_ms, "Argument #2 ($lifetime_ms) must be a valid integer");
+    lifetime_ms = zval_to_int64(zlifetime_ms, 2);
+    if (EG(exception)) {
+        return;
+    }
 
+    extensions = oauthbearer_extensions_new(extensions_hash, &extensions_size);
+    if (EG(exception)) {
+        return;
+    }
+
+    /* Converting the extensions can run PHP code that closes the consumer */
     intern = get_object(getThis());
     if (!intern) {
+        oauthbearer_extensions_free(extensions, extensions_size);
         return;
     }
 
-    oauthbearer_set_token(intern->rk, token_value, lifetime_ms, principal_name, extensions_hash);
+    oauthbearer_set_token(intern->rk, token_value, lifetime_ms, principal_name, extensions, extensions_size);
+    oauthbearer_extensions_free(extensions, extensions_size);
 }
 /* }}} */
 

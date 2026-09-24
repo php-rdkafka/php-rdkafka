@@ -444,7 +444,7 @@ PHP_METHOD(RdKafka_Conf, get)
     size_t dest_size;
     rd_kafka_conf_res_t ret;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &name, &name_len) == FAILURE) {
         return;
     }
 
@@ -527,7 +527,7 @@ PHP_METHOD(RdKafka_Conf, set)
     rd_kafka_conf_res_t ret = 0;
     char errstr[512];
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &name, &name_len, &value, &value_len) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "pp", &name, &name_len, &value, &value_len) == FAILURE) {
         return;
     }
 
@@ -605,7 +605,7 @@ PHP_METHOD(RdKafka_Conf, setErrorCb)
         return;
     }
 
-    Z_ADDREF_P(&fci.function_name);
+    Z_TRY_ADDREF_P(&fci.function_name);
 
     if (intern->cbs.error) {
         zval_ptr_dtor(&intern->cbs.error->fci.function_name);
@@ -637,7 +637,7 @@ PHP_METHOD(RdKafka_Conf, setDrMsgCb)
         return;
     }
 
-    Z_ADDREF_P(&fci.function_name);
+    Z_TRY_ADDREF_P(&fci.function_name);
 
     if (intern->cbs.dr_msg) {
         zval_ptr_dtor(&intern->cbs.dr_msg->fci.function_name);
@@ -669,7 +669,7 @@ PHP_METHOD(RdKafka_Conf, setStatsCb)
         return;
     }
 
-    Z_ADDREF_P(&fci.function_name);
+    Z_TRY_ADDREF_P(&fci.function_name);
 
     if (intern->cbs.stats) {
         zval_ptr_dtor(&intern->cbs.stats->fci.function_name);
@@ -701,7 +701,7 @@ PHP_METHOD(RdKafka_Conf, setRebalanceCb)
         return;
     }
 
-    Z_ADDREF_P(&fci.function_name);
+    Z_TRY_ADDREF_P(&fci.function_name);
 
     if (intern->cbs.rebalance) {
         zval_ptr_dtor(&intern->cbs.rebalance->fci.function_name);
@@ -733,7 +733,7 @@ PHP_METHOD(RdKafka_Conf, setConsumeCb)
         return;
     }
 
-    Z_ADDREF_P(&fci.function_name);
+    Z_TRY_ADDREF_P(&fci.function_name);
 
     if (intern->cbs.consume) {
         zval_ptr_dtor(&intern->cbs.consume->fci.function_name);
@@ -765,7 +765,7 @@ PHP_METHOD(RdKafka_Conf, setOffsetCommitCb)
         return;
     }
 
-    Z_ADDREF_P(&fci.function_name);
+    Z_TRY_ADDREF_P(&fci.function_name);
 
     if (intern->cbs.offset_commit) {
         zval_ptr_dtor(&intern->cbs.offset_commit->fci.function_name);
@@ -781,7 +781,7 @@ PHP_METHOD(RdKafka_Conf, setOffsetCommitCb)
 /* }}} */
 
 /* {{{ proto void RdKafka\Conf::setLogCb(mixed $callback)
-   Set offset commit callback for use with consumer groups */
+   Sets the log callback */
 PHP_METHOD(RdKafka_Conf, setLogCb)
 {
     zend_fcall_info fci;
@@ -798,7 +798,7 @@ PHP_METHOD(RdKafka_Conf, setLogCb)
         return;
     }
 
-    Z_ADDREF_P(&fci.function_name);
+    Z_TRY_ADDREF_P(&fci.function_name);
 
     if (conf->cbs.log) {
         zval_ptr_dtor(&conf->cbs.log->fci.function_name);
@@ -831,7 +831,7 @@ PHP_METHOD(RdKafka_Conf, setOauthbearerTokenRefreshCb)
         return;
     }
 
-    Z_ADDREF_P(&fci.function_name);
+    Z_TRY_ADDREF_P(&fci.function_name);
 
     if (conf->cbs.oauthbearer_token_refresh) {
         zval_ptr_dtor(&conf->cbs.oauthbearer_token_refresh->fci.function_name);

@@ -44,7 +44,7 @@ PHP_METHOD(RdKafka_ConsumerGroupMetadata, __construct)
     char *group_instance_id = NULL;
     size_t group_instance_id_len = 0;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lss!",
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|lpp!",
             &group_id, &group_id_len,
             &generation_id,
             &member_id, &member_id_len,
