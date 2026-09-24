@@ -42,22 +42,55 @@ zend_class_entry * ce_kafka_topic;
 typedef struct _php_callback {
     zend_fcall_info fci;
     zend_fcall_info_cache fcc;
+    kafka_object *kafka_intern;
 } php_callback;
+
+void kafka_topic_object_pre_free(kafka_topic_object **pp) /* {{{ */
+{
+    kafka_topic_object *intern = *pp;
+    zval zrk;
+
+    rd_kafka_topic_destroy(intern->rkt);
+    intern->rkt = NULL;
+    intern->registry = NULL;
+
+    ZVAL_COPY_VALUE(&zrk, &intern->zrk);
+    ZVAL_UNDEF(&intern->zrk);
+    zval_ptr_dtor(&zrk);
+}
+/* }}} */
 
 static void kafka_topic_free(zend_object *object) /* {{{ */
 {
     kafka_topic_object *intern = php_kafka_from_obj(kafka_topic_object, object);
 
-    if (Z_TYPE(intern->zrk) != IS_UNDEF && intern->rkt) {
-        kafka_object *kafka_intern = get_kafka_object(&intern->zrk);
-        if (kafka_intern) {
-            zend_hash_index_del(&kafka_intern->topics, (zend_ulong)intern);
-        }
+    if (intern->registry) {
+        zend_hash_index_del(intern->registry, (zend_ulong)intern);
     } else if (intern->rkt) {
         rd_kafka_topic_destroy(intern->rkt);
     }
 
     zend_object_std_dtor(&intern->std);
+}
+/* }}} */
+
+static HashTable *kafka_topic_get_gc(zend_object *object, zval **table, int *n) /* {{{ */
+{
+    kafka_topic_object *intern = php_kafka_from_obj(kafka_topic_object, object);
+    zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
+
+    zend_get_gc_buffer_add_zval(gc_buffer, &intern->zrk);
+    zend_get_gc_buffer_use(gc_buffer, table, n);
+
+    if (*n == 0) {
+        return zend_std_get_gc(object, table, n);
+    }
+
+    if (object->properties == NULL && object->ce->default_properties_count == 0) {
+        return NULL;
+    }
+
+    return zend_std_get_properties(object);
 }
 /* }}} */
 
@@ -95,9 +128,7 @@ static void consume_callback(rd_kafka_message_t *msg, void *opaque)
 
     kafka_message_new(&args[0], msg, NULL);
 
-    rdkafka_call_function(&cb->fci, &cb->fcc, NULL, 1, args);
-
-    zval_ptr_dtor(&args[0]);
+    kafka_conf_call_function(&cb->kafka_intern->cbs, cb->kafka_intern->rk, &cb->fci, &cb->fcc, 1, args, 1);
 }
 
 kafka_topic_object * get_kafka_topic_object(zval *zrkt)
@@ -105,7 +136,7 @@ kafka_topic_object * get_kafka_topic_object(zval *zrkt)
     kafka_topic_object *orkt = Z_RDKAFKA_P(kafka_topic_object, zrkt);
 
     if (!orkt->rkt) {
-        zend_throw_exception_ex(NULL, 0, "RdKafka\\Topic::__construct() has not been called");
+        zend_throw_exception_ex(NULL, 0, "RdKafka\\Topic is not initialized or its client has been closed");
         return NULL;
     }
 
@@ -132,6 +163,11 @@ PHP_METHOD(RdKafka_ConsumerTopic, consumeCallback)
 
     intern = get_kafka_topic_object(getThis());
     if (!intern) {
+        return;
+    }
+
+    cb.kafka_intern = get_kafka_object(&intern->zrk);
+    if (!cb.kafka_intern) {
         return;
     }
 
@@ -174,6 +210,13 @@ PHP_METHOD(RdKafka_ConsumerTopic, consumeQueueStart)
 
     queue_intern = get_kafka_queue_object(zrkqu);
     if (!queue_intern) {
+        return;
+    }
+
+    // librdkafka requires a queue created by rd_kafka_queue_new(). Messages
+    // fetched into a client's main queue would abort that client's poll().
+    if (queue_intern->registry_key) {
+        zend_throw_exception(spl_ce_InvalidArgumentException, "RdKafka\\ConsumerTopic::consumeQueueStart() requires a queue created by RdKafka\\Consumer::newQueue()", 0);
         return;
     }
 
@@ -327,7 +370,9 @@ PHP_METHOD(RdKafka_ConsumerTopic, consume)
 
     if (!message) {
         err = rd_kafka_last_error();
-        if (err == RD_KAFKA_RESP_ERR__TIMED_OUT) {
+        // A callback exception interrupts consumption; let it propagate
+        // instead of the interruption error
+        if (err == RD_KAFKA_RESP_ERR__TIMED_OUT || EG(exception)) {
             return;
         }
         zend_throw_exception(ce_kafka_exception, rd_kafka_err2str(err), err);
@@ -375,6 +420,9 @@ PHP_METHOD(RdKafka_ConsumerTopic, consumeBatch)
 
     if (result == -1) {
         efree(rkmessages);
+        if (EG(exception)) {
+            return;
+        }
         err = rd_kafka_last_error();
         zend_throw_exception(ce_kafka_exception, rd_kafka_err2str(err), err);
         return;
@@ -599,6 +647,7 @@ void kafka_topic_minit(INIT_FUNC_ARGS) { /* {{{ */
     memcpy(&object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
     object_handlers.clone_obj = NULL;
     object_handlers.free_obj = kafka_topic_free;
+    object_handlers.get_gc = kafka_topic_get_gc;
     object_handlers.offset = offsetof(kafka_topic_object, std);
 
     ce_kafka_topic = register_class_RdKafka_Topic();

@@ -37,8 +37,18 @@ typedef struct _kafka_conf_callback {
     zend_fcall_info_cache fcc;
 } kafka_conf_callback;
 
+typedef enum {
+    KAFKA_CONSUMER_OPEN = 0,
+    KAFKA_CONSUMER_CLOSING_ASYNC,
+    KAFKA_CONSUMER_FINALIZING
+} kafka_consumer_close_state;
+
 typedef struct _kafka_conf_callbacks {
     zval zrk;
+    rd_kafka_t *rk;
+    uint32_t callback_depth;
+    kafka_consumer_close_state consumer_close_state;
+    zend_bool rebalance_acknowledged;
     kafka_conf_callback *error;
     kafka_conf_callback *rebalance;
     kafka_conf_callback *dr_msg;
@@ -65,6 +75,8 @@ void kafka_conf_minit(INIT_FUNC_ARGS);
 
 void kafka_conf_callbacks_dtor(kafka_conf_callbacks *cbs);
 void kafka_conf_callbacks_copy(kafka_conf_callbacks *to, kafka_conf_callbacks *from);
+HashTable *kafka_conf_callbacks_get_gc(kafka_conf_callbacks *cbs, zend_object *object, zval **table, int *n);
+void kafka_conf_call_function(kafka_conf_callbacks *cbs, rd_kafka_t *rk, zend_fcall_info *fci, zend_fcall_info_cache *fcc, uint32_t param_count, zval params[], zend_bool yield_on_exception);
 
 void kafka_conf_dr_msg_cb(rd_kafka_t *rk, const rd_kafka_message_t *msg, void *opaque);
 

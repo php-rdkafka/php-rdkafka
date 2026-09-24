@@ -116,7 +116,7 @@ make test
 To run a single test:
 
 ```sh
-php run-tests.php tests/name-of-test.phpt
+make test TESTS=tests/name-of-test.phpt
 ```
 
 ### Running the OAuth integration tests
@@ -129,6 +129,18 @@ docker compose --profile oauth up -d
 ```
 
 `TEST_KAFKA_OAUTH_BROKERS` is already set correctly in the container's environment, so no additional configuration is needed.
+
+### Running the KIP-848 consumer group protocol tests
+
+`kafka_consumer_kip848.phpt` needs a Kafka 4.0 or later broker and librdkafka 2.12.0 or later, and runs only when `TEST_KAFKA_KIP848_BROKERS` is set. Start the broker with the `kip848` profile and pass the variable when running the test:
+
+```sh
+# From the host
+docker compose --profile kip848 up -d
+docker compose exec -e TEST_KAFKA_KIP848_BROKERS=kafka-kip848:9092 build-env make test TESTS=tests/kafka_consumer_kip848.phpt
+```
+
+Once the variable is set, the test fails instead of skipping if the broker or librdkafka does not support the protocol.
 
 ### Stopping the environment
 

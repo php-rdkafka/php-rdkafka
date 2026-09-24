@@ -6,7 +6,7 @@ image: Visual Studio 2017
 clone_folder: C:\projects\rdkafka
 environment:
   BIN_SDK_VER: 2.2.0
-  DEP: librdkafka-1.5.3
+  DEP: librdkafka-2.12.1
   matrix:
     - PHP_VER: 8.1
       TS: 0

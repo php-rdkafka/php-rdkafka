@@ -62,13 +62,13 @@ jobs:
               - php: '8.3.0'
                 librdkafka: 'v1.9.2'
 
-              # librdkafka 1.7.0
+              # librdkafka 1.6.1 (floor)
               - php: '8.5.0'
-                librdkafka: 'v1.7.0'
+                librdkafka: 'v1.6.1'
               - php: '8.4.0'
-                librdkafka: 'v1.7.0'
+                librdkafka: 'v1.6.1'
               - php: '8.3.0'
-                librdkafka: 'v1.7.0'
+                librdkafka: 'v1.6.1'
 
               # librdkafka master (experimental, does not block PRs)
               - php: '8.5.0'

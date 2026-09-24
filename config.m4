@@ -50,37 +50,25 @@ if test "$PHP_RDKAFKA" != "no"; then
   AC_MSG_CHECKING([for librdkafka version])
   AC_EGREP_CPP(yes,[
 #include <librdkafka/rdkafka.h>
-#if RD_KAFKA_VERSION >= 0x010503ff
+#if RD_KAFKA_VERSION >= 0x010600ff
   yes
 #endif
   ],[
-    AC_MSG_RESULT([>= 1.5.3])
+    AC_MSG_RESULT([>= 1.6.0])
   ],[
-    AC_MSG_ERROR([librdkafka version 1.5.3 or greater required.])
+    AC_MSG_ERROR([librdkafka version 1.6.0 or greater required.])
   ])
 
-  AC_CHECK_LIB($LIBNAME,[rd_kafka_incremental_assign, rd_kafka_incremental_unassign],[
-    AC_DEFINE(HAS_RD_KAFKA_INCREMENTAL_ASSIGN,1,[ ])
+  AC_CHECK_LIB($LIBNAME,[rd_kafka_consumer_close_queue],[
+    AC_DEFINE(HAS_RD_KAFKA_CONSUMER_CLOSE_QUEUE,1,[ ])
   ],[
-    AC_MSG_WARN([no rd_kafka_incremental_(un)assign, incremental rebalance support will not be available])
-  ])
-
-  AC_CHECK_LIB($LIBNAME,[rd_kafka_consumer_group_metadata_new_with_genid],[
-    AC_DEFINE(HAS_RD_KAFKA_CONSUMER_GROUP_METADATA_NEW_WITH_GENID,1,[ ])
-  ],[
-    AC_MSG_WARN([no rd_kafka_consumer_group_metadata_new_with_genid, ConsumerGroupMetadata constructor limited to group_id only (requires librdkafka >= 1.7.0 for full constructor)])
+    AC_MSG_WARN([no rd_kafka_consumer_close_queue, KafkaConsumer::closeAsync() and isClosed() not available (requires librdkafka >= 1.9.0)])
   ])
 
   AC_CHECK_LIB($LIBNAME,[rd_kafka_consumer_group_metadata_group_id],[
     AC_DEFINE(HAS_RD_KAFKA_CONSUMER_GROUP_METADATA_GETTERS,1,[ ])
   ],[
     AC_MSG_WARN([no rd_kafka_consumer_group_metadata_group_id, ConsumerGroupMetadata getters not available (requires librdkafka >= 2.8.0)])
-  ])
-
-  AC_CHECK_LIB($LIBNAME,[rd_kafka_rebalance_protocol],[
-    AC_DEFINE(HAS_RD_KAFKA_REBALANCE_PROTOCOL,1,[ ])
-  ],[
-    AC_MSG_WARN([no rd_kafka_rebalance_protocol, KafkaConsumer::getRebalanceProtocol() not available (requires librdkafka >= 1.6.0)])
   ])
 
   LDFLAGS="$ORIG_LDFLAGS"
