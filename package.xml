@@ -46,6 +46,7 @@
    <file role="doc" name="CREDITS"/>
    <file role="doc" name="LICENSE"/>
    <file role="doc" name="README.md"/>
+   <file role="doc" name="UPGRADE.md"/>
    <file role="src" name="conf.c"/>
    <file role="src" name="conf.h"/>
    <file role="src" name="conf.stub.php"/>
@@ -122,21 +123,33 @@
     <file role="test" name="bug74.phpt"/>
     <file role="test" name="bug88.phpt"/>
     <file role="test" name="bugConfSetArgument.phpt"/>
+    <file role="test" name="callback_dr_msg_cb_args.phpt"/>
+    <file role="test" name="callback_log_cb.phpt"/>
     <file role="test" name="conf_callbacks_integration.phpt"/>
     <file role="test" name="conf_callbacks_rdkafka11.phpt"/>
     <file role="test" name="conf_callbacks.phpt"/>
+    <file role="test" name="conf_dump.phpt"/>
+    <file role="test" name="conf_get_default_topic_conf.phpt"/>
+    <file role="test" name="conf_get.phpt"/>
     <file role="test" name="conf.phpt"/>
     <file role="test" name="conf_setDefaultTopicConf8.phpt"/>
     <file role="test" name="conf_setDefaultTopicConf.phpt"/>
     <file role="test" name="constants.phpt"/>
+    <file role="test" name="consume_batch_invalid_batch_size.phpt"/>
     <file role="test" name="controller_id.phpt"/>
+    <file role="test" name="deprecated_errno2err.phpt"/>
+    <file role="test" name="deprecated_set_logger.phpt"/>
     <file role="test" name="err2name.phpt"/>
     <file role="test" name="init_transaction_not_configured.phpt"/>
     <dir name="helpers">
      <file role="test" name="integration-tests-check.php"/>
      <file role="test" name="oauth-integration-tests-check.php"/>
     </dir>
+    <file role="test" name="kafka_consumer_close_destroy.phpt"/>
+    <file role="test" name="kafka_consumer_consume_returns_message_on_eof.phpt"/>
+    <file role="test" name="kafka_consumer_consume_returns_null_on_timeout.phpt"/>
     <file role="test" name="kafka_consumer_get_rebalance_protocol.phpt"/>
+    <file role="test" name="kafka_consumer_new_topic_no_memleak.phpt"/>
     <file role="test" name="kafka_error_exception.phpt"/>
     <file role="test" name="message_headers.phpt"/>
     <file role="test" name="metadata_001.phpt"/>
@@ -167,6 +180,8 @@
     <file role="test" name="topic_conf.phpt"/>
     <file role="test" name="topic_partition_001.phpt"/>
     <file role="test" name="topic_partition_002.phpt"/>
+    <file role="test" name="topic_partition_metadata.phpt"/>
+    <file role="test" name="transaction_error_no_memleak.phpt"/>
    </dir>
   </dir>
  </contents>

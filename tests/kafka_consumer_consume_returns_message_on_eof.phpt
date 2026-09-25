@@ -13,10 +13,17 @@ $topic = sprintf('test_rdkafka_%s', uniqid());
 $conf = new RdKafka\Conf();
 $conf->set('metadata.broker.list', getenv('TEST_KAFKA_BROKERS'));
 $conf->setLogCb(function () {});
-$conf->setDrMsgCb(function () {});
+$conf->setDrMsgCb(function ($producer, $msg) {
+    if ($msg->err) {
+        throw new Exception("Seed delivery failed: " . $msg->errstr());
+    }
+});
 $producer = new RdKafka\Producer($conf);
 $producer->newTopic($topic)->produce(RD_KAFKA_PARTITION_UA, 0, 'seed');
-$producer->flush(5000);
+$result = $producer->flush(5000);
+if (RD_KAFKA_RESP_ERR_NO_ERROR !== $result) {
+    throw new Exception(rd_kafka_err2str($result), $result);
+}
 unset($producer);
 
 // Consume from earliest with partition EOF enabled
