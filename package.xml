@@ -122,6 +122,8 @@
     <file role="test" name="bug74.phpt"/>
     <file role="test" name="bug88.phpt"/>
     <file role="test" name="bugConfSetArgument.phpt"/>
+    <file role="test" name="callback_log_cb_log_queue.phpt"/>
+    <file role="test" name="callback_log_cb_plugin.phpt"/>
     <file role="test" name="conf_callbacks_integration.phpt"/>
     <file role="test" name="conf_callbacks_rdkafka11.phpt"/>
     <file role="test" name="conf_callbacks.phpt"/>

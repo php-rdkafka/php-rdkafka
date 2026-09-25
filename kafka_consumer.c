@@ -140,6 +140,10 @@ PHP_METHOD(RdKafka_KafkaConsumer, __construct)
         kafka_conf_callbacks_copy(&intern->cbs, &conf_intern->cbs);
         intern->cbs.zrk = *getThis();
         rd_kafka_conf_set_opaque(conf, &intern->cbs);
+        if (intern->cbs.log) {
+            // The PHP log callback must not run on librdkafka threads
+            rd_kafka_conf_set(conf, "log.queue", "true", errstr, sizeof(errstr));
+        }
     }
 
     if (!has_group_id(conf)) {
