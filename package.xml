@@ -148,6 +148,7 @@
     <file role="test" name="oauthbearer_integration.phpt"/>
     <file role="test" name="oauthbearer_integration_hl.phpt"/>
     <file role="test" name="pause_resume.phpt"/>
+    <file role="test" name="pause_resume_consume.phpt"/>
     <file role="test" name="produce_consume.phpt"/>
     <file role="test" name="produce_consume_queue.phpt"/>
     <file role="test" name="produce_consume_transactional.phpt"/>
