@@ -46,6 +46,7 @@
    <file role="doc" name="CREDITS"/>
    <file role="doc" name="LICENSE"/>
    <file role="doc" name="README.md"/>
+   <file role="doc" name="UPGRADE.md"/>
    <file role="src" name="conf.c"/>
    <file role="src" name="conf.h"/>
    <file role="src" name="conf.stub.php"/>
@@ -125,6 +126,7 @@
     <file role="test" name="conf_callbacks_integration.phpt"/>
     <file role="test" name="conf_callbacks_rdkafka11.phpt"/>
     <file role="test" name="conf_callbacks.phpt"/>
+    <file role="test" name="conf_get_default_topic_conf.phpt"/>
     <file role="test" name="conf.phpt"/>
     <file role="test" name="conf_setDefaultTopicConf8.phpt"/>
     <file role="test" name="conf_setDefaultTopicConf.phpt"/>

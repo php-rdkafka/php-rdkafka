@@ -81,6 +81,14 @@ $autoOffsetReset = $conf->getDefaultTopicConf()->get('auto.offset.reset');  // t
 Note: This behavior existed in php-rdkafka 6.x but was not well-documented. Tests or debugging code that relied on dump() containing topic-level properties will need to be updated.
 Refer to librdkafka CONFIGURATION.md (https://github.com/confluentinc/librdkafka/blob/master/CONFIGURATION.md) to determine which properties are topic-level (marked with * in the C/P column) vs global.
 
+### Conf::getDefaultTopicConf() returns a copy
+
+`Conf::getDefaultTopicConf()` returns a copy of the default topic configuration. Changes made to the returned `TopicConf` do not affect the `Conf`, and a copy does not reflect later changes to the `Conf`. To change a topic-level property, call `Conf::set()` on the `Conf`:
+
+```php
+$conf->set('auto.offset.reset', 'earliest');
+```
+
 ### PHP 8.1 now required
 
 php-rdkafka 7.x requires PHP 8.1 or later. PHP 7.x is no longer supported.

@@ -99,7 +99,7 @@ static void kafka_conf_free(zend_object *object) /* {{{ */
             kafka_conf_callbacks_dtor(&intern->cbs);
             break;
         case KAFKA_TOPIC_CONF:
-            if (intern->u.topic_conf && !intern->is_borrowed) {
+            if (intern->u.topic_conf) {
                 rd_kafka_topic_conf_destroy(intern->u.topic_conf);
             }
             break;
@@ -486,7 +486,7 @@ PHP_METHOD(RdKafka_Conf, get)
 /* }}} */
 
 /* {{{ proto ?TopicConf RdKafka\Conf::getDefaultTopicConf()
-   Returns the default topic conf embedded in this Conf, or null if none exists. */
+   Returns a copy of the default topic conf embedded in this Conf, or null if none exists. */
 PHP_METHOD(RdKafka_Conf, getDefaultTopicConf)
 {
     kafka_conf_object *intern;
@@ -510,8 +510,7 @@ PHP_METHOD(RdKafka_Conf, getDefaultTopicConf)
     object_init_ex(return_value, ce_kafka_topic_conf);
     topic_intern = Z_RDKAFKA_P(kafka_conf_object, return_value);
     topic_intern->type = KAFKA_TOPIC_CONF;
-    topic_intern->is_borrowed = 1;
-    topic_intern->u.topic_conf = topic_conf;
+    topic_intern->u.topic_conf = rd_kafka_topic_conf_dup(topic_conf);
 }
 /* }}} */
 
