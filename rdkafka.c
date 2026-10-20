@@ -47,8 +47,8 @@
 #   error "PHP version 8.1.0 or greater required"
 #endif
 
-#if RD_KAFKA_VERSION < 0x010503ff
-#	error librdkafka version 1.5.3 or greater required
+#if RD_KAFKA_VERSION < 0x010600ff
+#	error librdkafka version 1.6.0 or greater required
 #endif
 
 enum {
@@ -88,15 +88,16 @@ static void kafka_free(zend_object *object) /* {{{ */
         if (intern->type == RD_KAFKA_CONSUMER) {
             stop_consuming(intern);
             zend_hash_destroy(&intern->consuming);
-            zend_hash_destroy(&intern->queues);
         } else if (intern->type == RD_KAFKA_PRODUCER) {
             // Force internal delivery callbacks for queued messages, as we rely
             // on these to free msg_opaques
             rd_kafka_purge(intern->rk, RD_KAFKA_PURGE_F_QUEUE | RD_KAFKA_PURGE_F_INFLIGHT);
             rd_kafka_flush(intern->rk, 0);
         }
+        zend_hash_destroy(&intern->queues);
         zend_hash_destroy(&intern->topics);
 
+        intern->cbs.rk = NULL;
         rd_kafka_destroy(intern->rk);
         intern->rk = NULL;
     }
@@ -105,22 +106,16 @@ static void kafka_free(zend_object *object) /* {{{ */
 }
 /* }}} */
 
+static HashTable *kafka_get_gc(zend_object *object, zval **table, int *n) /* {{{ */
+{
+    kafka_object *intern = php_kafka_from_obj(kafka_object, object);
+
+    return kafka_conf_callbacks_get_gc(&intern->cbs, object, table, n);
+}
+/* }}} */
+
 static void toppar_pp_dtor(toppar ** tp) {
     efree(*tp);
-}
-
-static void kafka_queue_object_pre_free(kafka_queue_object ** pp) {
-    kafka_queue_object *intern = *pp;
-    rd_kafka_queue_destroy(intern->rkqu);
-    intern->rkqu = NULL;
-    zval_ptr_dtor(&intern->zrk);
-}
-
-static void kafka_topic_object_pre_free(kafka_topic_object ** pp) {
-    kafka_topic_object *intern = *pp;
-    rd_kafka_topic_destroy(intern->rkt);
-    intern->rkt = NULL;
-    zval_ptr_dtor(&intern->zrk);
 }
 
 static void kafka_init(zval *this_ptr, rd_kafka_type_t type, zval *zconf) /* {{{ */
@@ -132,6 +127,13 @@ static void kafka_init(zval *this_ptr, rd_kafka_type_t type, zval *zconf) /* {{{
     rd_kafka_conf_t *conf = NULL;
 
     intern = Z_RDKAFKA_P(kafka_object, this_ptr);
+
+    // Constructing again would replace the client or its callbacks
+    if (Z_TYPE(intern->cbs.zrk) != IS_UNDEF) {
+        zend_throw_exception_ex(ce_kafka_exception, RD_KAFKA_RESP_ERR__STATE, "%s::__construct() has already been called", ZSTR_VAL(Z_OBJCE_P(this_ptr)->name));
+        return;
+    }
+
     intern->type = type;
 
     if (zconf) {
@@ -155,6 +157,15 @@ static void kafka_init(zval *this_ptr, rd_kafka_type_t type, zval *zconf) /* {{{
     rk = rd_kafka_new(type, conf, errstr, sizeof(errstr));
 
     if (rk == NULL) {
+        // rd_kafka_new() only takes ownership of the configuration on success
+        rd_kafka_conf_destroy(conf);
+
+        // Allow a retry with a corrected configuration. The callbacks are
+        // released first, so construction started by their destructors
+        // is still rejected.
+        kafka_conf_callbacks_dtor(&intern->cbs);
+        ZVAL_UNDEF(&intern->cbs.zrk);
+
         zend_throw_exception(ce_kafka_exception, errstr, 0);
         return;
     }
@@ -164,12 +175,13 @@ static void kafka_init(zval *this_ptr, rd_kafka_type_t type, zval *zconf) /* {{{
     }
 
     intern->rk = rk;
+    intern->cbs.rk = rk;
 
     if (type == RD_KAFKA_CONSUMER) {
         zend_hash_init(&intern->consuming, 0, NULL, (dtor_func_t)toppar_pp_dtor, 0);
-        zend_hash_init(&intern->queues, 0, NULL, (dtor_func_t)kafka_queue_object_pre_free, 0);
     }
 
+    zend_hash_init(&intern->queues, 0, NULL, (dtor_func_t)kafka_queue_object_pre_free, 0);
     zend_hash_init(&intern->topics, 0, NULL, (dtor_func_t)kafka_topic_object_pre_free, 0);
 }
 /* }}} */
@@ -286,7 +298,6 @@ PHP_METHOD(RdKafka_Consumer, newQueue)
 {
     rd_kafka_queue_t *rkqu;
     kafka_object *intern;
-    kafka_queue_object *queue_intern;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE) {
         return;
@@ -303,25 +314,7 @@ PHP_METHOD(RdKafka_Consumer, newQueue)
         return;
     }
 
-    if (object_init_ex(return_value, ce_kafka_queue) != SUCCESS) {
-        return;
-    }
-
-    queue_intern = Z_RDKAFKA_P(kafka_queue_object, return_value);
-    if (!queue_intern) {
-        return;
-    }
-
-    queue_intern->rkqu = rkqu;
-
-    // Keep a reference to the parent Kafka object, attempts to ensure that
-    // the Queue object is destroyed before the Kafka object.
-    // This avoids rd_kafka_destroy() hanging.
-    queue_intern->zrk = *getThis();
-
-    Z_ADDREF_P(&queue_intern->zrk);
-
-    zend_hash_index_add_ptr(&intern->queues, (zend_ulong)queue_intern, queue_intern);
+    kafka_queue_object_init(return_value, getThis(), &intern->queues, rkqu, NULL);
 }
 /* }}} */
 
@@ -546,6 +539,7 @@ PHP_METHOD(RdKafka, newTopic)
     }
 
     topic_intern->rkt = rkt;
+    topic_intern->registry = &intern->topics;
     topic_intern->zrk = *getThis();
 
     Z_ADDREF_P(&topic_intern->zrk);
@@ -590,6 +584,31 @@ PHP_METHOD(RdKafka, poll)
     }
 
     RETURN_LONG(rd_kafka_poll(intern->rk, timeout));
+}
+/* }}} */
+
+/* {{{ proto RdKafka\Queue RdKafka::getMainQueue()
+   Returns the queue that poll() serves */
+PHP_METHOD(RdKafka, getMainQueue)
+{
+    kafka_object *intern;
+    kafka_queue_object *queue_intern;
+
+    if (zend_parse_parameters_none() == FAILURE) {
+        return;
+    }
+
+    intern = get_kafka_object(getThis());
+    if (!intern) {
+        return;
+    }
+
+    queue_intern = zend_hash_str_find_ptr(&intern->queues, ZEND_STRL("main"));
+    if (queue_intern) {
+        RETURN_OBJ_COPY(&queue_intern->std);
+    }
+
+    kafka_queue_object_init(return_value, getThis(), &intern->queues, rd_kafka_queue_get_main(intern->rk), zend_string_init(ZEND_STRL("main"), 0));
 }
 /* }}} */
 
@@ -1059,6 +1078,7 @@ PHP_MINIT_FUNCTION(rdkafka)
 
 	kafka_object_handlers = kafka_default_object_handlers;
     kafka_object_handlers.free_obj = kafka_free;
+    kafka_object_handlers.get_gc = kafka_get_gc;
     kafka_object_handlers.offset = offsetof(kafka_object, std);
 
     ce_kafka = register_class_RdKafka();

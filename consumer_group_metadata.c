@@ -59,7 +59,6 @@ PHP_METHOD(RdKafka_ConsumerGroupMetadata, __construct)
         intern->cgmd = NULL;
     }
 
-#ifdef HAS_RD_KAFKA_CONSUMER_GROUP_METADATA_NEW_WITH_GENID
     if (generation_id != -1 || member_id_len > 0 || group_instance_id != NULL) {
         intern->cgmd = rd_kafka_consumer_group_metadata_new_with_genid(
             group_id,
@@ -70,13 +69,6 @@ PHP_METHOD(RdKafka_ConsumerGroupMetadata, __construct)
     } else {
         intern->cgmd = rd_kafka_consumer_group_metadata_new(group_id);
     }
-#else
-    if (generation_id != -1 || member_id_len > 0 || group_instance_id != NULL) {
-        zend_throw_exception(ce_kafka_exception, "Full ConsumerGroupMetadata constructor requires librdkafka >= 1.7.0", 0);
-        return;
-    }
-    intern->cgmd = rd_kafka_consumer_group_metadata_new(group_id);
-#endif
 
     if (!intern->cgmd) {
         zend_throw_exception(ce_kafka_exception, "Failed to create ConsumerGroupMetadata", 0);

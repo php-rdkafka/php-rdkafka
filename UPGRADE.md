@@ -2,13 +2,19 @@
 
 ## Summary of changes
 
-**Minimum requirements raised.** PHP 7.x is no longer supported; PHP 8.1 or later is required. librdkafka 1.5.3 or later is required (previously 1.0.0).
+**Minimum requirements raised.** PHP 7.x is no longer supported; PHP 8.1 or later is required. librdkafka 1.6.0 or later is required (previously 1.0.0).
 
-**Compile-time feature flags removed.** Several methods were previously compiled in only when the installed librdkafka was new enough to support them (guarded by `#ifdef HAS_RD_KAFKA_OAUTHBEARER`, `HAS_RD_KAFKA_TRANSACTIONS`, `HAS_RD_KAFKA_PURGE`, `HAS_RD_KAFKA_CONTROLLERID`, `HAVE_RD_KAFKA_MESSAGE_HEADERS`). Because the minimum librdkafka is now 1.5.3, which provides all of these features, the guards have been removed and the methods are always available.
+**Compile-time feature flags removed.** Several methods were previously compiled in only when the installed librdkafka was new enough to support them (guarded by `#ifdef HAS_RD_KAFKA_OAUTHBEARER`, `HAS_RD_KAFKA_TRANSACTIONS`, `HAS_RD_KAFKA_PURGE`, `HAS_RD_KAFKA_CONTROLLERID`, `HAVE_RD_KAFKA_MESSAGE_HEADERS`, `HAS_RD_KAFKA_INCREMENTAL_ASSIGN`). Because the minimum librdkafka is now 1.6.0, which provides all of these features, the guards have been removed and the methods are always available.
 
-**New methods on `KafkaConsumer`.** The high-level consumer gained `poll()`, `oauthbearerSetToken()`, and `oauthbearerSetTokenFailure()`, and now supports SASL/SSL OAUTHBEARER authentication end-to-end.
+**New methods on `KafkaConsumer`.** The high-level consumer gained `poll()`, `oauthbearerSetToken()`, `oauthbearerSetTokenFailure()`, `getRebalanceProtocol()`, and `getConsumerGroupMetadata()`, and now supports SASL/SSL OAUTHBEARER authentication end-to-end.
 
 **Internal fixes.** A missing `zend_restore_error_handling()` call in the KafkaConsumer error path was corrected. Several internal type mismatches were fixed.
+
+**Callback cycles are now collected.** Keep a reference to clients while using them and flush producers before releasing them. A callback that captures its client no longer keeps an otherwise unreachable client alive until request shutdown.
+
+**`KafkaConsumer::close()` rejected inside callbacks.** The method now throws `RdKafka\Exception` when called from one of the consumer's callbacks. Close the consumer after the method that invoked the callback returns.
+
+**Callback exceptions stop consumption and polling.** When a callback throws, the method that called it now returns before handing out another message or calling another callback. Messages and delivery reports that were not handed out stay queued for the next call. A consumer's error callback is the exception and keeps the previous behavior.
 
 **PHP 7 compatibility shims removed.** Internal compatibility code for PHP 7 has been cleaned up; this has no effect on behaviour for PHP 8 users.
 
@@ -37,6 +43,22 @@ if ($msg === null) {
 ```
 
 `RD_KAFKA_RESP_ERR__TIMED_OUT` on a returned `Message` now means an actual timeout error originating from librdkafka, not a poll window expiry.
+
+### `KafkaConsumer::close()` cannot be called from a callback
+
+Calling `KafkaConsumer::close()` from a consumer callback now throws `RdKafka\Exception` with code `RD_KAFKA_RESP_ERR__STATE`. Record that shutdown was requested in the callback, then close the consumer after the method that invoked the callback returns.
+
+### `KafkaConsumer::close()` reports close errors
+
+`close()` now throws `RdKafka\Exception` for a native close error instead of ignoring it. Handle this exception where your application closes consumers. Once closing starts, the consumer is released even if `close()` throws; do not retry it on that object. Calls rejected inside a callback or during another `close()` do not start closing the consumer.
+
+### Callback exceptions stop consumption and polling
+
+After catching a callback exception, call `poll()`, `consume()` or `consumeCallback()` again if processing is to continue. Events that were not handed out now stay queued for that next call. A consumer's error callback keeps the previous dispatch behavior. This does not recover messages already collected by `ConsumerTopic::consumeBatch()` before an exception.
+
+### Clients cannot be constructed twice
+
+Calling `__construct()` again on an `RdKafka\Producer`, `RdKafka\Consumer` or `RdKafka\KafkaConsumer` that was constructed successfully now throws `RdKafka\Exception` with code `RD_KAFKA_RESP_ERR__STATE`, including after `KafkaConsumer::close()`. Create a new object instead.
 
 ### Conf::dump() does not include topic-level properties
 
@@ -85,13 +107,13 @@ Refer to librdkafka CONFIGURATION.md (https://github.com/confluentinc/librdkafka
 
 php-rdkafka 7.x requires PHP 8.1 or later. PHP 7.x is no longer supported.
 
-### librdkafka 1.5.3 now required
+### librdkafka 1.6.0 now required
 
-librdkafka 1.5.3 is the new minimum. Versions older than 1.5.3 are not supported.
+librdkafka 1.6.0 is the new minimum. Versions older than 1.6.0 are not supported.
 
 ### Previously conditional methods are now always available
 
-The following methods were only compiled in when the build-time librdkafka was sufficiently new. They are now unconditionally available (librdkafka 1.5.3 supports all of them):
+The following methods were only compiled in when the build-time librdkafka was sufficiently new. They are now unconditionally available (librdkafka 1.6.0 supports all of them):
 
 | Class | Method |
 |-------|--------|
@@ -101,21 +123,28 @@ The following methods were only compiled in when the build-time librdkafka was s
 | `RdKafka\Producer` | `oauthbearerSetToken()`, `oauthbearerSetTokenFailure()` |
 | `RdKafka\Producer` | `getControllerId()` |
 | `RdKafka\KafkaConsumer` | `getControllerId()` |
+| `RdKafka\KafkaConsumer` | `incrementalAssign()`, `incrementalUnassign()` |
 | `RdKafka\ProducerTopic` | `producev()` |
 
 If your code checked `method_exists()` before calling any of these, those guards can be removed.
 
 ### New methods on `KafkaConsumer`
 
-`RdKafka\KafkaConsumer` gained three new methods:
+`RdKafka\KafkaConsumer` gained five new methods:
 
 ```php
 KafkaConsumer::poll(int $timeout_ms): int
 KafkaConsumer::oauthbearerSetToken(string $token_value, int $lifetime_ms, string $principal_name, array $extensions = []): void
 KafkaConsumer::oauthbearerSetTokenFailure(string $error): void
+KafkaConsumer::getRebalanceProtocol(): string
+KafkaConsumer::getConsumerGroupMetadata(): ConsumerGroupMetadata
 ```
 
 `poll()` allows the high-level consumer to service callbacks (including the OAUTHBEARER token refresh callback) without consuming a message. This is the same method that exists on the low-level `RdKafka\Consumer`.
+
+### New `ConsumerGroupMetadata` API
+
+`RdKafka\ConsumerGroupMetadata` can be constructed with full group metadata on every supported librdkafka version. Its getter methods require librdkafka 2.8.0 and throw `RdKafka\Exception` on older versions.
 
 ### `RdKafka::setLogger()` and `rd_kafka_errno2err()` are deprecated
 

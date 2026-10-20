@@ -15,4 +15,15 @@ class Queue
 
     /** @tentative-return-type */
     public function consume(int $timeout_ms): ?Message {}
+
+    /** @tentative-return-type */
+    public function getLength(): int {}
+
+#ifndef PHP_WIN32
+    /**
+     * @param resource|null $stream
+     * @tentative-return-type
+     */
+    public function ioEventEnable($stream, string $payload = "\x01"): void {}
+#endif
 }

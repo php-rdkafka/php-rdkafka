@@ -2,11 +2,11 @@
 
 [![Join the chat at https://gitter.im/arnaud-lb/php-rdkafka](https://badges.gitter.im/arnaud-lb/php-rdkafka.svg)](https://gitter.im/arnaud-lb/php-rdkafka?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-[![Supported librdkafka versions: >= 0.11](https://img.shields.io/badge/librdkafka-%3E%3D%200.11-blue.svg)](https://github.com/edenhill/librdkafka/releases) [![Supported Kafka versions: >= 0.8](https://img.shields.io/badge/kafka-%3E%3D%200.8-blue.svg)](https://github.com/edenhill/librdkafka/blob/master/INTRODUCTION.md#broker-version-compatibility) ![Supported PHP versions: 7.x .. 8.x](https://img.shields.io/badge/php-7.x%20..%208.x-blue.svg)
+[![Supported librdkafka versions: >= 1.6.0](https://img.shields.io/badge/librdkafka-%3E%3D%201.6.0-blue.svg)](https://github.com/confluentinc/librdkafka/releases) [![Supported Kafka versions: >= 0.8](https://img.shields.io/badge/kafka-%3E%3D%200.8-blue.svg)](https://github.com/edenhill/librdkafka/blob/master/INTRODUCTION.md#broker-version-compatibility) ![Supported PHP versions: >= 8.1](https://img.shields.io/badge/php-%3E%3D%208.1-blue.svg)
 
 PHP-rdkafka is a **stable**, **production-ready**, and **fast** Kafka client for PHP based on [librdkafka](https://github.com/edenhill/librdkafka).
 
-Current version supports PHP >= 8.1.0, librdkafka >= 1.5.3, Kafka >= 0.8. Version [6.x](https://github.com/arnaud-lb/php-rdkafka/tree/6.x) supports PHP 7.x..8.x, librdkafka 0.11..2.x. Older versions support PHP 5.
+Current version supports PHP >= 8.1.0, librdkafka >= 1.6.0, Kafka >= 0.8. Version [6.x](https://github.com/arnaud-lb/php-rdkafka/tree/6.x) supports PHP 7.x..8.x, librdkafka 0.11..2.x. Older versions support PHP 5.
 
 The goal of the extension is to be a low-level un-opinionated librdkafka binding focused on production and long term support.
 
@@ -35,6 +35,37 @@ Documentation is available [here](https://arnaud-lb.github.io/php-rdkafka/phpdoc
 ## Installation
 
 https://arnaud-lb.github.io/php-rdkafka-doc/phpdoc/rdkafka.setup.html
+
+## Supported Versions
+
+7.x requires **PHP >= 8.1** and **librdkafka >= 1.6.0** (enforced at `configure` time; a build against an older librdkafka fails with `librdkafka version 1.6.0 or greater required`).
+
+The test matrix builds and tests against librdkafka v1.6.1, v1.9.2, v2.6.0, and v2.14.1 (the v1.6.1 job exercises the floor), plus a non-blocking experimental build against librdkafka `master`. librdkafka 1.5.3, the previous floor, was the last release in the 1.5.x line (released 2020-12-09); librdkafka does not maintain long-term branches per minor version, so it received zero fixes after development moved on to 1.6.0.
+
+### What your distro likely ships
+
+If you're relying on your OS's packaged `librdkafka` rather than building it yourself or installing from Confluent's repositories, check the version against the floor above. As of this writing:
+
+| Distro | librdkafka | Meets the 1.6.0 floor? |
+|---|---|---|
+| Ubuntu 22.04 (Jammy) | 1.8.0 | Yes |
+| Ubuntu 24.04 (Noble) | 2.3.0 | Yes |
+| Ubuntu 26.04 (Resolute) | 2.13.0 | Yes |
+| Debian 11 (Bullseye) | 1.6.0 | Yes |
+| Debian 12 (Bookworm) | 2.0.2 | Yes |
+| Debian 13 (Trixie) | 2.8.0 | Yes |
+| RHEL 8 family (AlmaLinux/Rocky/CentOS Stream 8) | 1.6.1 | Yes |
+| RHEL 9 family (AlmaLinux/Rocky/CentOS Stream 9) | 1.6.1 | Yes |
+| CentOS Stream 10 | 2.1.1 | Yes |
+| Fedora (39–44) | 2.1.1 – 2.14.1 | Yes |
+| Ubuntu 20.04 (Focal) | 1.2.1 | No |
+| Amazon Linux 2 | 0.11.4 | No |
+| CentOS 7 | 0.11.4 | No |
+| openSUSE Leap 15.x | 0.11.6 | No |
+
+Source: [repology.org](https://repology.org/project/librdkafka/versions). If your distro ships a version below the floor, you'll need to install librdkafka from [Confluent's repositories](https://github.com/confluentinc/librdkafka#installation), build it from source, or use a container image with a newer version.
+
+Debian 11's stock package (1.6.0) sits exactly at the `configure`-enforced floor, one patch release below the v1.6.1 CI actually builds and tests. Debian 11's own free LTS support ended 2026-08-31; further updates require Debian's paid ELTS program.
 
 ## Examples
 

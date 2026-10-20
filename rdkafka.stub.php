@@ -53,6 +53,9 @@ namespace {
         public function poll(int $timeout_ms): int {}
 
         /** @tentative-return-type */
+        public function getMainQueue(): RdKafka\Queue {}
+
+        /** @tentative-return-type */
         public function flush(int $timeout_ms): int {}
 
         /** @tentative-return-type */

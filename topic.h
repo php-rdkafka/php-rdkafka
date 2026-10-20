@@ -18,12 +18,14 @@
 
 typedef struct _kafka_topic_object {
     rd_kafka_topic_t    *rkt;
-    zval               zrk;
+    HashTable           *registry;
+    zval                zrk;
     zend_object         std;
 } kafka_topic_object;
 
 void kafka_topic_minit(INIT_FUNC_ARGS);
 kafka_topic_object * get_kafka_topic_object(zval *zrkt);
+void kafka_topic_object_pre_free(kafka_topic_object **pp);
 
 extern zend_class_entry * ce_kafka_consumer_topic;
 extern zend_class_entry * ce_kafka_kafka_consumer_topic;
