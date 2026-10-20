@@ -32,6 +32,7 @@ $conf->set('metadata.broker.list', getenv('TEST_KAFKA_BROKERS'));
 $conf->set('group.id', sprintf("test_rdkafka_group_%s", uniqid()));
 $conf->set('statistics.interval.ms', 10);
 $conf->set('enable.partition.eof', 'true');
+$conf->setLogCb(function () {});
 
 $conf->setOffsetCommitCb(function ($consumer, $error, $topicPartitions) {
     echo "Offset " . $topicPartitions[0]->getOffset() . " committed.\n";
