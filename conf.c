@@ -311,8 +311,14 @@ static void kafka_conf_offset_commit_cb(rd_kafka_t *rk, rd_kafka_resp_err_t err,
 static void kafka_conf_log_cb(const rd_kafka_t *rk, int level, const char *facility, const char *message)
 {
     zval args[4];
+    kafka_conf_callbacks *cbs;
 
-    kafka_conf_callbacks *cbs = (kafka_conf_callbacks*) rd_kafka_opaque(rk);
+    // librdkafka logs without a client while loading plugins
+    if (!rk) {
+        return;
+    }
+
+    cbs = (kafka_conf_callbacks*) rd_kafka_opaque(rk);
 
     if (!cbs->log) {
         return;
@@ -781,7 +787,7 @@ PHP_METHOD(RdKafka_Conf, setOffsetCommitCb)
 /* }}} */
 
 /* {{{ proto void RdKafka\Conf::setLogCb(mixed $callback)
-   Set offset commit callback for use with consumer groups */
+   Sets the log callback */
 PHP_METHOD(RdKafka_Conf, setLogCb)
 {
     zend_fcall_info fci;
