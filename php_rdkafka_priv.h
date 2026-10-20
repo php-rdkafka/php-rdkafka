@@ -60,19 +60,6 @@ static inline void rdkafka_read_property(zend_class_entry *scope, zend_object *o
     }
 }
 
-
-static inline char *rdkafka_hash_get_current_key_ex(HashTable *ht, HashPosition *pos)
-{
-    zend_string* key;
-    zend_ulong index;
-
-    if (zend_hash_get_current_key_ex(ht, &key, &index, pos) == HASH_KEY_IS_STRING) {
-        return key->val;
-    }
-
-    return NULL;
-}
-
 kafka_object * get_kafka_object(zval *zrk);
 void add_consuming_toppar(kafka_object * intern, rd_kafka_topic_t * rkt, int32_t partition);
 void del_consuming_toppar(kafka_object * intern, rd_kafka_topic_t * rkt, int32_t partition);

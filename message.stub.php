@@ -30,6 +30,11 @@ class Message
 
     public ?string $opaque = null;
 
+    private ?array $native_headers = null;
+
     /** @tentative-return-type */
     public function errstr(): ?string {}
+
+    /** @tentative-return-type */
+    public function getHeaderPairs(): array {}
 }

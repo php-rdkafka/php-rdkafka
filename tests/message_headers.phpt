@@ -44,6 +44,13 @@ $headers = [
         'key3' => 'value3',
     ],
     ['gzencoded' => gzencode('gzdata')],
+    [
+        'before' => 'first',
+        0 => 'zero',
+        'after' => 'last',
+        -2 => 'negative',
+        "nul\0suffix" => 'nul',
+    ],
     [],
     null,
     ['key'],
@@ -90,10 +97,11 @@ while (true) {
     printf("Got message: %s | Headers: %s\n", $msg->payload, $headersString);
 }
 --EXPECT--
-6 messages delivered
+7 messages delivered
 Got message: message 0 | Headers: key: value
 Got message: message 1 | Headers: key1: value1, key2: value2, key3: value3
 Got message: message 2 | Headers: gzencoded: gzdata
-Got message: message 3 | Headers: none
+Got message: message 3 | Headers: before: first, 0: zero, after: last, -2: negative, nul: nul
 Got message: message 4 | Headers: none
 Got message: message 5 | Headers: none
+Got message: message 6 | Headers: 0: key
