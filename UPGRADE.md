@@ -6,7 +6,9 @@
 
 **Compile-time feature flags removed.** Several methods were previously compiled in only when the installed librdkafka was new enough to support them (guarded by `#ifdef HAS_RD_KAFKA_OAUTHBEARER`, `HAS_RD_KAFKA_TRANSACTIONS`, `HAS_RD_KAFKA_PURGE`, `HAS_RD_KAFKA_CONTROLLERID`, `HAVE_RD_KAFKA_MESSAGE_HEADERS`). Because the minimum librdkafka is now 1.5.3, which provides all of these features, the guards have been removed and the methods are always available.
 
-**New methods on `KafkaConsumer`.** The high-level consumer gained `poll()`, `oauthbearerSetToken()`, and `oauthbearerSetTokenFailure()`, and now supports SASL/SSL OAUTHBEARER authentication end-to-end.
+**High-level consumer polling corrected.** `KafkaConsumer::poll()` was removed. Use `KafkaConsumer::consume()` to service callbacks, and handle any message or error event it returns. Polling on producers and low-level consumers is unchanged.
+
+**New methods on `KafkaConsumer`.** The high-level consumer gained `oauthbearerSetToken()` and `oauthbearerSetTokenFailure()`, and now supports SASL/SSL OAUTHBEARER authentication end-to-end.
 
 **Internal fixes.** A missing `zend_restore_error_handling()` call in the KafkaConsumer error path was corrected. Several internal type mismatches were fixed.
 
@@ -105,17 +107,28 @@ The following methods were only compiled in when the build-time librdkafka was s
 
 If your code checked `method_exists()` before calling any of these, those guards can be removed.
 
-### New methods on `KafkaConsumer`
+### `KafkaConsumer::poll()` was removed
 
-`RdKafka\KafkaConsumer` gained three new methods:
+`KafkaConsumer::poll()` was added during the 7.0 alpha, but it could terminate the process when a fetched record was ready. Use `consume()` to service callbacks, and handle any returned message or error event:
 
 ```php
-KafkaConsumer::poll(int $timeout_ms): int
+$message = $consumer->consume($timeoutMs);
+
+if ($message !== null) {
+    // Handle the message or error event.
+}
+```
+
+`RdKafka::poll()` remains available on producers and low-level consumers.
+
+### New OAUTHBEARER methods on `KafkaConsumer`
+
+`RdKafka\KafkaConsumer` gained two new methods:
+
+```php
 KafkaConsumer::oauthbearerSetToken(string $token_value, int $lifetime_ms, string $principal_name, array $extensions = []): void
 KafkaConsumer::oauthbearerSetTokenFailure(string $error): void
 ```
-
-`poll()` allows the high-level consumer to service callbacks (including the OAUTHBEARER token refresh callback) without consuming a message. This is the same method that exists on the low-level `RdKafka\Consumer`.
 
 ### `RdKafka::setLogger()` and `rd_kafka_errno2err()` are deprecated
 

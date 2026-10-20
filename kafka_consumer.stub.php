@@ -81,9 +81,6 @@ class KafkaConsumer
     public function resumePartitions(array $topic_partitions): array {}
 
     /** @tentative-return-type */
-    public function poll(int $timeout_ms): int {}
-
-    /** @tentative-return-type */
     public function oauthbearerSetToken(string $token_value, int $lifetime_ms, string $principal_name, array $extensions = []): void {}
 
     /** @tentative-return-type */
