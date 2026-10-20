@@ -746,7 +746,7 @@ PHP_METHOD(RdKafka, setLogger)
 }
 /* }}} */
 
-/* {{{ proto RdKafka\TopicPartition[] RdKafka::pausePatitions(RdKafka\TopicPartition[] $topicPartitions)
+/* {{{ proto RdKafka\TopicPartition[] RdKafka::pausePartitions(RdKafka\TopicPartition[] $topicPartitions)
    Pause producing or consumption for the provided list of partitions. */
 PHP_METHOD(RdKafka, pausePartitions)
 {
@@ -782,8 +782,8 @@ PHP_METHOD(RdKafka, pausePartitions)
 }
 /* }}} */
 
-/* {{{ proto RdKafka\TopicPartition[] RdKafka::resumePatitions(RdKafka\TopicPartition[] $topicPartitions)
-   Resume producing consumption for the provided list of partitions. */
+/* {{{ proto RdKafka\TopicPartition[] RdKafka::resumePartitions(RdKafka\TopicPartition[] $topicPartitions)
+   Resume producing or consumption for the provided list of partitions. */
 PHP_METHOD(RdKafka, resumePartitions)
 {
     HashTable *htopars;
@@ -805,7 +805,7 @@ PHP_METHOD(RdKafka, resumePartitions)
         return;
     }
 
-    err = rd_kafka_pause_partitions(intern->rk, topars);
+    err = rd_kafka_resume_partitions(intern->rk, topars);
 
     if (err != RD_KAFKA_RESP_ERR_NO_ERROR) {
         rd_kafka_topic_partition_list_destroy(topars);
