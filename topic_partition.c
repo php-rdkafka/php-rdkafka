@@ -174,16 +174,11 @@ rd_kafka_topic_partition_list_t * array_arg_to_kafka_topic_partition_list(int ar
         kafka_topic_partition_intern *topar_intern;
         rd_kafka_topic_partition_t *topar;
 
+        ZVAL_DEREF(zv);
+
         if (Z_TYPE_P(zv) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(zv), ce_kafka_topic_partition)) {
-            const char *space;
-            const char *class_name = get_active_class_name(&space);
             rd_kafka_topic_partition_list_destroy(list);
-            php_error(E_ERROR,
-                    "Argument %d passed to %s%s%s() must be an array of RdKafka\\TopicPartition, at least one element is a(n) %s",
-                    argnum,
-                    class_name, space,
-                    get_active_function_name(),
-                    zend_zval_type_name(zv));
+            zend_argument_type_error(argnum, "must be an array of RdKafka\\TopicPartition, at least one element is a(n) %s", zend_zval_type_name(zv));
             return NULL;
         }
 
@@ -218,7 +213,7 @@ PHP_METHOD(RdKafka_TopicPartition, __construct)
 
     zend_replace_error_handling(EH_THROW, spl_ce_InvalidArgumentException, &error_handling);
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|l", &topic, &topic_len, &partition, &offset) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "pl|l", &topic, &topic_len, &partition, &offset) == FAILURE) {
         zend_restore_error_handling(&error_handling);
         return;
     }
@@ -260,7 +255,7 @@ PHP_METHOD(RdKafka_TopicPartition, setTopic)
     size_t topic_len;
     object_intern *intern;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &topic, &topic_len) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &topic, &topic_len) == FAILURE) {
         return;
     }
 

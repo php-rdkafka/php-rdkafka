@@ -38,6 +38,14 @@ if ($msg === null) {
 
 `RD_KAFKA_RESP_ERR__TIMED_OUT` on a returned `Message` now means an actual timeout error originating from librdkafka, not a poll window expiry.
 
+### Invalid arguments throw exceptions
+
+Check callers that rely on invalid values being converted or truncated. These arguments now throw exceptions:
+
+- A topic partition list containing anything other than `RdKafka\TopicPartition` objects throws a `TypeError`. So does a `KafkaConsumer::commit()` or `commitAsync()` argument that is not a `Message`, an array or `null`.
+- A null byte in a topic name, configuration name or value, broker list, consumer group metadata ID, or OAUTHBEARER token, principal or extension throws a `ValueError` instead of the string being cut short at that byte. Committing a `Message` whose `topic_name` contains a null byte throws an `RdKafka\Exception`.
+- `oauthbearerSetToken()` throws an `InvalidArgumentException` when `$lifetime_ms` is an empty, non-numeric or out-of-range string, or an infinite, NaN or out-of-range float. Types other than int, float or string throw a `TypeError`.
+
 ### Conf::dump() does not include topic-level properties
 
 `Conf::set()` accepts both global and topic-level properties, silently routing topic-level properties to an embedded `default_topic_conf`. However, `Conf::dump()` only returns global configuration properties.
@@ -111,7 +119,7 @@ If your code checked `method_exists()` before calling any of these, those guards
 
 ```php
 KafkaConsumer::poll(int $timeout_ms): int
-KafkaConsumer::oauthbearerSetToken(string $token_value, int $lifetime_ms, string $principal_name, array $extensions = []): void
+KafkaConsumer::oauthbearerSetToken(string $token_value, int|float|string $lifetime_ms, string $principal_name, array $extensions = []): void
 KafkaConsumer::oauthbearerSetTokenFailure(string $error): void
 ```
 
