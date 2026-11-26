@@ -108,31 +108,34 @@ void kafka_message_list_to_array(zval *return_value, rd_kafka_message_t **messag
  */
 PHP_METHOD(RdKafka_Message, errstr)
 {
-    zval *zerr;
-    zval *zpayload;
+    zval zerr;
+    zval zpayload;
     const char *errstr;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE) {
         return;
     }
 
-    zerr = rdkafka_read_property(NULL, Z_OBJ_P(getThis()), ZEND_STRL("err"), 0);
+    rdkafka_read_property(NULL, Z_OBJ_P(getThis()), ZEND_STRL("err"), 0, &zerr);
 
-    if (!zerr || Z_TYPE_P(zerr) != IS_LONG) {
+    if (Z_TYPE(zerr) != IS_LONG) {
+        zval_ptr_dtor(&zerr);
         return;
     }
 
-    errstr = rd_kafka_err2str(Z_LVAL_P(zerr));
+    errstr = rd_kafka_err2str(Z_LVAL(zerr));
 
     if (errstr) {
         RETURN_STRING(errstr);
     }
 
-    zpayload = rdkafka_read_property(NULL, Z_OBJ_P(getThis()), ZEND_STRL("payload"), 0);
+    rdkafka_read_property(NULL, Z_OBJ_P(getThis()), ZEND_STRL("payload"), 0, &zpayload);
 
-    if (zpayload && Z_TYPE_P(zpayload) == IS_STRING) {
-        RETURN_ZVAL(zpayload, 1, 0);
+    if (Z_TYPE(zpayload) == IS_STRING) {
+        RETURN_COPY_VALUE(&zpayload);
     }
+
+    zval_ptr_dtor(&zpayload);
 }
 /* }}} */
 
