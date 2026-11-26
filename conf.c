@@ -299,7 +299,11 @@ static void kafka_conf_offset_commit_cb(rd_kafka_t *rk, rd_kafka_resp_err_t err,
 
     ZVAL_ZVAL(&args[0], &cbs->zrk, 1, 0);
     ZVAL_LONG(&args[1], err);
-    kafka_topic_partition_list_to_array(&args[2], partitions);
+    if (partitions) {
+        kafka_topic_partition_list_to_array(&args[2], partitions);
+    } else {
+        array_init(&args[2]);
+    }
 
     rdkafka_call_function(&cbs->offset_commit->fci, &cbs->offset_commit->fcc, NULL, 3, args);
 

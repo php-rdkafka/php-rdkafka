@@ -47,10 +47,17 @@ static inline void rdkafka_call_function(zend_fcall_info *fci, zend_fcall_info_c
     }
 }
 
-static inline zval *rdkafka_read_property(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, zend_bool silent)
+/* Copies the property into value, which the caller releases. __get() and
+ * property hooks return a temporary instead of the property itself. */
+static inline void rdkafka_read_property(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, zend_bool silent, zval *value)
 {
     zval rv;
-    return zend_read_property(scope, object, name, name_length, silent, &rv);
+    zval *property = zend_read_property(scope, object, name, name_length, silent, &rv);
+
+    ZVAL_COPY_DEREF(value, property);
+    if (property == &rv) {
+        zval_ptr_dtor(&rv);
+    }
 }
 
 

@@ -20,6 +20,9 @@ jobs:
           matrix:
             include:
               # Latest librdkafka 2.x with memcheck
+              - php: '8.6.0'
+                librdkafka: 'v2.6.0'
+                memcheck: '1'
               - php: '8.5.0'
                 librdkafka: 'v2.6.0'
                 memcheck: '1'
@@ -31,6 +34,9 @@ jobs:
                 memcheck: '1'
 
               # Latest librdkafka 1.x with memcheck
+              - php: '8.6.0'
+                librdkafka: 'v1.9.2'
+                memcheck: '1'
               - php: '8.5.0'
                 librdkafka: 'v1.9.2'
                 memcheck: '1'
@@ -47,6 +53,8 @@ jobs:
                 arch: 'X32'
 
               # Latest librdkafka 2.x
+              - php: '8.6.0'
+                librdkafka: 'v2.14.1'
               - php: '8.5.0'
                 librdkafka: 'v2.14.1'
               - php: '8.4.0'
@@ -55,6 +63,8 @@ jobs:
                 librdkafka: 'v2.14.1'
 
               # Latest librdkafka 1.x
+              - php: '8.6.0'
+                librdkafka: 'v1.9.2'
               - php: '8.5.0'
                 librdkafka: 'v1.9.2'
               - php: '8.4.0'
@@ -63,6 +73,8 @@ jobs:
                 librdkafka: 'v1.9.2'
 
               # librdkafka 1.7.0
+              - php: '8.6.0'
+                librdkafka: 'v1.7.0'
               - php: '8.5.0'
                 librdkafka: 'v1.7.0'
               - php: '8.4.0'
@@ -71,6 +83,9 @@ jobs:
                 librdkafka: 'v1.7.0'
 
               # librdkafka master (experimental, does not block PRs)
+              - php: '8.6.0'
+                librdkafka: 'master'
+                experimental: true
               - php: '8.5.0'
                 librdkafka: 'master'
                 experimental: true
