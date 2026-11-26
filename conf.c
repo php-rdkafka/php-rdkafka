@@ -317,7 +317,7 @@ static void kafka_conf_log_cb(const rd_kafka_t *rk, int level, const char *facil
     zval args[4];
     kafka_conf_callbacks *cbs;
 
-    // librdkafka logs without a client while loading plugins
+    /* librdkafka logs without a client while loading plugins */
     if (!rk) {
         return;
     }

@@ -152,7 +152,7 @@ static void kafka_init(zval *this_ptr, rd_kafka_type_t type, zval *zconf) /* {{{
         rd_kafka_conf_set_dr_msg_cb(conf, kafka_conf_dr_msg_cb);
     }
     if (intern->cbs.log) {
-        // The PHP log callback must not run on librdkafka threads
+        /* The PHP log callback must not run on librdkafka threads */
         rd_kafka_conf_set(conf, "log.queue", "true", errstr, sizeof(errstr));
     }
 
