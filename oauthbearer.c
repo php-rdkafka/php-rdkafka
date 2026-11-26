@@ -138,6 +138,7 @@ int64_t zval_to_int64(zval *zval, const char *errstr) {
            }
            return converted;
         break;
-        EMPTY_SWITCH_DEFAULT_CASE();
+        default:
+            ZEND_UNREACHABLE();
     }
 }
