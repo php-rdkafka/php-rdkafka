@@ -15,15 +15,9 @@ if ! [ "$CODE_VERSION" = "$PACKAGE_VERSION" ]; then
     exit 1
 fi
 
+php tools/update-package-contents.php
+
 pecl package
-
-tar -tzf "rdkafka-$PACKAGE_VERSION.tgz"|sed -n "s@^rdkafka-$PACKAGE_VERSION/tests/@@p"|sort > package-test-files
-find tests/ -type f|sed 's@^tests/@@'|sort > repository-test-files
-
-if ! diff -u repository-test-files package-test-files; then
-    echo "Some test files are missing from package.xml (see diff above)" >&2
-    exit 1
-fi
 
 if [ "$MEMORY_CHECK" = "1" ] || [ "$ARCH" = "X32" ]; then
     export CFLAGS="$CFLAGS -Wall -Werror -Wno-deprecated-declarations"
