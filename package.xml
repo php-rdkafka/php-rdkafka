@@ -125,6 +125,8 @@
     <file role="test" name="bugConfSetArgument.phpt"/>
     <file role="test" name="callback_dr_msg_cb_args.phpt"/>
     <file role="test" name="callback_log_cb.phpt"/>
+    <file role="test" name="callback_log_cb_log_queue.phpt"/>
+    <file role="test" name="callback_log_cb_plugin.phpt"/>
     <file role="test" name="conf_callbacks_integration.phpt"/>
     <file role="test" name="conf_callbacks_rdkafka11.phpt"/>
     <file role="test" name="conf_callbacks.phpt"/>
@@ -146,6 +148,7 @@
      <file role="test" name="oauth-integration-tests-check.php"/>
     </dir>
     <file role="test" name="kafka_consumer_close_destroy.phpt"/>
+    <file role="test" name="kafka_consumer_commit_async_without_assignment.phpt"/>
     <file role="test" name="kafka_consumer_commit_message_properties.phpt"/>
     <file role="test" name="kafka_consumer_consume_returns_message_on_eof.phpt"/>
     <file role="test" name="kafka_consumer_consume_returns_null_on_timeout.phpt"/>
@@ -163,6 +166,7 @@
     <file role="test" name="oauthbearer_integration.phpt"/>
     <file role="test" name="oauthbearer_integration_hl.phpt"/>
     <file role="test" name="pause_resume.phpt"/>
+    <file role="test" name="pause_resume_consume.phpt"/>
     <file role="test" name="produce_consume.phpt"/>
     <file role="test" name="produce_consume_queue.phpt"/>
     <file role="test" name="produce_consume_transactional.phpt"/>
