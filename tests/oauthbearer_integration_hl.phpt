@@ -104,22 +104,24 @@ $message = $consumer->consume(10*1000);
 echo $message === null ? "Received empty message when reading data after not setting or refreshing any token\n" :
     "FAIL: Did receive a message after not setting or refreshing any token\n";
 
-// Test that metadata will be loaded before data consumption, under the condition that poll is called
+// Test that metadata will be loaded before data consumption, under the condition that consume is called
 $confConsumer->setOauthbearerTokenRefreshCb(function ($consumer) {
-    echo "Refreshing token on poll and succeeding\n";
+    echo "Refreshing token on consume and succeeding\n";
     $token = generateJws();
     $consumer->oauthbearerSetToken($token['value'], (string) $token['expiryMs'], $token['principal']);
 });
 $consumer = new \RdKafka\KafkaConsumer($confConsumer);
 $consumerTopic = $consumer->newTopic($topicName);
-$consumer->poll(0);
+$message = $consumer->consume(0);
+echo $message === null ? "No message consumed while refreshing token\n" :
+    "FAIL: Did receive a message while refreshing token\n";
 
 try {
     echo "Reading metadata\n";
     $consumer->getMetadata(false, $consumerTopic, 10*1000);
-    echo "Metadata was fetched successfully after calling poll\n";
+    echo "Metadata was fetched successfully after calling consume\n";
 } catch (\RdKafka\Exception $e) {
-    echo "FAIL: Caught exception when getting metadata after calling poll:\n";
+    echo "FAIL: Caught exception when getting metadata after calling consume:\n";
     echo $e, "\n";
 }
 
@@ -135,6 +137,7 @@ Reading data
 Setting token failure in refresh cb
 Local: Authentication failure: Failed to acquire SASL OAUTHBEARER token: Token failure before data consumption
 Received empty message when reading data after not setting or refreshing any token
-Refreshing token on poll and succeeding
+Refreshing token on consume and succeeding
+No message consumed while refreshing token
 Reading metadata
-Metadata was fetched successfully after calling poll
+Metadata was fetched successfully after calling consume

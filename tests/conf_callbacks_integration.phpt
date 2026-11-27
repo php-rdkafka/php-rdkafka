@@ -33,8 +33,10 @@ $conf->set('group.id', sprintf("test_rdkafka_group_%s", uniqid()));
 $conf->set('statistics.interval.ms', 10);
 $conf->set('enable.partition.eof', 'true');
 
-$conf->setOffsetCommitCb(function ($consumer, $error, $topicPartitions) {
+$offsetsCommitted = 0;
+$conf->setOffsetCommitCb(function ($consumer, $error, $topicPartitions) use (&$offsetsCommitted) {
     echo "Offset " . $topicPartitions[0]->getOffset() . " committed.\n";
+    $offsetsCommitted++;
 });
 
 $statsCbCalled = false;
@@ -49,26 +51,25 @@ $conf->setStatsCb(function ($consumer, $json) use (&$statsCbCalled) {
 $consumer = new RdKafka\KafkaConsumer($conf);
 $consumer->subscribe([$topicName]);
 
-while (true) {
-    $msg = $consumer->consume(15000);
+$messagesConsumed = 0;
+$deadline = microtime(true) + 40;
+
+while (($messagesConsumed < 10 || $offsetsCommitted < 10 || !$statsCbCalled) && microtime(true) < $deadline) {
+    $msg = $consumer->consume(100);
 
     if (!$msg || RD_KAFKA_RESP_ERR__PARTITION_EOF === $msg->err) {
-        break;
+        continue;
     }
 
     if (RD_KAFKA_RESP_ERR_NO_ERROR !== $msg->err) {
         throw new Exception($msg->errstr(), $msg->err);
     }
 
+    $messagesConsumed++;
     $consumer->commit($msg);
 }
 
-// Poll until statsCb fires (statistics.interval.ms=10 so it should be near-immediate)
-$deadline = time() + 5;
-while (!$statsCbCalled && time() < $deadline) {
-    $consumer->poll(100);
-}
-
+var_dump($messagesConsumed);
 var_dump($statsCbCalled);
 
 --EXPECT--
@@ -82,4 +83,5 @@ Offset 7 committed.
 Offset 8 committed.
 Offset 9 committed.
 Offset 10 committed.
+int(10)
 bool(true)
