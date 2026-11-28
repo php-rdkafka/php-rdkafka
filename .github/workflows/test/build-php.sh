@@ -12,7 +12,7 @@ if ! [ -f ~/build-cache/php/usr/local/bin/php ]; then
 
     PHP_BUILD_FLAGS="--prefix=/usr/local --disable-all --enable-cli --enable-cgi --with-config-file-scan-dir=/usr/local/etc/php --with-zlib"
 
-    if [ $MEMORY_CHECK -eq 1 ]; then
+    if [ "$MEMORY_CHECK" = "1" ]; then
         PHP_BUILD_FLAGS="$PHP_BUILD_FLAGS --enable-debug --with-valgrind"
     else
         PHP_BUILD_FLAGS="$PHP_BUILD_FLAGS --enable-zts"

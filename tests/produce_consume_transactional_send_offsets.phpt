@@ -29,7 +29,10 @@ for ($i = 0; $i < 5; $i++) {
     $seedTopic->produce(0, 0, "source $i");
     $seedProducer->poll(0);
 }
-$seedProducer->flush(10000);
+$result = $seedProducer->flush(10000);
+if (RD_KAFKA_RESP_ERR_NO_ERROR !== $result) {
+    throw new Exception(rd_kafka_err2str($result), $result);
+}
 
 // Transactional producer
 $conf = new RdKafka\Conf();

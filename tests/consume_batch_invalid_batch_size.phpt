@@ -5,6 +5,7 @@ RdKafka\ConsumerTopic::consumeBatch() rejects an out-of-range $batch_size
 
 $conf = new RdKafka\Conf();
 $conf->set('metadata.broker.list', '127.0.0.1:9092');
+$conf->setLogCb(function () {});
 
 $consumer = new RdKafka\Consumer($conf);
 $topic = $consumer->newTopic('test');
