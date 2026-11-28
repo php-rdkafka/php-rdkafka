@@ -16,6 +16,8 @@ if [ "$MEMORY_CHECK" = "1" ]; then
 fi
 
 if [ -n "$DEPS" ]; then
-    sudo apt-get update
+    # Third-party sources preinstalled on the runner can fail to refresh;
+    # the install below still fails if the Ubuntu sources it needs are broken.
+    sudo apt-get update || echo "::warning::apt-get update reported errors"
     sudo apt-get -y install $DEPS
 fi

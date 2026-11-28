@@ -13,6 +13,7 @@ fi
 
 echo "Updating package.xml"
 ./tools/new-package-release.php "$1"
+./tools/update-package-contents.php
 pecl package-validate
 
 echo "Updating PHP_RDKAFKA_VERSION"
